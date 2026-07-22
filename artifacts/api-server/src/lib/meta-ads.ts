@@ -56,6 +56,61 @@ async function metaGet<T>(path: string, params: Record<string, string> = {}): Pr
   return data;
 }
 
+// ─── Interest Search ──────────────────────────────────────────────────────────
+
+export async function searchMetaInterest(
+  query: string
+): Promise<{ id: string; name: string; audienceSize?: number } | null> {
+  const { accessToken } = getMetaConfig();
+  const qs = new URLSearchParams({
+    type: "adinterest",
+    q: query,
+    limit: "5",
+    locale: "en_US",
+    access_token: accessToken,
+  });
+  const url = `${META_BASE}/search?${qs}`;
+  const res = await fetch(url);
+  const data = (await res.json()) as {
+    data?: { id: string; name: string; audience_size_lower_bound?: number }[];
+    error?: { message: string };
+  };
+  if (!res.ok || data.error) {
+    throw new Error(`Meta Interest Search error: ${data.error?.message ?? res.statusText}`);
+  }
+  const hit = data.data?.[0];
+  if (!hit) return null;
+  return { id: hit.id, name: hit.name, audienceSize: hit.audience_size_lower_bound };
+}
+
+export async function searchMetaInterests(
+  query: string,
+  limit = 10
+): Promise<{ id: string; name: string; audienceSize?: number }[]> {
+  const { accessToken } = getMetaConfig();
+  const qs = new URLSearchParams({
+    type: "adinterest",
+    q: query,
+    limit: String(Math.min(limit, 25)),
+    locale: "en_US",
+    access_token: accessToken,
+  });
+  const url = `${META_BASE}/search?${qs}`;
+  const res = await fetch(url);
+  const data = (await res.json()) as {
+    data?: { id: string; name: string; audience_size_lower_bound?: number }[];
+    error?: { message: string };
+  };
+  if (!res.ok || data.error) {
+    throw new Error(`Meta Interest Search error: ${data.error?.message ?? res.statusText}`);
+  }
+  return (data.data ?? []).map((h) => ({
+    id: h.id,
+    name: h.name,
+    audienceSize: h.audience_size_lower_bound,
+  }));
+}
+
 // ─── Validation ───────────────────────────────────────────────────────────────
 
 export async function validateMetaCredentials(): Promise<{
@@ -154,16 +209,20 @@ export async function createMetaAdSet(opts: {
     targeting.geo_locations = { countries: ["ID"] };
   }
 
-  // Flexible targeting for interests (simplified — production would use interest IDs)
+  // Resolve interest names → real Meta interest IDs via Targeting Search API
   if (opts.targetingInterests && opts.targetingInterests.length > 0) {
-    targeting.flexible_spec = [
-      {
-        interests: opts.targetingInterests.slice(0, 3).map((name, i) => ({
-          id: String(6003200000000 + i), // placeholder IDs — production: use Meta Interest API
-          name,
-        })),
-      },
-    ];
+    const resolvedInterests: { id: string; name: string }[] = [];
+    for (const interestName of opts.targetingInterests.slice(0, 5)) {
+      try {
+        const found = await searchMetaInterest(interestName);
+        if (found) resolvedInterests.push(found);
+      } catch (e) {
+        logger.warn({ interestName, err: e }, "Could not resolve Meta interest ID — skipping");
+      }
+    }
+    if (resolvedInterests.length > 0) {
+      targeting.flexible_spec = [{ interests: resolvedInterests }];
+    }
   }
 
   const OPTIMIZATION_MAP: Record<string, string> = {
@@ -225,10 +284,15 @@ export async function createMetaAdCreative(opts: {
     ? CTA_MAP[opts.callToActionType] ?? "CONTACT_US"
     : "CONTACT_US";
 
+  const pageId = opts.pageId || process.env.META_PAGE_ID;
+  if (!pageId) {
+    throw new Error("META_PAGE_ID is required to create ad creatives. Set it in Secrets.");
+  }
+
   const body: Record<string, unknown> = {
     name: opts.name,
     object_story_spec: {
-      page_id: opts.pageId || process.env.META_PAGE_ID || "me",
+      page_id: pageId,
       link_data: {
         message: opts.primaryText,
         link: opts.linkUrl || "https://www.facebook.com",

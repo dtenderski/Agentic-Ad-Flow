@@ -7,10 +7,24 @@ import {
   createMetaAdSet,
   createMetaAdCreative,
   createMetaAd,
+  searchMetaInterests,
 } from "../lib/meta-ads";
 import { PushToMetaParams } from "@workspace/api-zod";
 
 const router: IRouter = Router();
+
+// ─── Interest Search ──────────────────────────────────────────────────────────
+router.get("/meta/interests/search", async (req, res): Promise<void> => {
+  const q = String(req.query.q ?? "").trim();
+  if (!q) { res.status(400).json({ error: "q is required" }); return; }
+  try {
+    const results = await searchMetaInterests(q, 10);
+    res.json({ data: results });
+  } catch (err: unknown) {
+    req.log.error({ err }, "Meta interest search failed");
+    res.status(500).json({ error: err instanceof Error ? err.message : "Search failed" });
+  }
+});
 
 // ─── Validate Meta credentials ────────────────────────────────────────────────
 router.get("/meta/validate", async (_req, res): Promise<void> => {

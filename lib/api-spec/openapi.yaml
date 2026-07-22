@@ -758,6 +758,25 @@ paths:
           description: Not found
 
   # ─── Meta Ads API ─────────────────────────────────────────────────────────────
+  /meta/interests/search:
+    get:
+      tags: [meta]
+      operationId: searchMetaInterests
+      summary: Search Meta interest targeting options
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Interest search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetaInterestSearchResult"
+
   /meta/validate:
     get:
       tags: [meta]
@@ -1479,6 +1498,26 @@ components:
           type: string
 
     # ─── Meta Ads ─────────────────────────────────────────────────────────────────
+    MetaInterestItem:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        audienceSize:
+          type: ["integer", "null"]
+
+    MetaInterestSearchResult:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/MetaInterestItem"
+
     MetaValidationResult:
       type: object
       required: [valid]
