@@ -33,6 +33,10 @@ import type {
   Campaign,
   CampaignInput,
   CampaignUpdate,
+  CopilotCommandInput,
+  CopilotCommandResult,
+  CopilotGenerateResult,
+  CopilotReport,
   Creative,
   CreativeInput,
   CreativeUpdate,
@@ -3475,5 +3479,295 @@ export const usePushToMeta = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getPushToMetaMutationOptions(options));
+    }
+
+export const getListCopilotReportsUrl = () => {
+
+
+
+
+  return `/api/copilot/reports`
+}
+
+/**
+ * @summary List recent Copilot reports (last 20)
+ */
+export const listCopilotReports = async ( options?: RequestInit): Promise<CopilotReport[]> => {
+
+  return customFetch<CopilotReport[]>(getListCopilotReportsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListCopilotReportsQueryKey = () => {
+    return [
+    `/api/copilot/reports`
+    ] as const;
+    }
+
+
+export const getListCopilotReportsQueryOptions = <TData = Awaited<ReturnType<typeof listCopilotReports>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCopilotReports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListCopilotReportsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCopilotReports>>> = ({ signal }) => listCopilotReports({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listCopilotReports>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListCopilotReportsQueryResult = NonNullable<Awaited<ReturnType<typeof listCopilotReports>>>
+export type ListCopilotReportsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List recent Copilot reports (last 20)
+ */
+
+export function useListCopilotReports<TData = Awaited<ReturnType<typeof listCopilotReports>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCopilotReports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListCopilotReportsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGenerateCopilotBriefUrl = () => {
+
+
+
+
+  return `/api/copilot/generate-brief`
+}
+
+/**
+ * @summary Manually trigger morning trend brief generation
+ */
+export const generateCopilotBrief = async ( options?: RequestInit): Promise<CopilotGenerateResult> => {
+
+  return customFetch<CopilotGenerateResult>(getGenerateCopilotBriefUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getGenerateCopilotBriefMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateCopilotBrief>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof generateCopilotBrief>>, TError,void, TContext> => {
+
+const mutationKey = ['generateCopilotBrief'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof generateCopilotBrief>>, void> = () => {
+
+
+          return  generateCopilotBrief(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GenerateCopilotBriefMutationResult = NonNullable<Awaited<ReturnType<typeof generateCopilotBrief>>>
+
+    export type GenerateCopilotBriefMutationError = ErrorType<void>
+
+    /**
+ * @summary Manually trigger morning trend brief generation
+ */
+export const useGenerateCopilotBrief = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateCopilotBrief>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof generateCopilotBrief>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getGenerateCopilotBriefMutationOptions(options));
+    }
+
+export const getGenerateCopilotReportUrl = () => {
+
+
+
+
+  return `/api/copilot/generate-report`
+}
+
+/**
+ * @summary Manually trigger afternoon performance report generation
+ */
+export const generateCopilotReport = async ( options?: RequestInit): Promise<CopilotGenerateResult> => {
+
+  return customFetch<CopilotGenerateResult>(getGenerateCopilotReportUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getGenerateCopilotReportMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateCopilotReport>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof generateCopilotReport>>, TError,void, TContext> => {
+
+const mutationKey = ['generateCopilotReport'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof generateCopilotReport>>, void> = () => {
+
+
+          return  generateCopilotReport(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GenerateCopilotReportMutationResult = NonNullable<Awaited<ReturnType<typeof generateCopilotReport>>>
+
+    export type GenerateCopilotReportMutationError = ErrorType<void>
+
+    /**
+ * @summary Manually trigger afternoon performance report generation
+ */
+export const useGenerateCopilotReport = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateCopilotReport>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof generateCopilotReport>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getGenerateCopilotReportMutationOptions(options));
+    }
+
+export const getRunCopilotCommandUrl = () => {
+
+
+
+
+  return `/api/copilot/command`
+}
+
+/**
+ * @summary Send a natural-language command to AdClaw Copilot
+ */
+export const runCopilotCommand = async (copilotCommandInput: CopilotCommandInput, options?: RequestInit): Promise<CopilotCommandResult> => {
+
+  return customFetch<CopilotCommandResult>(getRunCopilotCommandUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(copilotCommandInput)
+  }
+);}
+
+
+
+
+
+export const getRunCopilotCommandMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof runCopilotCommand>>, TError,{data: BodyType<CopilotCommandInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof runCopilotCommand>>, TError,{data: BodyType<CopilotCommandInput>}, TContext> => {
+
+const mutationKey = ['runCopilotCommand'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof runCopilotCommand>>, {data: BodyType<CopilotCommandInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  runCopilotCommand(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RunCopilotCommandMutationResult = NonNullable<Awaited<ReturnType<typeof runCopilotCommand>>>
+    export type RunCopilotCommandMutationBody = BodyType<CopilotCommandInput>
+    export type RunCopilotCommandMutationError = ErrorType<void>
+
+    /**
+ * @summary Send a natural-language command to AdClaw Copilot
+ */
+export const useRunCopilotCommand = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof runCopilotCommand>>, TError,{data: BodyType<CopilotCommandInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof runCopilotCommand>>,
+        TError,
+        {data: BodyType<CopilotCommandInput>},
+        TContext
+      > => {
+      return useMutation(getRunCopilotCommandMutationOptions(options));
     }
 

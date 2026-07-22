@@ -1188,3 +1188,57 @@ export const PushToMetaResponse = zod.object({
 })
 
 
+/**
+ * @summary List recent Copilot reports (last 20)
+ */
+export const ListCopilotReportsResponseItem = zod.object({
+  "id": zod.number(),
+  "type": zod.string().describe('trend_brief | performance_report | command_response'),
+  "businessId": zod.number().nullish(),
+  "prompt": zod.string(),
+  "response": zod.string().describe('Claude output in Markdown'),
+  "metaData": zod.string().nullish().describe('JSON string with insights snapshot or tool metadata'),
+  "createdAt": zod.string()
+})
+export const ListCopilotReportsResponse = zod.array(ListCopilotReportsResponseItem)
+
+
+/**
+ * @summary Manually trigger morning trend brief generation
+ */
+export const GenerateCopilotBriefResponse = zod.object({
+  "success": zod.boolean(),
+  "reportId": zod.number().optional(),
+  "response": zod.string().optional(),
+  "error": zod.string().nullish()
+})
+
+
+/**
+ * @summary Manually trigger afternoon performance report generation
+ */
+export const GenerateCopilotReportResponse = zod.object({
+  "success": zod.boolean(),
+  "reportId": zod.number().optional(),
+  "response": zod.string().optional(),
+  "error": zod.string().nullish()
+})
+
+
+/**
+ * @summary Send a natural-language command to AdClaw Copilot
+ */
+export const RunCopilotCommandBody = zod.object({
+  "message": zod.string().describe('Natural language command (English or Bahasa Indonesia)'),
+  "businessId": zod.number().optional()
+})
+
+export const RunCopilotCommandResponse = zod.object({
+  "success": zod.boolean(),
+  "reportId": zod.number().optional(),
+  "response": zod.string(),
+  "toolsUsed": zod.array(zod.string()).optional(),
+  "error": zod.string().nullish()
+})
+
+

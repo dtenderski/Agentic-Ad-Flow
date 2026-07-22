@@ -603,6 +603,46 @@ export interface MetaAdSetResult {
   ads: MetaAdSetResultAdsItem[];
 }
 
+export interface CopilotReport {
+  id: number;
+  /** trend_brief | performance_report | command_response */
+  type: string;
+  /** @nullable */
+  businessId?: number | null;
+  prompt: string;
+  /** Claude output in Markdown */
+  response: string;
+  /**
+     * JSON string with insights snapshot or tool metadata
+     * @nullable
+     */
+  metaData?: string | null;
+  createdAt: string;
+}
+
+export interface CopilotCommandInput {
+  /** Natural language command (English or Bahasa Indonesia) */
+  message: string;
+  businessId?: number;
+}
+
+export interface CopilotCommandResult {
+  success: boolean;
+  reportId?: number;
+  response: string;
+  toolsUsed?: string[];
+  /** @nullable */
+  error?: string | null;
+}
+
+export interface CopilotGenerateResult {
+  success: boolean;
+  reportId?: number;
+  response?: string;
+  /** @nullable */
+  error?: string | null;
+}
+
 export type MetaPushResultResults = {
   metaCampaignId: string;
   adSets: MetaAdSetResult[];

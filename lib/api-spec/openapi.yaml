@@ -32,6 +32,8 @@ tags:
     description: Dashboard summary and analytics
   - name: meta
     description: Meta Ads API integration
+  - name: copilot
+    description: AI Copilot scheduled reports and commands
 
 paths:
   /healthz:
@@ -895,6 +897,75 @@ paths:
           description: Campaign not found
         "500":
           description: Meta API error
+
+  # ─── Copilot ─────────────────────────────────────────────────────────────────
+  /copilot/reports:
+    get:
+      tags: [copilot]
+      operationId: listCopilotReports
+      summary: List recent Copilot reports (last 20)
+      responses:
+        "200":
+          description: List of copilot reports
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CopilotReport"
+
+  /copilot/generate-brief:
+    post:
+      tags: [copilot]
+      operationId: generateCopilotBrief
+      summary: Manually trigger morning trend brief generation
+      responses:
+        "200":
+          description: Generated brief
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CopilotGenerateResult"
+        "500":
+          description: Generation failed
+
+  /copilot/generate-report:
+    post:
+      tags: [copilot]
+      operationId: generateCopilotReport
+      summary: Manually trigger afternoon performance report generation
+      responses:
+        "200":
+          description: Generated report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CopilotGenerateResult"
+        "500":
+          description: Generation failed
+
+  /copilot/command:
+    post:
+      tags: [copilot]
+      operationId: runCopilotCommand
+      summary: Send a natural-language command to AdClaw Copilot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CopilotCommandInput"
+      responses:
+        "200":
+          description: Command result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CopilotCommandResult"
+        "400":
+          description: Missing message
+        "500":
+          description: Command failed
 
 components:
   schemas:
@@ -1764,6 +1835,69 @@ components:
                 type: integer
               metaAdId:
                 type: string
+
+    # ─── Copilot ─────────────────────────────────────────────────────────────────
+    CopilotReport:
+      type: object
+      required: [id, type, prompt, response, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          description: "trend_brief | performance_report | command_response"
+        businessId:
+          type: ["integer", "null"]
+        prompt:
+          type: string
+        response:
+          type: string
+          description: Claude output in Markdown
+        metaData:
+          type: ["string", "null"]
+          description: JSON string with insights snapshot or tool metadata
+        createdAt:
+          type: string
+
+    CopilotCommandInput:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          description: Natural language command (English or Bahasa Indonesia)
+        businessId:
+          type: integer
+
+    CopilotCommandResult:
+      type: object
+      required: [success, response]
+      properties:
+        success:
+          type: boolean
+        reportId:
+          type: integer
+        response:
+          type: string
+        toolsUsed:
+          type: array
+          items:
+            type: string
+        error:
+          type: ["string", "null"]
+
+    CopilotGenerateResult:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        reportId:
+          type: integer
+        response:
+          type: string
+        error:
+          type: ["string", "null"]
 
     MetaPushResult:
       type: object

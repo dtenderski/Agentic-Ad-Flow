@@ -19,6 +19,7 @@ import CampaignsNew from '@/pages/campaigns-new';
 import CampaignDetail from '@/pages/campaign-detail';
 import ApprovalsList from '@/pages/approvals-list';
 import MemoryList from '@/pages/memory-list';
+import CopilotPage from '@/pages/copilot';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,6 +51,7 @@ function Router() {
       
       <Route path="/approvals" component={ApprovalsList} />
       <Route path="/memory" component={MemoryList} />
+      <Route path="/copilot" component={CopilotPage} />
       
       <Route component={NotFound} />
     </Switch>

@@ -11,6 +11,7 @@ import approvalsRouter from "./approvals";
 import memoryRouter from "./memory";
 import dashboardRouter from "./dashboard";
 import metaRouter from "./meta";
+import copilotRouter from "./copilot";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(blueprintsRouter);
 router.use(approvalsRouter);
 router.use(memoryRouter);
 router.use(metaRouter);
+router.use(copilotRouter);
 
 export default router;

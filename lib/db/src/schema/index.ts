@@ -7,3 +7,4 @@ export * from "./adsets";
 export * from "./creatives";
 export * from "./approvals";
 export * from "./memory";
+export * from "./copilot";
