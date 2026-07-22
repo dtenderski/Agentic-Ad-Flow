@@ -211,6 +211,7 @@ async function executeTool(toolUse: ToolInput): Promise<unknown> {
         id: campaignsTable.id,
         campaignName: campaignsTable.campaignName,
         status: campaignsTable.status,
+        platform: campaignsTable.platform,
         metaCampaignId: campaignsTable.metaCampaignId,
         placement: campaignsTable.placement,
         dailyBudget: campaignsTable.dailyBudget,

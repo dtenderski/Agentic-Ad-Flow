@@ -49,7 +49,7 @@ router.post("/campaigns", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [campaign] = await db.insert(campaignsTable).values(parsed.data).returning();
+  const [campaign] = await db.insert(campaignsTable).values(parsed.data as typeof campaignsTable.$inferInsert).returning();
 
   // Create an approval record
   await db.insert(approvalsTable).values({
@@ -91,7 +91,7 @@ router.patch("/campaigns/:campaignId", async (req, res): Promise<void> => {
   }
   const [campaign] = await db
     .update(campaignsTable)
-    .set(parsed.data)
+    .set(parsed.data as Partial<typeof campaignsTable.$inferInsert>)
     .where(eq(campaignsTable.id, params.data.campaignId))
     .returning();
   if (!campaign) {

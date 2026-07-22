@@ -1292,7 +1292,7 @@ components:
     # ─── Campaign ────────────────────────────────────────────────────────────────
     Campaign:
       type: object
-      required: [id, businessId, campaignName, objective, status, placement, createdAt]
+      required: [id, businessId, campaignName, objective, status, platform, placement, createdAt]
       properties:
         id:
           type: integer
@@ -1310,6 +1310,10 @@ components:
         status:
           type: string
           description: "draft | review | approved | active | learning | optimizing | scaling | paused | completed"
+        platform:
+          type: string
+          description: "meta | google | tiktok | linkedin"
+          default: meta
         placement:
           type: string
           description: "facebook | instagram | whatsapp | all"
@@ -1354,6 +1358,10 @@ components:
           minLength: 1
         objective:
           type: string
+        platform:
+          type: string
+          description: "meta | google | tiktok | linkedin"
+          default: meta
         placement:
           type: string
           description: "facebook | instagram | whatsapp | all"
@@ -1382,6 +1390,9 @@ components:
           type: string
         status:
           type: string
+        platform:
+          type: string
+          description: "meta | google | tiktok | linkedin"
         placement:
           type: string
           description: "facebook | instagram | whatsapp | all"

@@ -37,6 +37,7 @@ export const GetDashboardSummaryResponse = zod.object({
  * Returns the most recently active/created campaigns
  * @summary Get recent campaigns
  */
+export const getRecentCampaignsResponsePlatformDefault = `meta`;
 export const getRecentCampaignsResponsePlacementDefault = `facebook`;
 
 export const GetRecentCampaignsResponseItem = zod.object({
@@ -47,6 +48,7 @@ export const GetRecentCampaignsResponseItem = zod.object({
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
   "status": zod.string().describe('draft | review | approved | active | learning | optimizing | scaling | paused | completed'),
+  "platform": zod.string().default(getRecentCampaignsResponsePlatformDefault).describe('meta | google | tiktok | linkedin'),
   "placement": zod.string().default(getRecentCampaignsResponsePlacementDefault).describe('facebook | instagram | whatsapp | all'),
   "budgetType": zod.string().nullish().describe('daily | lifetime'),
   "dailyBudget": zod.number().nullish(),
@@ -488,6 +490,7 @@ export const ListCampaignsQueryParams = zod.object({
   "status": zod.coerce.string().optional()
 })
 
+export const listCampaignsResponsePlatformDefault = `meta`;
 export const listCampaignsResponsePlacementDefault = `facebook`;
 
 export const ListCampaignsResponseItem = zod.object({
@@ -498,6 +501,7 @@ export const ListCampaignsResponseItem = zod.object({
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
   "status": zod.string().describe('draft | review | approved | active | learning | optimizing | scaling | paused | completed'),
+  "platform": zod.string().default(listCampaignsResponsePlatformDefault).describe('meta | google | tiktok | linkedin'),
   "placement": zod.string().default(listCampaignsResponsePlacementDefault).describe('facebook | instagram | whatsapp | all'),
   "budgetType": zod.string().nullish().describe('daily | lifetime'),
   "dailyBudget": zod.number().nullish(),
@@ -519,6 +523,7 @@ export const ListCampaignsResponse = zod.array(ListCampaignsResponseItem)
  * @summary Create a campaign draft
  */
 
+export const createCampaignBodyPlatformDefault = `meta`;
 export const createCampaignBodyPlacementDefault = `facebook`;
 
 export const CreateCampaignBody = zod.object({
@@ -526,6 +531,7 @@ export const CreateCampaignBody = zod.object({
   "blueprintId": zod.number().optional(),
   "campaignName": zod.string().min(1),
   "objective": zod.string(),
+  "platform": zod.string().default(createCampaignBodyPlatformDefault).describe('meta | google | tiktok | linkedin'),
   "placement": zod.string().default(createCampaignBodyPlacementDefault).describe('facebook | instagram | whatsapp | all'),
   "budgetType": zod.string().optional(),
   "dailyBudget": zod.number().optional(),
@@ -536,6 +542,7 @@ export const CreateCampaignBody = zod.object({
   "campaignBudgetOptimization": zod.boolean().optional()
 })
 
+export const createCampaignResponsePlatformDefault = `meta`;
 export const createCampaignResponsePlacementDefault = `facebook`;
 
 export const CreateCampaignResponse = zod.object({
@@ -546,6 +553,7 @@ export const CreateCampaignResponse = zod.object({
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
   "status": zod.string().describe('draft | review | approved | active | learning | optimizing | scaling | paused | completed'),
+  "platform": zod.string().default(createCampaignResponsePlatformDefault).describe('meta | google | tiktok | linkedin'),
   "placement": zod.string().default(createCampaignResponsePlacementDefault).describe('facebook | instagram | whatsapp | all'),
   "budgetType": zod.string().nullish().describe('daily | lifetime'),
   "dailyBudget": zod.number().nullish(),
@@ -569,6 +577,7 @@ export const GetCampaignParams = zod.object({
   "campaignId": zod.coerce.number()
 })
 
+export const getCampaignResponsePlatformDefault = `meta`;
 export const getCampaignResponsePlacementDefault = `facebook`;
 
 export const GetCampaignResponse = zod.object({
@@ -579,6 +588,7 @@ export const GetCampaignResponse = zod.object({
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
   "status": zod.string().describe('draft | review | approved | active | learning | optimizing | scaling | paused | completed'),
+  "platform": zod.string().default(getCampaignResponsePlatformDefault).describe('meta | google | tiktok | linkedin'),
   "placement": zod.string().default(getCampaignResponsePlacementDefault).describe('facebook | instagram | whatsapp | all'),
   "budgetType": zod.string().nullish().describe('daily | lifetime'),
   "dailyBudget": zod.number().nullish(),
@@ -606,6 +616,7 @@ export const UpdateCampaignBody = zod.object({
   "campaignName": zod.string().optional(),
   "objective": zod.string().optional(),
   "status": zod.string().optional(),
+  "platform": zod.string().optional().describe('meta | google | tiktok | linkedin'),
   "placement": zod.string().optional().describe('facebook | instagram | whatsapp | all'),
   "budgetType": zod.string().optional(),
   "dailyBudget": zod.number().optional(),
@@ -614,6 +625,7 @@ export const UpdateCampaignBody = zod.object({
   "endDate": zod.string().optional()
 })
 
+export const updateCampaignResponsePlatformDefault = `meta`;
 export const updateCampaignResponsePlacementDefault = `facebook`;
 
 export const UpdateCampaignResponse = zod.object({
@@ -624,6 +636,7 @@ export const UpdateCampaignResponse = zod.object({
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
   "status": zod.string().describe('draft | review | approved | active | learning | optimizing | scaling | paused | completed'),
+  "platform": zod.string().default(updateCampaignResponsePlatformDefault).describe('meta | google | tiktok | linkedin'),
   "placement": zod.string().default(updateCampaignResponsePlacementDefault).describe('facebook | instagram | whatsapp | all'),
   "budgetType": zod.string().nullish().describe('daily | lifetime'),
   "dailyBudget": zod.number().nullish(),
@@ -662,6 +675,7 @@ export const ApproveCampaignBody = zod.object({
   "notes": zod.string().optional()
 })
 
+export const approveCampaignResponsePlatformDefault = `meta`;
 export const approveCampaignResponsePlacementDefault = `facebook`;
 
 export const ApproveCampaignResponse = zod.object({
@@ -672,6 +686,7 @@ export const ApproveCampaignResponse = zod.object({
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
   "status": zod.string().describe('draft | review | approved | active | learning | optimizing | scaling | paused | completed'),
+  "platform": zod.string().default(approveCampaignResponsePlatformDefault).describe('meta | google | tiktok | linkedin'),
   "placement": zod.string().default(approveCampaignResponsePlacementDefault).describe('facebook | instagram | whatsapp | all'),
   "budgetType": zod.string().nullish().describe('daily | lifetime'),
   "dailyBudget": zod.number().nullish(),

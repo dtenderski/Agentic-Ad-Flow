@@ -10,6 +10,8 @@ export interface CampaignUpdate {
   campaignName?: string;
   objective?: string;
   status?: string;
+  /** meta | google | tiktok | linkedin */
+  platform?: string;
   /** facebook | instagram | whatsapp | all */
   placement?: string;
   budgetType?: string;

@@ -12,6 +12,8 @@ export interface CampaignInput {
   /** @minLength 1 */
   campaignName: string;
   objective: string;
+  /** meta | google | tiktok | linkedin */
+  platform?: string;
   /** facebook | instagram | whatsapp | all */
   placement?: string;
   budgetType?: string;

@@ -5,9 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Link } from "wouter";
-import { Target, Search, Filter, Globe } from "lucide-react";
+import { Target, Filter, Globe } from "lucide-react";
 import { SiFacebook, SiInstagram, SiWhatsapp } from "react-icons/si";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
+import { PlatformBadge } from "@/components/platform-badge";
 
 function PlacementBadge({ placement }: { placement: string }) {
   switch (placement) {
@@ -70,10 +71,11 @@ export default function CampaignsList() {
             <TableHeader className="bg-muted/50">
               <TableRow>
                 <TableHead>Campaign Name</TableHead>
+                <TableHead>Platform</TableHead>
                 <TableHead>Objective</TableHead>
                 <TableHead>Placement</TableHead>
                 <TableHead>Budget</TableHead>
-                <TableHead>Meta</TableHead>
+                <TableHead>Pushed</TableHead>
                 <TableHead>Approval</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Action</TableHead>
@@ -82,11 +84,11 @@ export default function CampaignsList() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center">Syncing with Meta Graph API...</TableCell>
+                  <TableCell colSpan={9} className="h-24 text-center">Loading campaigns...</TableCell>
                 </TableRow>
               ) : (!campaigns || campaigns.length === 0) ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-48 text-center">
+                  <TableCell colSpan={9} className="h-48 text-center">
                     <Target className="w-8 h-8 text-muted-foreground mx-auto mb-3 opacity-20" />
                     <span className="text-muted-foreground">No campaigns deployed.</span>
                   </TableCell>
@@ -102,6 +104,9 @@ export default function CampaignsList() {
                         <span>ID: {campaign.metaCampaignId || `INT-${campaign.id}`}</span>
                         {campaign.blueprintId && <span>• Blueprint #{campaign.blueprintId}</span>}
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <PlatformBadge platform={campaign.platform ?? "meta"} />
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="bg-background text-[10px] font-mono tracking-wider">{campaign.objective}</Badge>

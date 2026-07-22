@@ -246,6 +246,8 @@ export interface Campaign {
   objective: string;
   /** draft | review | approved | active | learning | optimizing | scaling | paused | completed */
   status: string;
+  /** meta | google | tiktok | linkedin */
+  platform: string;
   /** facebook | instagram | whatsapp | all */
   placement: string;
   /**
@@ -281,6 +283,8 @@ export interface CampaignInput {
   /** @minLength 1 */
   campaignName: string;
   objective: string;
+  /** meta | google | tiktok | linkedin */
+  platform?: string;
   /** facebook | instagram | whatsapp | all */
   placement?: string;
   budgetType?: string;
@@ -296,6 +300,8 @@ export interface CampaignUpdate {
   campaignName?: string;
   objective?: string;
   status?: string;
+  /** meta | google | tiktok | linkedin */
+  platform?: string;
   /** facebook | instagram | whatsapp | all */
   placement?: string;
   budgetType?: string;

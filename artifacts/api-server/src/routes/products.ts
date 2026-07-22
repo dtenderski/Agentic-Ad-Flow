@@ -46,7 +46,7 @@ router.post("/businesses/:businessId/products", async (req, res): Promise<void> 
   }
   const [product] = await db
     .insert(productsTable)
-    .values({ ...parsed.data, businessId: params.data.businessId })
+    .values({ ...parsed.data, businessId: params.data.businessId } as typeof productsTable.$inferInsert)
     .returning();
   res.status(201).json(serializeProduct(product));
 });
@@ -81,7 +81,7 @@ router.patch("/products/:productId", async (req, res): Promise<void> => {
   }
   const [product] = await db
     .update(productsTable)
-    .set(parsed.data)
+    .set(parsed.data as Partial<typeof productsTable.$inferInsert>)
     .where(eq(productsTable.id, params.data.productId))
     .returning();
   if (!product) {

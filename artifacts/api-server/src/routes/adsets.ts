@@ -46,7 +46,7 @@ router.post("/campaigns/:campaignId/adsets", async (req, res): Promise<void> => 
   }
   const [adset] = await db
     .insert(adsetsTable)
-    .values({ ...parsed.data, campaignId: params.data.campaignId })
+    .values({ ...parsed.data, campaignId: params.data.campaignId } as typeof adsetsTable.$inferInsert)
     .returning();
   res.status(201).json(serializeAdset(adset));
 });
@@ -81,7 +81,7 @@ router.patch("/adsets/:adsetId", async (req, res): Promise<void> => {
   }
   const [adset] = await db
     .update(adsetsTable)
-    .set(parsed.data)
+    .set(parsed.data as Partial<typeof adsetsTable.$inferInsert>)
     .where(eq(adsetsTable.id, params.data.adsetId))
     .returning();
   if (!adset) {

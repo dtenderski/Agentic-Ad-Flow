@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Target, Edit, Play, Pause, ExternalLink, Settings, GitMerge, FileImage, Loader2, Zap, Globe } from "lucide-react";
+import { Target, Edit, Play, Pause, ExternalLink, Settings, GitMerge, FileImage, Loader2, Zap, Globe, Lock } from "lucide-react";
 import { SiFacebook, SiInstagram, SiWhatsapp } from "react-icons/si";
 import { useGetCampaign, useListAdSets, useListCreatives, getGetCampaignQueryKey, getListAdSetsQueryKey, usePushToMeta, useUpdateAdSet, useGetMetaCampaignInsights, getGetMetaCampaignInsightsQueryKey } from "@workspace/api-client-react";
+import { PlatformBadge, PLATFORM_CONFIG } from "@/components/platform-badge";
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -16,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 
-function PlacementBadge({ placement }: { placement: string }) {
+function MetaPlacementBadge({ placement }: { placement: string }) {
   switch (placement) {
     case "instagram":
       return (
@@ -116,26 +117,39 @@ export default function CampaignDetail() {
               </>
             )}
           </p>
-          <div className="mt-2">
-            <PlacementBadge placement={campaign.placement ?? "facebook"} />
+          <div className="mt-2 flex items-center gap-2">
+            <PlatformBadge platform={campaign.platform ?? "meta"} size="md" />
+            {(campaign.platform ?? "meta") === "meta" && (
+              <MetaPlacementBadge placement={campaign.placement ?? "facebook"} />
+            )}
           </div>
         </div>
         
         <div className="flex items-center gap-3">
-          {campaign.approvalStatus === "approved" && !campaign.metaCampaignId && (
-            <Button 
-              onClick={handlePushToMeta}
-              disabled={pushToMeta.isPending}
-              className="gap-2 bg-orange-500 hover:bg-orange-600 text-white border-transparent"
-            >
-              {pushToMeta.isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <SiFacebook className="w-4 h-4" />
-              )}
-              Push to Meta Ads
-            </Button>
-          )}
+          {campaign.approvalStatus === "approved" && !campaign.metaCampaignId && (() => {
+            const platform = (campaign.platform ?? "meta") as import("@/components/platform-badge").AdPlatform;
+            const config = PLATFORM_CONFIG[platform] ?? PLATFORM_CONFIG.meta;
+            const Icon = config.Icon;
+            const isMeta = platform === "meta";
+            if (!isMeta) {
+              return (
+                <Button disabled className="gap-2 opacity-60" title="API integration coming soon">
+                  <Lock className="w-4 h-4" />
+                  Push to {config.label}
+                </Button>
+              );
+            }
+            return (
+              <Button
+                onClick={handlePushToMeta}
+                disabled={pushToMeta.isPending}
+                className="gap-2 bg-orange-500 hover:bg-orange-600 text-white border-transparent"
+              >
+                {pushToMeta.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Icon className="w-4 h-4" />}
+                Push to Meta Ads
+              </Button>
+            );
+          })()}
 
           {campaign.metaCampaignId && (
             <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20 px-3 py-1 flex items-center gap-2">
@@ -147,11 +161,13 @@ export default function CampaignDetail() {
           <Button variant="outline" size="icon">
             <Settings className="w-4 h-4" />
           </Button>
-          <Button variant="outline" className="gap-2" asChild>
-            <a href={campaign.metaCampaignId ? `https://adsmanager.facebook.com/adsmanager/manage/campaigns?campaign_id=${campaign.metaCampaignId}` : "https://adsmanager.facebook.com"} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="w-4 h-4" /> Open in Ads Manager
-            </a>
-          </Button>
+          {(campaign.platform ?? "meta") === "meta" && (
+            <Button variant="outline" className="gap-2" asChild>
+              <a href={campaign.metaCampaignId ? `https://adsmanager.facebook.com/adsmanager/manage/campaigns?campaign_id=${campaign.metaCampaignId}` : "https://adsmanager.facebook.com"} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="w-4 h-4" /> Open in Ads Manager
+              </a>
+            </Button>
+          )}
           <Button className="gap-2" variant={campaign.status === 'active' ? 'destructive' : 'default'}>
             {campaign.status === 'active' ? (
               <><Pause className="w-4 h-4 fill-current" /> Pause Delivery</>
@@ -168,8 +184,16 @@ export default function CampaignDetail() {
           <h2 className="text-xl font-bold">Ad Sets & Creatives</h2>
         </div>
 
-        {campaign.metaCampaignId && (
+        {campaign.metaCampaignId && (campaign.platform ?? "meta") === "meta" && (
           <LiveMetaPerformanceCard campaignId={id} metaCampaignId={campaign.metaCampaignId} />
+        )}
+        {(campaign.platform ?? "meta") !== "meta" && (
+          <div className="mb-6 p-4 rounded-lg border border-border bg-secondary/10 flex items-center gap-3 text-sm text-muted-foreground">
+            <Lock className="w-4 h-4 shrink-0" />
+            <span>
+              <strong className="text-foreground">{PLATFORM_CONFIG[(campaign.platform ?? "meta") as import("@/components/platform-badge").AdPlatform]?.label ?? "Platform"} insights</strong> will be available once the API integration is active.
+            </span>
+          </div>
         )}
 
         {loadingAdSets ? (

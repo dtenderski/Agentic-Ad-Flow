@@ -6,12 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Target, Loader2, Facebook, Instagram, MessageCircle, Globe } from "lucide-react";
+import { Target, Loader2, Globe, Lock } from "lucide-react";
 import { SiFacebook, SiInstagram, SiWhatsapp } from "react-icons/si";
 import { useCreateCampaign, useListBusinesses } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { PLATFORM_CONFIG, type AdPlatform } from "@/components/platform-badge";
+
+const PLATFORMS: { value: AdPlatform; description: string; available: boolean }[] = [
+  { value: "meta", description: "Facebook, Instagram, WhatsApp CTWA", available: true },
+  { value: "google", description: "Search, Display, Shopping, YouTube", available: false },
+  { value: "tiktok", description: "In-Feed, TopView, Spark Ads", available: false },
+  { value: "linkedin", description: "Sponsored Content, Lead Gen Forms", available: false },
+];
 
 const PLACEMENTS = [
   {
@@ -72,12 +79,14 @@ export default function CampaignsNew() {
     businessId: "",
     campaignName: "",
     objective: "LEADS",
+    platform: "meta" as AdPlatform,
     placement: "facebook",
     budgetType: "daily",
     dailyBudget: "",
   });
 
   const selectedPlacement = PLACEMENTS.find(p => p.value === form.placement)!;
+  const isMeta = form.platform === "meta";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,7 +105,8 @@ export default function CampaignsNew() {
           businessId: parseInt(form.businessId),
           campaignName: form.campaignName.trim(),
           objective: form.objective,
-          placement: form.placement,
+          platform: form.platform,
+          placement: isMeta ? form.placement : "facebook",
           budgetType: form.dailyBudget ? form.budgetType : undefined,
           dailyBudget: form.dailyBudget ? parseFloat(form.dailyBudget) : undefined,
         },
@@ -106,8 +116,8 @@ export default function CampaignsNew() {
           toast({ title: "Campaign created", description: `"${campaign.campaignName}" is in draft.` });
           navigate(`/campaigns/${campaign.id}`);
         },
-        onError: (err: any) => {
-          toast({ title: "Error", description: err.message || "Failed to create campaign.", variant: "destructive" });
+        onError: (err: unknown) => {
+          toast({ title: "Error", description: (err as Error).message || "Failed to create campaign.", variant: "destructive" });
         },
       }
     );
@@ -120,19 +130,69 @@ export default function CampaignsNew() {
           <Target className="w-8 h-8 text-primary" />
           <div>
             <h1 className="text-3xl font-bold tracking-tight">New Campaign</h1>
-            <p className="text-muted-foreground mt-0.5">Set up your ad placement and objective.</p>
+            <p className="text-muted-foreground mt-0.5">Choose your platform, placement, and objective.</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Placement selector */}
+          {/* Platform selector */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Ad Placement</CardTitle>
-              <CardDescription>Choose where your ads will be shown.</CardDescription>
+              <CardTitle className="text-base">Ad Platform</CardTitle>
+              <CardDescription>Where do you want to run this campaign?</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-3">
+                {PLATFORMS.map((p) => {
+                  const config = PLATFORM_CONFIG[p.value];
+                  const Icon = config.Icon;
+                  const isSelected = form.platform === p.value;
+                  return (
+                    <button
+                      key={p.value}
+                      type="button"
+                      disabled={!p.available}
+                      onClick={() => p.available && setForm(f => ({ ...f, platform: p.value }))}
+                      className={cn(
+                        "flex items-start gap-3 p-4 rounded-lg border-2 text-left transition-all relative",
+                        !p.available && "opacity-50 cursor-not-allowed",
+                        p.available && isSelected && config.cardActive,
+                        p.available && !isSelected && `${config.cardBg} hover:border-opacity-60`,
+                      )}
+                    >
+                      <Icon className={cn("w-5 h-5 mt-0.5 shrink-0", config.color)} />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm flex items-center gap-1.5">
+                          {config.label}
+                          {!p.available && <Lock className="w-3 h-3 text-muted-foreground" />}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-0.5">{p.description}</div>
+                        {!p.available && (
+                          <div className="text-[10px] text-primary mt-1 font-medium">Integration coming soon</div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Placement selector — Meta only */}
+          <Card className={!isMeta ? "opacity-50" : ""}>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                Meta Placement
+                {!isMeta && <span className="text-xs font-normal text-muted-foreground">(Meta only)</span>}
+              </CardTitle>
+              <CardDescription>
+                {isMeta
+                  ? "Choose where your Meta ads will be shown."
+                  : "Platform-specific placements will be configurable once the integration is available."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className={cn("grid grid-cols-2 gap-3", !isMeta && "pointer-events-none")}>
                 {PLACEMENTS.map((p) => {
                   const Icon = p.icon;
                   const isSelected = form.placement === p.value;
@@ -156,7 +216,7 @@ export default function CampaignsNew() {
                 })}
               </div>
 
-              {form.placement === "whatsapp" && (
+              {isMeta && form.placement === "whatsapp" && (
                 <div className="mt-3 p-3 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-sm text-emerald-400">
                   <strong>CTWA requirement:</strong> Set <code className="bg-emerald-900/30 px-1 rounded text-xs">META_WHATSAPP_NUMBER</code> in Replit Secrets (e.g. <code className="bg-emerald-900/30 px-1 rounded text-xs">6281234567890</code>) before pushing to Meta.
                 </div>

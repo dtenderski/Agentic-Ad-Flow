@@ -18,6 +18,8 @@ export interface Campaign {
   objective: string;
   /** draft | review | approved | active | learning | optimizing | scaling | paused | completed */
   status: string;
+  /** meta | google | tiktok | linkedin */
+  platform: string;
   /** facebook | instagram | whatsapp | all */
   placement: string;
   /**
