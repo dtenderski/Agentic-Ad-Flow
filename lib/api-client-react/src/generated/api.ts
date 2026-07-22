@@ -39,6 +39,7 @@ import type {
   DashboardSummary,
   HealthStatus,
   ListCampaignsParams,
+  MetaInterestSearchResult,
   MetaPushResult,
   MetaValidationResult,
   PipelineInput,
@@ -46,7 +47,8 @@ import type {
   PipelineRunDetail,
   Product,
   ProductInput,
-  ProductUpdate
+  ProductUpdate,
+  SearchMetaInterestsParams
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -2909,6 +2911,90 @@ export function useGetBusinessMemory<TData = Awaited<ReturnType<typeof getBusine
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetBusinessMemoryQueryOptions(businessId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSearchMetaInterestsUrl = (params: SearchMetaInterestsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/meta/interests/search?${stringifiedParams}` : `/api/meta/interests/search`
+}
+
+/**
+ * @summary Search Meta interest targeting options
+ */
+export const searchMetaInterests = async (params: SearchMetaInterestsParams, options?: RequestInit): Promise<MetaInterestSearchResult> => {
+
+  return customFetch<MetaInterestSearchResult>(getSearchMetaInterestsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getSearchMetaInterestsQueryKey = (params?: SearchMetaInterestsParams,) => {
+    return [
+    `/api/meta/interests/search`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSearchMetaInterestsQueryOptions = <TData = Awaited<ReturnType<typeof searchMetaInterests>>, TError = ErrorType<unknown>>(params: SearchMetaInterestsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof searchMetaInterests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSearchMetaInterestsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof searchMetaInterests>>> = ({ signal }) => searchMetaInterests(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof searchMetaInterests>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type SearchMetaInterestsQueryResult = NonNullable<Awaited<ReturnType<typeof searchMetaInterests>>>
+export type SearchMetaInterestsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Search Meta interest targeting options
+ */
+
+export function useSearchMetaInterests<TData = Awaited<ReturnType<typeof searchMetaInterests>>, TError = ErrorType<unknown>>(
+ params: SearchMetaInterestsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof searchMetaInterests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getSearchMetaInterestsQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

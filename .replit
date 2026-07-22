@@ -21,3 +21,8 @@ timeoutMs = 20000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+META_PAGE_ID = "1213993801797459"

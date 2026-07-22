@@ -494,6 +494,17 @@ export interface AgentMemory {
   updatedAt?: string;
 }
 
+export interface MetaInterestItem {
+  id: string;
+  name: string;
+  /** @nullable */
+  audienceSize?: number | null;
+}
+
+export interface MetaInterestSearchResult {
+  data: MetaInterestItem[];
+}
+
 export interface MetaValidationResult {
   valid: boolean;
   /** @nullable */
@@ -530,5 +541,9 @@ export interface MetaPushResult {
 
 export type ListCampaignsParams = {
 status?: string;
+};
+
+export type SearchMetaInterestsParams = {
+q: string;
 };
 

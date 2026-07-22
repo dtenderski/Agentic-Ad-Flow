@@ -1039,6 +1039,22 @@ export const GetBusinessMemoryResponse = zod.object({
 
 
 /**
+ * @summary Search Meta interest targeting options
+ */
+export const SearchMetaInterestsQueryParams = zod.object({
+  "q": zod.coerce.string()
+})
+
+export const SearchMetaInterestsResponse = zod.object({
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "audienceSize": zod.number().nullish()
+}))
+})
+
+
+/**
  * @summary Validate Meta Ads credentials
  */
 export const ValidateMetaResponse = zod.object({

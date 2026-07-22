@@ -6,10 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Target, Edit, Play, Pause, ExternalLink, Settings, GitMerge, FileImage, Loader2 } from "lucide-react";
 import { SiFacebook } from "react-icons/si";
-import { useGetCampaign, useListAdSets, useListCreatives, getGetCampaignQueryKey, getListAdSetsQueryKey, usePushToMeta } from "@workspace/api-client-react";
+import { useGetCampaign, useListAdSets, useListCreatives, getGetCampaignQueryKey, getListAdSetsQueryKey, usePushToMeta, useUpdateAdSet } from "@workspace/api-client-react";
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { InterestPicker } from "@/components/interest-picker";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
 
 export default function CampaignDetail() {
   const [, params] = useRoute("/campaigns/:id");
@@ -140,16 +145,33 @@ export default function CampaignDetail() {
             </CardContent>
           </Card>
         ) : (
-          adSets.map(adSet => (
+          adSets.map(adSet => {
+            let interestsArray: string[] = [];
+            if (adSet.interests) {
+              try {
+                interestsArray = JSON.parse(adSet.interests);
+              } catch (e) {
+                // Ignore parse errors
+              }
+            }
+            
+            return (
             <Card key={adSet.id} className="border-l-4 border-l-info overflow-hidden">
               <CardHeader className="bg-secondary/20 pb-4 border-b border-border/50 flex flex-row items-start justify-between">
                 <div>
                   <CardTitle className="text-lg flex items-center gap-2">
                     {adSet.adsetName}
+                    <EditAdSetModal adSet={adSet} campaignId={id} />
                   </CardTitle>
                   <CardDescription className="font-mono text-xs mt-2 text-muted-foreground max-w-2xl leading-relaxed">
                     TARGET: {adSet.location || 'Broad'} | AGE: {adSet.ageMin}-{adSet.ageMax || '65+'} | 
-                    INT: {adSet.interests ? JSON.parse(adSet.interests).join(", ") : "None"} <br/>
+                    INT: {interestsArray.length > 0 ? (
+                      <span className="inline-flex gap-1 items-center ml-1">
+                        {interestsArray.map((int, i) => (
+                          <Badge key={i} variant="outline" className="text-[10px] px-1 py-0 h-4 bg-background">{int}</Badge>
+                        ))}
+                      </span>
+                    ) : "None"} <br/>
                     OPT: {adSet.optimizationEvent || "N/A"} | PLACEMENT: {adSet.placement || "Auto"}
                   </CardDescription>
                 </div>
@@ -174,7 +196,7 @@ export default function CampaignDetail() {
                 </Table>
               </CardContent>
             </Card>
-          ))
+          )})
         )}
       </div>
     </Shell>
@@ -232,5 +254,88 @@ function CreativeList({ adSetId }: { adSetId: number }) {
         </TableRow>
       ))}
     </>
+  );
+}
+
+function EditAdSetModal({ adSet, campaignId }: { adSet: any; campaignId: number }) {
+  const [open, setOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const updateAdSet = useUpdateAdSet();
+
+  const [name, setName] = useState(adSet.adsetName || "");
+  const [interests, setInterests] = useState<string[]>([]);
+
+  // Sync state when modal opens
+  useEffect(() => {
+    if (open) {
+      setName(adSet.adsetName || "");
+      if (adSet.interests) {
+        try {
+          setInterests(JSON.parse(adSet.interests));
+        } catch (e) {
+          setInterests([]);
+        }
+      } else {
+        setInterests([]);
+      }
+    }
+  }, [open, adSet]);
+
+  const handleSave = () => {
+    updateAdSet.mutate(
+      {
+        adsetId: adSet.id,
+        data: {
+          adsetName: name,
+          interests: JSON.stringify(interests),
+        }
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListAdSetsQueryKey(campaignId) });
+          toast({ title: "Ad Set updated", description: "Your changes have been saved." });
+          setOpen(false);
+        },
+        onError: (error: any) => {
+          toast({ title: "Error", description: error.message || "Failed to update Ad Set.", variant: "destructive" });
+        }
+      }
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary ml-2">
+          <Edit className="w-4 h-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit Ad Set</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-6 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="name">Ad Set Name</Label>
+            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="grid gap-2">
+            <Label>Meta Interests</Label>
+            <InterestPicker value={interests} onChange={setInterests} />
+            <p className="text-xs text-muted-foreground mt-1">
+              Select up to 5 interests to target for this ad set.
+            </p>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button onClick={handleSave} disabled={updateAdSet.isPending}>
+            {updateAdSet.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+            Save Changes
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
