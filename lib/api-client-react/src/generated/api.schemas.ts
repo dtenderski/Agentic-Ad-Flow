@@ -494,6 +494,40 @@ export interface AgentMemory {
   updatedAt?: string;
 }
 
+export interface MetaValidationResult {
+  valid: boolean;
+  /** @nullable */
+  adAccountName?: string | null;
+  /** @nullable */
+  accountId?: string | null;
+  /** @nullable */
+  currency?: string | null;
+  /** @nullable */
+  error?: string | null;
+}
+
+export type MetaAdSetResultAdsItem = {
+  localId: number;
+  metaAdId: string;
+};
+
+export interface MetaAdSetResult {
+  localId: number;
+  metaAdsetId: string;
+  ads: MetaAdSetResultAdsItem[];
+}
+
+export type MetaPushResultResults = {
+  metaCampaignId: string;
+  adSets: MetaAdSetResult[];
+};
+
+export interface MetaPushResult {
+  success: boolean;
+  message: string;
+  results: MetaPushResultResults;
+}
+
 export type ListCampaignsParams = {
 status?: string;
 };

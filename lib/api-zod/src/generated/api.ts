@@ -1038,3 +1038,39 @@ export const GetBusinessMemoryResponse = zod.object({
 })
 
 
+/**
+ * @summary Validate Meta Ads credentials
+ */
+export const ValidateMetaResponse = zod.object({
+  "valid": zod.boolean(),
+  "adAccountName": zod.string().nullish(),
+  "accountId": zod.string().nullish(),
+  "currency": zod.string().nullish(),
+  "error": zod.string().nullish()
+})
+
+
+/**
+ * @summary Push approved campaign to Meta Ads Manager
+ */
+export const PushToMetaParams = zod.object({
+  "campaignId": zod.coerce.number()
+})
+
+export const PushToMetaResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string(),
+  "results": zod.object({
+  "metaCampaignId": zod.string(),
+  "adSets": zod.array(zod.object({
+  "localId": zod.number(),
+  "metaAdsetId": zod.string(),
+  "ads": zod.array(zod.object({
+  "localId": zod.number(),
+  "metaAdId": zod.string()
+}))
+}))
+})
+})
+
+

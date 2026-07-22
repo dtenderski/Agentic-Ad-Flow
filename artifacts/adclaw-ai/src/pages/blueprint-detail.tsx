@@ -4,9 +4,46 @@ import { Shell } from "@/components/layout/Shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShieldAlert, Target, Users, Megaphone, PenTool, CircleDollarSign, Check, X } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ShieldAlert, Target, Users, Megaphone, PenTool, CircleDollarSign, Check, X, Briefcase } from "lucide-react";
 import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+
+function StructuredDataViewer({ data }: { data: any }) {
+  if (typeof data !== 'object' || data === null) {
+    return <span className="text-foreground">{String(data)}</span>;
+  }
+
+  if (Array.isArray(data)) {
+    return (
+      <div className="flex flex-col gap-2">
+        {data.map((item, idx) => (
+          <div key={idx} className="bg-secondary/20 p-3 rounded-md border border-border">
+            <StructuredDataViewer data={item} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-y-3 gap-x-4">
+      {Object.entries(data).map(([key, value]) => (
+        <div key={key} className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4 border-b border-border/50 pb-2 last:border-0 last:pb-0">
+          <span className="font-mono text-xs text-muted-foreground uppercase w-1/3 shrink-0 pt-1">
+            {key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}
+          </span>
+          <div className="text-sm text-foreground flex-1">
+            {typeof value === 'object' && value !== null ? (
+              <StructuredDataViewer data={value} />
+            ) : (
+              <span>{String(value)}</span>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function BlueprintDetail() {
   const [, params] = useRoute("/blueprints/:id");
@@ -28,12 +65,14 @@ export default function BlueprintDetail() {
   const parseSection = (jsonString: string | null | undefined) => {
     if (!jsonString) return null;
     try {
-      return JSON.parse(jsonString);
+      const parsed = JSON.parse(jsonString);
+      return { parsed, raw: jsonString };
     } catch (e) {
-      return { raw: jsonString };
+      return { parsed: null, raw: jsonString };
     }
   };
 
+  const business = parseSection(blueprint.businessContext);
   const strategy = parseSection(blueprint.campaignStrategy);
   const audience = parseSection(blueprint.audiencePlan);
   const offer = parseSection(blueprint.offerStrategy);
@@ -84,11 +123,14 @@ export default function BlueprintDetail() {
     );
   };
 
-  const renderJsonBlock = (data: any) => {
-    if (!data) return <div className="text-muted-foreground">Data unavailable</div>;
+  const renderSectionContent = (sectionData: { parsed: any, raw: string } | null) => {
+    if (!sectionData) return <div className="text-muted-foreground">Data unavailable</div>;
+    if (sectionData.parsed) {
+      return <StructuredDataViewer data={sectionData.parsed} />;
+    }
     return (
       <pre className="bg-secondary/50 p-4 rounded-lg font-mono text-sm overflow-x-auto text-foreground border border-border">
-        {JSON.stringify(data, null, 2)}
+        {sectionData.raw}
       </pre>
     );
   };
@@ -132,48 +174,96 @@ export default function BlueprintDetail() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="strategy" className="mt-8">
-        <TabsList className="grid w-full grid-cols-6 h-12 bg-card border border-border">
-          <TabsTrigger value="strategy" className="gap-2"><Target className="w-4 h-4"/> Strategy</TabsTrigger>
-          <TabsTrigger value="audience" className="gap-2"><Users className="w-4 h-4"/> Audience</TabsTrigger>
-          <TabsTrigger value="offer" className="gap-2"><Megaphone className="w-4 h-4"/> Offer</TabsTrigger>
-          <TabsTrigger value="creative" className="gap-2"><PenTool className="w-4 h-4"/> Creative</TabsTrigger>
-          <TabsTrigger value="budget" className="gap-2"><CircleDollarSign className="w-4 h-4"/> Budget</TabsTrigger>
-          <TabsTrigger value="policy" className="gap-2"><ShieldAlert className="w-4 h-4"/> Policy</TabsTrigger>
-        </TabsList>
-        
-        <div className="mt-6 border border-border bg-card rounded-lg min-h-[400px] p-6 shadow-sm">
-          <TabsContent value="strategy" className="m-0 focus-visible:outline-none">
-            <h3 className="text-xl font-bold mb-4">Campaign Strategy</h3>
-            {renderJsonBlock(strategy)}
-          </TabsContent>
-          <TabsContent value="audience" className="m-0 focus-visible:outline-none">
-            <h3 className="text-xl font-bold mb-4">Audience Matrix</h3>
-            {renderJsonBlock(audience)}
-          </TabsContent>
-          <TabsContent value="offer" className="m-0 focus-visible:outline-none">
-            <h3 className="text-xl font-bold mb-4">Offer Architecture</h3>
-            {renderJsonBlock(offer)}
-          </TabsContent>
-          <TabsContent value="creative" className="m-0 focus-visible:outline-none">
-            <h3 className="text-xl font-bold mb-4">Creative Blueprint</h3>
-            {renderJsonBlock(creative)}
-          </TabsContent>
-          <TabsContent value="budget" className="m-0 focus-visible:outline-none">
-            <h3 className="text-xl font-bold mb-4">Budget Allocation</h3>
-            {renderJsonBlock(budget)}
-          </TabsContent>
-          <TabsContent value="policy" className="m-0 focus-visible:outline-none">
-            <div className="flex items-center gap-3 mb-4">
-              <h3 className="text-xl font-bold">Policy & Compliance Review</h3>
-              {blueprint.policyRiskScore && blueprint.policyRiskScore > 40 && (
-                <Badge variant="destructive">High Risk Detected</Badge>
-              )}
-            </div>
-            {renderJsonBlock(policy)}
-          </TabsContent>
-        </div>
-      </Tabs>
+      <div className="mt-8">
+        <Accordion type="multiple" defaultValue={["businessContext", "campaignStrategy"]} className="space-y-4">
+          <AccordionItem value="businessContext" className="border border-border bg-card rounded-lg overflow-hidden">
+            <AccordionTrigger className="px-6 hover:bg-secondary/50 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <Briefcase className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-bold">Business Context</h3>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-6 pt-2">
+              {renderSectionContent(business)}
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="campaignStrategy" className="border border-border bg-card rounded-lg overflow-hidden">
+            <AccordionTrigger className="px-6 hover:bg-secondary/50 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <Target className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-bold">Campaign Strategy</h3>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-6 pt-2">
+              {renderSectionContent(strategy)}
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="audiencePlan" className="border border-border bg-card rounded-lg overflow-hidden">
+            <AccordionTrigger className="px-6 hover:bg-secondary/50 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <Users className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-bold">Audience Plan</h3>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-6 pt-2">
+              {renderSectionContent(audience)}
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="offerStrategy" className="border border-border bg-card rounded-lg overflow-hidden">
+            <AccordionTrigger className="px-6 hover:bg-secondary/50 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <Megaphone className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-bold">Offer Strategy</h3>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-6 pt-2">
+              {renderSectionContent(offer)}
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="creativeBlueprint" className="border border-border bg-card rounded-lg overflow-hidden">
+            <AccordionTrigger className="px-6 hover:bg-secondary/50 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <PenTool className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-bold">Creative Blueprint</h3>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-6 pt-2">
+              {renderSectionContent(creative)}
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="budgetPlan" className="border border-border bg-card rounded-lg overflow-hidden">
+            <AccordionTrigger className="px-6 hover:bg-secondary/50 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <CircleDollarSign className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-bold">Budget Plan</h3>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-6 pt-2">
+              {renderSectionContent(budget)}
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="policyReview" className="border border-border bg-card rounded-lg overflow-hidden">
+            <AccordionTrigger className="px-6 hover:bg-secondary/50 hover:no-underline">
+              <div className="flex items-center gap-3 w-full">
+                <ShieldAlert className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-bold">Policy Review</h3>
+                {blueprint.policyRiskScore && blueprint.policyRiskScore > 40 && (
+                  <Badge variant="destructive" className="ml-4">High Risk Detected</Badge>
+                )}
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-6 pt-2">
+              {renderSectionContent(policy)}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
     </Shell>
   );
 }

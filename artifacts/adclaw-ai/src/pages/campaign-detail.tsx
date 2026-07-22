@@ -4,13 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Target, Edit, Play, Pause, ExternalLink, Settings, GitMerge, FileImage } from "lucide-react";
-import { useGetCampaign, useListAdSets, useListCreatives, getGetCampaignQueryKey, getListAdSetsQueryKey } from "@workspace/api-client-react";
+import { Target, Edit, Play, Pause, ExternalLink, Settings, GitMerge, FileImage, Loader2 } from "lucide-react";
+import { SiFacebook } from "react-icons/si";
+import { useGetCampaign, useListAdSets, useListCreatives, getGetCampaignQueryKey, getListAdSetsQueryKey, usePushToMeta } from "@workspace/api-client-react";
 import { formatCurrency } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function CampaignDetail() {
   const [, params] = useRoute("/campaigns/:id");
   const id = parseInt(params?.id || "0", 10);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: campaign, isLoading: loadingCampaign } = useGetCampaign(id, {
     query: { enabled: !!id, queryKey: getGetCampaignQueryKey(id) }
@@ -19,6 +24,31 @@ export default function CampaignDetail() {
   const { data: adSets, isLoading: loadingAdSets } = useListAdSets(id, {
     query: { enabled: !!id, queryKey: getListAdSetsQueryKey(id) }
   });
+
+  const pushToMeta = usePushToMeta();
+
+  const handlePushToMeta = () => {
+    pushToMeta.mutate(
+      { campaignId: id },
+      {
+        onSuccess: (result) => {
+          queryClient.invalidateQueries({ queryKey: getGetCampaignQueryKey(id) });
+          toast({
+            title: "Success",
+            description: `Successfully pushed to Meta Ads. Campaign ID: ${result.metaCampaignId}`,
+            variant: "default",
+          });
+        },
+        onError: (error: any) => {
+          toast({
+            title: "Error pushing to Meta",
+            description: error.message || "Failed to push campaign to Meta Ads.",
+            variant: "destructive",
+          });
+        }
+      }
+    );
+  };
 
   if (loadingCampaign) {
     return <Shell><div className="animate-pulse h-64 bg-card rounded-lg" /></Shell>;
@@ -55,11 +85,35 @@ export default function CampaignDetail() {
         </div>
         
         <div className="flex items-center gap-3">
+          {campaign.approvalStatus === "approved" && !campaign.metaCampaignId && (
+            <Button 
+              onClick={handlePushToMeta}
+              disabled={pushToMeta.isPending}
+              className="gap-2 bg-orange-500 hover:bg-orange-600 text-white border-transparent"
+            >
+              {pushToMeta.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <SiFacebook className="w-4 h-4" />
+              )}
+              Push to Meta Ads
+            </Button>
+          )}
+
+          {campaign.metaCampaignId && (
+            <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20 px-3 py-1 flex items-center gap-2">
+              <SiFacebook className="w-3 h-3" />
+              {campaign.metaCampaignId}
+            </Badge>
+          )}
+          
           <Button variant="outline" size="icon">
             <Settings className="w-4 h-4" />
           </Button>
-          <Button variant="outline" className="gap-2">
-            <ExternalLink className="w-4 h-4" /> Open in Ads Manager
+          <Button variant="outline" className="gap-2" asChild>
+            <a href={campaign.metaCampaignId ? `https://adsmanager.facebook.com/adsmanager/manage/campaigns?campaign_id=${campaign.metaCampaignId}` : "https://adsmanager.facebook.com"} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="w-4 h-4" /> Open in Ads Manager
+            </a>
           </Button>
           <Button className="gap-2" variant={campaign.status === 'active' ? 'destructive' : 'default'}>
             {campaign.status === 'active' ? (

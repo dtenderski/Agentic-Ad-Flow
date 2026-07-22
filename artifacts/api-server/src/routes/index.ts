@@ -10,6 +10,7 @@ import blueprintsRouter from "./blueprints";
 import approvalsRouter from "./approvals";
 import memoryRouter from "./memory";
 import dashboardRouter from "./dashboard";
+import metaRouter from "./meta";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(pipelineRouter);
 router.use(blueprintsRouter);
 router.use(approvalsRouter);
 router.use(memoryRouter);
+router.use(metaRouter);
 
 export default router;

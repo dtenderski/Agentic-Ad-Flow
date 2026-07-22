@@ -58,6 +58,7 @@ export default function CampaignsList() {
                 <TableHead>Campaign Name</TableHead>
                 <TableHead>Objective</TableHead>
                 <TableHead>Budget</TableHead>
+                <TableHead>Meta</TableHead>
                 <TableHead>Approval</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Action</TableHead>
@@ -92,6 +93,21 @@ export default function CampaignsList() {
                     </TableCell>
                     <TableCell className="font-mono text-sm">
                       {campaign.budgetType === 'daily' ? `${formatCurrency(campaign.dailyBudget)}/d` : `${formatCurrency(campaign.lifetimeBudget)} LTV`}
+                    </TableCell>
+                    <TableCell>
+                      {campaign.metaCampaignId ? (
+                        <div className="flex items-center gap-1.5" title={campaign.metaCampaignId}>
+                          <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400">
+                            {campaign.metaCampaignId.substring(0, 8)}...
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                          <div className="w-2 h-2 rounded-full bg-muted-foreground/30" />
+                          <span className="text-xs">Not pushed</span>
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>
                        {campaign.approvalStatus === 'approved' ? (

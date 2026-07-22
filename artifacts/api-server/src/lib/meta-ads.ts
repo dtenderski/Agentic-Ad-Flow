@@ -1,0 +1,268 @@
+import { logger } from "./logger";
+
+const META_API_VERSION = "v21.0";
+const META_BASE = `https://graph.facebook.com/${META_API_VERSION}`;
+
+function getMetaConfig() {
+  const accessToken = process.env.META_ACCESS_TOKEN;
+  const adAccountId = process.env.META_AD_ACCOUNT_ID;
+  if (!accessToken || !adAccountId) {
+    throw new Error("META_ACCESS_TOKEN and META_AD_ACCOUNT_ID must be set");
+  }
+  // Ensure account ID starts with act_
+  const accountId = adAccountId.startsWith("act_") ? adAccountId : `act_${adAccountId}`;
+  return { accessToken, accountId };
+}
+
+async function metaPost<T>(path: string, body: Record<string, unknown>): Promise<T> {
+  const { accessToken } = getMetaConfig();
+  const url = `${META_BASE}/${path}`;
+
+  const params = new URLSearchParams();
+  for (const [k, v] of Object.entries(body)) {
+    if (v !== undefined && v !== null) {
+      params.set(k, typeof v === "object" ? JSON.stringify(v) : String(v));
+    }
+  }
+  params.set("access_token", accessToken);
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
+
+  const data = (await res.json()) as T & { error?: { message: string; code: number } };
+  if (!res.ok || (data as Record<string, unknown>).error) {
+    const err = (data as Record<string, unknown>).error as { message: string } | undefined;
+    logger.error({ url, status: res.status, metaError: err }, "Meta API error");
+    throw new Error(`Meta API error: ${err?.message ?? res.statusText}`);
+  }
+  return data;
+}
+
+async function metaGet<T>(path: string, params: Record<string, string> = {}): Promise<T> {
+  const { accessToken } = getMetaConfig();
+  const qs = new URLSearchParams({ ...params, access_token: accessToken });
+  const url = `${META_BASE}/${path}?${qs}`;
+
+  const res = await fetch(url);
+  const data = (await res.json()) as T & { error?: { message: string } };
+  if (!res.ok || (data as Record<string, unknown>).error) {
+    const err = (data as Record<string, unknown>).error as { message: string } | undefined;
+    logger.error({ url, status: res.status, metaError: err }, "Meta API GET error");
+    throw new Error(`Meta API error: ${err?.message ?? res.statusText}`);
+  }
+  return data;
+}
+
+// ─── Validation ───────────────────────────────────────────────────────────────
+
+export async function validateMetaCredentials(): Promise<{
+  valid: boolean;
+  adAccountName?: string;
+  accountId?: string;
+  currency?: string;
+  error?: string;
+}> {
+  try {
+    const { accountId } = getMetaConfig();
+    const data = await metaGet<{
+      id: string;
+      name: string;
+      currency: string;
+      account_status: number;
+    }>(accountId, { fields: "id,name,currency,account_status" });
+    return {
+      valid: data.account_status === 1,
+      adAccountName: data.name,
+      accountId: data.id,
+      currency: data.currency,
+    };
+  } catch (err: unknown) {
+    return { valid: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+// ─── Campaign ─────────────────────────────────────────────────────────────────
+
+const OBJECTIVE_MAP: Record<string, string> = {
+  AWARENESS: "OUTCOME_AWARENESS",
+  TRAFFIC: "OUTCOME_TRAFFIC",
+  ENGAGEMENT: "OUTCOME_ENGAGEMENT",
+  LEADS: "OUTCOME_LEADS",
+  APP_PROMOTION: "OUTCOME_APP_PROMOTION",
+  SALES: "OUTCOME_SALES",
+};
+
+export async function createMetaCampaign(opts: {
+  name: string;
+  objective: string;
+  dailyBudget?: number | null;
+  specialAdCategory?: boolean | null;
+  cbo?: boolean | null;
+}): Promise<string> {
+  const { accountId } = getMetaConfig();
+  const metaObjective = OBJECTIVE_MAP[opts.objective.toUpperCase()] ?? "OUTCOME_LEADS";
+
+  const body: Record<string, unknown> = {
+    name: opts.name,
+    objective: metaObjective,
+    status: "PAUSED", // Always start paused for human review
+    special_ad_categories: opts.specialAdCategory ? ["CREDIT"] : [],
+  };
+
+  if (opts.cbo && opts.dailyBudget) {
+    body.daily_budget = Math.round(opts.dailyBudget); // in lowest currency unit (IDR = Rupiah, no cents)
+    body.bid_strategy = "LOWEST_COST_WITHOUT_CAP";
+  }
+
+  const result = await metaPost<{ id: string }>(`${accountId}/campaigns`, body);
+  logger.info({ metaCampaignId: result.id }, "Meta campaign created");
+  return result.id;
+}
+
+// ─── Ad Set ───────────────────────────────────────────────────────────────────
+
+export async function createMetaAdSet(opts: {
+  campaignId: string;
+  name: string;
+  dailyBudget: number;
+  optimizationGoal: string;
+  billingEvent: string;
+  targetingLocation?: string;
+  targetingAgeMin?: number;
+  targetingAgeMax?: number;
+  targetingGender?: string;
+  targetingInterests?: string[];
+  bidAmount?: number;
+}): Promise<string> {
+  const { accountId } = getMetaConfig();
+
+  const targeting: Record<string, unknown> = {
+    age_min: opts.targetingAgeMin ?? 18,
+    age_max: opts.targetingAgeMax ?? 65,
+  };
+
+  if (opts.targetingGender === "male") targeting.genders = [1];
+  if (opts.targetingGender === "female") targeting.genders = [2];
+
+  // Use geo_locations with country if no specific city provided
+  if (opts.targetingLocation) {
+    targeting.geo_locations = { countries: ["ID"] };
+  } else {
+    targeting.geo_locations = { countries: ["ID"] };
+  }
+
+  // Flexible targeting for interests (simplified — production would use interest IDs)
+  if (opts.targetingInterests && opts.targetingInterests.length > 0) {
+    targeting.flexible_spec = [
+      {
+        interests: opts.targetingInterests.slice(0, 3).map((name, i) => ({
+          id: String(6003200000000 + i), // placeholder IDs — production: use Meta Interest API
+          name,
+        })),
+      },
+    ];
+  }
+
+  const OPTIMIZATION_MAP: Record<string, string> = {
+    LEAD: "LEAD_GENERATION",
+    PURCHASE: "OFFSITE_CONVERSIONS",
+    ADD_TO_CART: "OFFSITE_CONVERSIONS",
+    CONTACT: "CONVERSATIONS",
+    REACH: "REACH",
+  };
+
+  const optimizationGoal =
+    OPTIMIZATION_MAP[opts.optimizationGoal.toUpperCase()] ?? "LEAD_GENERATION";
+
+  const body: Record<string, unknown> = {
+    campaign_id: opts.campaignId,
+    name: opts.name,
+    daily_budget: Math.round(opts.dailyBudget),
+    billing_event: opts.billingEvent || "IMPRESSIONS",
+    optimization_goal: optimizationGoal,
+    targeting,
+    status: "PAUSED",
+    start_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // tomorrow
+  };
+
+  if (opts.bidAmount) body.bid_amount = opts.bidAmount;
+
+  const result = await metaPost<{ id: string }>(`${accountId}/adsets`, body);
+  logger.info({ metaAdsetId: result.id }, "Meta ad set created");
+  return result.id;
+}
+
+// ─── Ad Creative ──────────────────────────────────────────────────────────────
+
+export async function createMetaAdCreative(opts: {
+  name: string;
+  primaryText: string;
+  headline: string;
+  description?: string;
+  linkUrl?: string;
+  callToActionType?: string;
+  pageId?: string;
+}): Promise<string> {
+  const { accountId } = getMetaConfig();
+
+  const CTA_MAP: Record<string, string> = {
+    "Hubungi Kami": "CONTACT_US",
+    "Contact Us": "CONTACT_US",
+    "Beli Sekarang": "SHOP_NOW",
+    "Buy Now": "SHOP_NOW",
+    "Learn More": "LEARN_MORE",
+    "Pelajari Selengkapnya": "LEARN_MORE",
+    "Konsultasi Gratis": "CONTACT_US",
+    "Daftar Sekarang": "SIGN_UP",
+    "Sign Up": "SIGN_UP",
+    "Download": "DOWNLOAD",
+  };
+
+  const ctaType = opts.callToActionType
+    ? CTA_MAP[opts.callToActionType] ?? "CONTACT_US"
+    : "CONTACT_US";
+
+  const body: Record<string, unknown> = {
+    name: opts.name,
+    object_story_spec: {
+      page_id: opts.pageId || process.env.META_PAGE_ID || "me",
+      link_data: {
+        message: opts.primaryText,
+        link: opts.linkUrl || "https://www.facebook.com",
+        name: opts.headline,
+        description: opts.description || "",
+        call_to_action: {
+          type: ctaType,
+          value: { link: opts.linkUrl || "https://www.facebook.com" },
+        },
+      },
+    },
+  };
+
+  const result = await metaPost<{ id: string }>(`${accountId}/adcreatives`, body);
+  logger.info({ metaCreativeId: result.id }, "Meta ad creative created");
+  return result.id;
+}
+
+// ─── Ad ───────────────────────────────────────────────────────────────────────
+
+export async function createMetaAd(opts: {
+  adsetId: string;
+  name: string;
+  creativeId: string;
+}): Promise<string> {
+  const { accountId } = getMetaConfig();
+
+  const result = await metaPost<{ id: string }>(`${accountId}/ads`, {
+    adset_id: opts.adsetId,
+    name: opts.name,
+    creative: { creative_id: opts.creativeId },
+    status: "PAUSED",
+  });
+
+  logger.info({ metaAdId: result.id }, "Meta ad created");
+  return result.id;
+}

@@ -2,9 +2,16 @@ import * as React from "react"
 import { Activity, Briefcase, Plus, CopyPlus, Play, CheckCircle, Database, Server, Settings, Home, Target, MapPin, Search } from "lucide-react"
 import { Link, useLocation } from "wouter"
 import { cn } from "@/lib/utils"
+import { useValidateMeta } from "@workspace/api-client-react"
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const [location] = useLocation()
+  
+  const { data: metaStatus, isLoading: loadingMeta } = useValidateMeta({
+    query: {
+      retry: false,
+    }
+  });
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: Home },
@@ -46,7 +53,29 @@ export function Shell({ children }: { children: React.ReactNode }) {
             })}
           </nav>
         </div>
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-border flex flex-col gap-2">
+          {loadingMeta ? (
+            <div className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground animate-pulse">
+              <div className="w-2 h-2 rounded-full bg-muted-foreground/50" />
+              Checking Meta...
+            </div>
+          ) : metaStatus?.valid ? (
+            <div className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-emerald-500 bg-emerald-500/10 rounded-md" title={metaStatus.adAccountName || "Meta Ads Account"}>
+              <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+              <div className="truncate flex-1 text-xs">
+                <div>Meta Connected</div>
+                <div className="text-[10px] opacity-80 truncate">{metaStatus.adAccountName}</div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-destructive bg-destructive/10 rounded-md" title={metaStatus?.error || "Connection error"}>
+              <div className="w-2 h-2 rounded-full bg-destructive shrink-0" />
+              <div className="truncate flex-1 text-xs">
+                <div>Meta Error</div>
+                <div className="text-[10px] opacity-80 truncate">Check connection</div>
+              </div>
+            </div>
+          )}
           <div className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50">
             <Settings className="w-4 h-4" />
             Settings

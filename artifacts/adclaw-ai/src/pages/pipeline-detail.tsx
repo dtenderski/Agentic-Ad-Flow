@@ -99,9 +99,33 @@ export default function PipelineDetail() {
             <CardContent className="flex-1 p-0">
               <div className="h-[600px] overflow-y-auto p-4 font-mono text-xs leading-relaxed">
                 {run.agentLog ? (
-                  <pre className="text-foreground whitespace-pre-wrap">
-                    {run.agentLog}
-                  </pre>
+                  <div className="text-foreground whitespace-pre-wrap flex flex-col gap-1">
+                    {run.agentLog.split('\n').map((line, idx) => {
+                      let colorClass = "text-muted-foreground"; // default
+                      
+                      if (line.includes("[OpenClaw]")) {
+                        colorClass = "text-cyan-400";
+                      } else if (line.includes("[Business Claw]") || line.includes("[Audience Claw]") || line.includes("[Offer Claw]") || line.includes("[Creative Claw]") || line.includes("[Budget Claw]")) {
+                        colorClass = "text-amber-400";
+                      } else if (line.includes("[Human Gate]")) {
+                        colorClass = "text-orange-500 animate-pulse";
+                      } else if (line.includes("[Policy Claw]")) {
+                        if (line.includes("HIGH") || line.includes("CRITICAL")) {
+                          colorClass = "text-red-500 font-bold";
+                        } else {
+                          colorClass = "text-amber-400";
+                        }
+                      } else if (line.startsWith(">") || line.startsWith("-")) {
+                        colorClass = "text-foreground/80 pl-4";
+                      }
+
+                      return (
+                        <div key={idx} className={colorClass}>
+                          {line}
+                        </div>
+                      );
+                    })}
+                  </div>
                 ) : (
                   <div className="text-muted-foreground flex flex-col items-center justify-center h-full opacity-50">
                     <Cpu className="w-12 h-12 mb-4" />

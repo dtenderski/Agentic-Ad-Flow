@@ -30,6 +30,8 @@ tags:
     description: Agent memory and learning
   - name: dashboard
     description: Dashboard summary and analytics
+  - name: meta
+    description: Meta Ads API integration
 
 paths:
   /healthz:
@@ -755,6 +757,45 @@ paths:
         "404":
           description: Not found
 
+  # ─── Meta Ads API ─────────────────────────────────────────────────────────────
+  /meta/validate:
+    get:
+      tags: [meta]
+      operationId: validateMeta
+      summary: Validate Meta Ads credentials
+      responses:
+        "200":
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetaValidationResult"
+
+  /meta/push/{campaignId}:
+    post:
+      tags: [meta]
+      operationId: pushToMeta
+      summary: Push approved campaign to Meta Ads Manager
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Push result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetaPushResult"
+        "400":
+          description: Campaign not approved or invalid
+        "404":
+          description: Campaign not found
+        "500":
+          description: Meta API error
+
 components:
   schemas:
     HealthStatus:
@@ -1436,3 +1477,57 @@ components:
           type: string
         updatedAt:
           type: string
+
+    # ─── Meta Ads ─────────────────────────────────────────────────────────────────
+    MetaValidationResult:
+      type: object
+      required: [valid]
+      properties:
+        valid:
+          type: boolean
+        adAccountName:
+          type: ["string", "null"]
+        accountId:
+          type: ["string", "null"]
+        currency:
+          type: ["string", "null"]
+        error:
+          type: ["string", "null"]
+
+    MetaAdSetResult:
+      type: object
+      required: [localId, metaAdsetId, ads]
+      properties:
+        localId:
+          type: integer
+        metaAdsetId:
+          type: string
+        ads:
+          type: array
+          items:
+            type: object
+            required: [localId, metaAdId]
+            properties:
+              localId:
+                type: integer
+              metaAdId:
+                type: string
+
+    MetaPushResult:
+      type: object
+      required: [success, message, results]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        results:
+          type: object
+          required: [metaCampaignId, adSets]
+          properties:
+            metaCampaignId:
+              type: string
+            adSets:
+              type: array
+              items:
+                $ref: "#/components/schemas/MetaAdSetResult"

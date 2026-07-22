@@ -39,6 +39,8 @@ import type {
   DashboardSummary,
   HealthStatus,
   ListCampaignsParams,
+  MetaPushResult,
+  MetaValidationResult,
   PipelineInput,
   PipelineRun,
   PipelineRunDetail,
@@ -2918,4 +2920,152 @@ export function useGetBusinessMemory<TData = Awaited<ReturnType<typeof getBusine
 
 
 
+
+export const getValidateMetaUrl = () => {
+
+
+
+
+  return `/api/meta/validate`
+}
+
+/**
+ * @summary Validate Meta Ads credentials
+ */
+export const validateMeta = async ( options?: RequestInit): Promise<MetaValidationResult> => {
+
+  return customFetch<MetaValidationResult>(getValidateMetaUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getValidateMetaQueryKey = () => {
+    return [
+    `/api/meta/validate`
+    ] as const;
+    }
+
+
+export const getValidateMetaQueryOptions = <TData = Awaited<ReturnType<typeof validateMeta>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof validateMeta>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getValidateMetaQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof validateMeta>>> = ({ signal }) => validateMeta({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof validateMeta>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ValidateMetaQueryResult = NonNullable<Awaited<ReturnType<typeof validateMeta>>>
+export type ValidateMetaQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Validate Meta Ads credentials
+ */
+
+export function useValidateMeta<TData = Awaited<ReturnType<typeof validateMeta>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof validateMeta>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getValidateMetaQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getPushToMetaUrl = (campaignId: number,) => {
+
+
+
+
+  return `/api/meta/push/${campaignId}`
+}
+
+/**
+ * @summary Push approved campaign to Meta Ads Manager
+ */
+export const pushToMeta = async (campaignId: number, options?: RequestInit): Promise<MetaPushResult> => {
+
+  return customFetch<MetaPushResult>(getPushToMetaUrl(campaignId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPushToMetaMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pushToMeta>>, TError,{campaignId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof pushToMeta>>, TError,{campaignId: number}, TContext> => {
+
+const mutationKey = ['pushToMeta'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof pushToMeta>>, {campaignId: number}> = (props) => {
+          const {campaignId} = props ?? {};
+
+          return  pushToMeta(campaignId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PushToMetaMutationResult = NonNullable<Awaited<ReturnType<typeof pushToMeta>>>
+
+    export type PushToMetaMutationError = ErrorType<void>
+
+    /**
+ * @summary Push approved campaign to Meta Ads Manager
+ */
+export const usePushToMeta = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pushToMeta>>, TError,{campaignId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof pushToMeta>>,
+        TError,
+        {campaignId: number},
+        TContext
+      > => {
+      return useMutation(getPushToMetaMutationOptions(options));
+    }
 
