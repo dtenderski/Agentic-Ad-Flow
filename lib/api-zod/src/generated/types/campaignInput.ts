@@ -12,6 +12,8 @@ export interface CampaignInput {
   /** @minLength 1 */
   campaignName: string;
   objective: string;
+  /** facebook | instagram | whatsapp | all */
+  placement?: string;
   budgetType?: string;
   dailyBudget?: number;
   lifetimeBudget?: number;

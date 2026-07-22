@@ -378,12 +378,44 @@ export async function createMetaCampaign(opts: {
 
 // ─── Ad Set ───────────────────────────────────────────────────────────────────
 
+// ─── Placement helpers ────────────────────────────────────────────────────────
+
+type CampaignPlacement = "facebook" | "instagram" | "whatsapp" | "all";
+
+function buildPlacementTargeting(
+  placement: CampaignPlacement,
+  baseTargeting: Record<string, unknown>
+): Record<string, unknown> {
+  const t = { ...baseTargeting };
+  switch (placement) {
+    case "instagram":
+      t.publisher_platforms = ["instagram"];
+      t.instagram_positions = ["stream", "stories", "reels"];
+      break;
+    case "whatsapp":
+      // CTWA runs on Facebook feed (the click opens WhatsApp)
+      t.publisher_platforms = ["facebook"];
+      t.facebook_positions = ["feed", "marketplace"];
+      break;
+    case "all":
+      // Advantage+ automatic placements — omit publisher_platforms so Meta decides
+      break;
+    case "facebook":
+    default:
+      t.publisher_platforms = ["facebook"];
+      t.facebook_positions = ["feed", "right_hand_column", "marketplace"];
+      break;
+  }
+  return t;
+}
+
 export async function createMetaAdSet(opts: {
   campaignId: string;
   name: string;
   dailyBudget: number;
   optimizationGoal: string;
   billingEvent: string;
+  placement?: string;
   targetingLocation?: string;
   targetingAgeMin?: number;
   targetingAgeMax?: number;
@@ -392,21 +424,16 @@ export async function createMetaAdSet(opts: {
   bidAmount?: number;
 }): Promise<string> {
   const { accountId } = getMetaConfig();
+  const placement = (opts.placement ?? "facebook") as CampaignPlacement;
 
-  const targeting: Record<string, unknown> = {
+  const baseTargeting: Record<string, unknown> = {
     age_min: opts.targetingAgeMin ?? 18,
     age_max: opts.targetingAgeMax ?? 65,
+    geo_locations: { countries: ["ID"] },
   };
 
-  if (opts.targetingGender === "male") targeting.genders = [1];
-  if (opts.targetingGender === "female") targeting.genders = [2];
-
-  // Use geo_locations with country if no specific city provided
-  if (opts.targetingLocation) {
-    targeting.geo_locations = { countries: ["ID"] };
-  } else {
-    targeting.geo_locations = { countries: ["ID"] };
-  }
+  if (opts.targetingGender === "male") baseTargeting.genders = [1];
+  if (opts.targetingGender === "female") baseTargeting.genders = [2];
 
   // Resolve interest names → real Meta interest IDs via Targeting Search API
   if (opts.targetingInterests && opts.targetingInterests.length > 0) {
@@ -420,9 +447,11 @@ export async function createMetaAdSet(opts: {
       }
     }
     if (resolvedInterests.length > 0) {
-      targeting.flexible_spec = [{ interests: resolvedInterests }];
+      baseTargeting.flexible_spec = [{ interests: resolvedInterests }];
     }
   }
+
+  const targeting = buildPlacementTargeting(placement, baseTargeting);
 
   const OPTIMIZATION_MAP: Record<string, string> = {
     LEAD: "LEAD_GENERATION",
@@ -446,10 +475,24 @@ export async function createMetaAdSet(opts: {
     start_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // tomorrow
   };
 
+  // CTWA: route clicks to WhatsApp
+  if (placement === "whatsapp") {
+    const whatsappNumber = process.env.META_WHATSAPP_NUMBER;
+    if (!whatsappNumber) {
+      throw new Error("META_WHATSAPP_NUMBER must be set in Secrets for WhatsApp (CTWA) campaigns");
+    }
+    const pageId = process.env.META_PAGE_ID;
+    if (!pageId) {
+      throw new Error("META_PAGE_ID must be set in Secrets for WhatsApp (CTWA) campaigns");
+    }
+    body.destination_type = "WHATSAPP";
+    body.promoted_object = { page_id: pageId, whatsapp_phone_number: whatsappNumber };
+  }
+
   if (opts.bidAmount) body.bid_amount = opts.bidAmount;
 
   const result = await metaPost<{ id: string }>(`${accountId}/adsets`, body);
-  logger.info({ metaAdsetId: result.id }, "Meta ad set created");
+  logger.info({ metaAdsetId: result.id, placement }, "Meta ad set created");
   return result.id;
 }
 
@@ -463,8 +506,11 @@ export async function createMetaAdCreative(opts: {
   linkUrl?: string;
   callToActionType?: string;
   pageId?: string;
+  placement?: string;
 }): Promise<string> {
   const { accountId } = getMetaConfig();
+  const placement = (opts.placement ?? "facebook") as CampaignPlacement;
+  const isCtwa = placement === "whatsapp";
 
   const CTA_MAP: Record<string, string> = {
     "Hubungi Kami": "CONTACT_US",
@@ -479,13 +525,26 @@ export async function createMetaAdCreative(opts: {
     "Download": "DOWNLOAD",
   };
 
-  const ctaType = opts.callToActionType
-    ? CTA_MAP[opts.callToActionType] ?? "CONTACT_US"
-    : "CONTACT_US";
+  const ctaType = isCtwa
+    ? "WHATSAPP_MESSAGE"
+    : (opts.callToActionType ? CTA_MAP[opts.callToActionType] ?? "CONTACT_US" : "CONTACT_US");
 
   const pageId = opts.pageId || process.env.META_PAGE_ID;
   if (!pageId) {
     throw new Error("META_PAGE_ID is required to create ad creatives. Set it in Secrets.");
+  }
+
+  // Build CTA value — CTWA needs app_destination and WhatsApp number
+  const ctaValue: Record<string, unknown> = {};
+  if (isCtwa) {
+    const whatsappNumber = process.env.META_WHATSAPP_NUMBER;
+    if (!whatsappNumber) {
+      throw new Error("META_WHATSAPP_NUMBER must be set in Secrets for WhatsApp (CTWA) creatives");
+    }
+    ctaValue.app_destination = "WHATSAPP";
+    ctaValue.whatsapp_number = whatsappNumber;
+  } else {
+    ctaValue.link = opts.linkUrl || "https://www.facebook.com";
   }
 
   const body: Record<string, unknown> = {
@@ -494,12 +553,12 @@ export async function createMetaAdCreative(opts: {
       page_id: pageId,
       link_data: {
         message: opts.primaryText,
-        link: opts.linkUrl || "https://www.facebook.com",
+        link: isCtwa ? `https://wa.me/${(process.env.META_WHATSAPP_NUMBER ?? "").replace(/\D/g, "")}` : (opts.linkUrl || "https://www.facebook.com"),
         name: opts.headline,
         description: opts.description || "",
         call_to_action: {
           type: ctaType,
-          value: { link: opts.linkUrl || "https://www.facebook.com" },
+          value: ctaValue,
         },
       },
     },

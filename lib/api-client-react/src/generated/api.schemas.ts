@@ -246,6 +246,8 @@ export interface Campaign {
   objective: string;
   /** draft | review | approved | active | learning | optimizing | scaling | paused | completed */
   status: string;
+  /** facebook | instagram | whatsapp | all */
+  placement: string;
   /**
      * daily | lifetime
      * @nullable
@@ -279,6 +281,8 @@ export interface CampaignInput {
   /** @minLength 1 */
   campaignName: string;
   objective: string;
+  /** facebook | instagram | whatsapp | all */
+  placement?: string;
   budgetType?: string;
   dailyBudget?: number;
   lifetimeBudget?: number;
@@ -292,6 +296,8 @@ export interface CampaignUpdate {
   campaignName?: string;
   objective?: string;
   status?: string;
+  /** facebook | instagram | whatsapp | all */
+  placement?: string;
   budgetType?: string;
   dailyBudget?: number;
   lifetimeBudget?: number;

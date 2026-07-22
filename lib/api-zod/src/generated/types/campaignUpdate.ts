@@ -10,6 +10,8 @@ export interface CampaignUpdate {
   campaignName?: string;
   objective?: string;
   status?: string;
+  /** facebook | instagram | whatsapp | all */
+  placement?: string;
   budgetType?: string;
   dailyBudget?: number;
   lifetimeBudget?: number;

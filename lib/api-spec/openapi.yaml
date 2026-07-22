@@ -1221,7 +1221,7 @@ components:
     # ─── Campaign ────────────────────────────────────────────────────────────────
     Campaign:
       type: object
-      required: [id, businessId, campaignName, objective, status, createdAt]
+      required: [id, businessId, campaignName, objective, status, placement, createdAt]
       properties:
         id:
           type: integer
@@ -1239,6 +1239,10 @@ components:
         status:
           type: string
           description: "draft | review | approved | active | learning | optimizing | scaling | paused | completed"
+        placement:
+          type: string
+          description: "facebook | instagram | whatsapp | all"
+          default: facebook
         budgetType:
           type: ["string", "null"]
           description: "daily | lifetime"
@@ -1279,6 +1283,10 @@ components:
           minLength: 1
         objective:
           type: string
+        placement:
+          type: string
+          description: "facebook | instagram | whatsapp | all"
+          default: facebook
         budgetType:
           type: string
         dailyBudget:
@@ -1303,6 +1311,9 @@ components:
           type: string
         status:
           type: string
+        placement:
+          type: string
+          description: "facebook | instagram | whatsapp | all"
         budgetType:
           type: string
         dailyBudget:

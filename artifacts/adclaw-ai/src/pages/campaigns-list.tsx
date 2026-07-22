@@ -5,8 +5,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Link } from "wouter";
-import { Target, Search, Filter } from "lucide-react";
+import { Target, Search, Filter, Globe } from "lucide-react";
+import { SiFacebook, SiInstagram, SiWhatsapp } from "react-icons/si";
 import { formatCurrency, formatDate } from "@/lib/utils";
+
+function PlacementBadge({ placement }: { placement: string }) {
+  switch (placement) {
+    case "instagram":
+      return <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-pink-500/10 text-pink-400"><SiInstagram className="w-2.5 h-2.5" /> IG</span>;
+    case "whatsapp":
+      return <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400"><SiWhatsapp className="w-2.5 h-2.5" /> WA</span>;
+    case "all":
+      return <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400"><Globe className="w-2.5 h-2.5" /> Auto</span>;
+    default:
+      return <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400"><SiFacebook className="w-2.5 h-2.5" /> FB</span>;
+  }
+}
 
 export default function CampaignsList() {
   // Can pass status filters if needed, using empty for all
@@ -57,6 +71,7 @@ export default function CampaignsList() {
               <TableRow>
                 <TableHead>Campaign Name</TableHead>
                 <TableHead>Objective</TableHead>
+                <TableHead>Placement</TableHead>
                 <TableHead>Budget</TableHead>
                 <TableHead>Meta</TableHead>
                 <TableHead>Approval</TableHead>
@@ -67,18 +82,18 @@ export default function CampaignsList() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">Syncing with Meta Graph API...</TableCell>
+                  <TableCell colSpan={8} className="h-24 text-center">Syncing with Meta Graph API...</TableCell>
                 </TableRow>
               ) : (!campaigns || campaigns.length === 0) ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-48 text-center">
+                  <TableCell colSpan={8} className="h-48 text-center">
                     <Target className="w-8 h-8 text-muted-foreground mx-auto mb-3 opacity-20" />
                     <span className="text-muted-foreground">No campaigns deployed.</span>
                   </TableCell>
                 </TableRow>
               ) : (
                 campaigns.map(campaign => (
-                  <TableRow key={campaign.id} className="cursor-pointer group">
+                  <TableRow key={campaign.id} className="cursor-pointer group" onClick={() => window.location.href = `/campaigns/${campaign.id}`}>
                     <TableCell>
                       <div className="font-medium text-sm group-hover:text-primary transition-colors">
                         {campaign.campaignName}
@@ -90,6 +105,9 @@ export default function CampaignsList() {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="bg-background text-[10px] font-mono tracking-wider">{campaign.objective}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <PlacementBadge placement={campaign.placement ?? "facebook"} />
                     </TableCell>
                     <TableCell className="font-mono text-sm">
                       {campaign.budgetType === 'daily' ? `${formatCurrency(campaign.dailyBudget)}/d` : `${formatCurrency(campaign.lifetimeBudget)} LTV`}

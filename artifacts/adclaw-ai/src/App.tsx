@@ -15,6 +15,7 @@ import PipelineDetail from '@/pages/pipeline-detail';
 import BlueprintsList from '@/pages/blueprints-list';
 import BlueprintDetail from '@/pages/blueprint-detail';
 import CampaignsList from '@/pages/campaigns-list';
+import CampaignsNew from '@/pages/campaigns-new';
 import CampaignDetail from '@/pages/campaign-detail';
 import ApprovalsList from '@/pages/approvals-list';
 import MemoryList from '@/pages/memory-list';
@@ -44,7 +45,7 @@ function Router() {
       <Route path="/blueprints/:id" component={BlueprintDetail} />
       
       <Route path="/campaigns" component={CampaignsList} />
-      <Route path="/campaigns/new" component={CampaignsList} /> {/* Fallback to list or new impl */}
+      <Route path="/campaigns/new" component={CampaignsNew} />
       <Route path="/campaigns/:id" component={CampaignDetail} />
       
       <Route path="/approvals" component={ApprovalsList} />

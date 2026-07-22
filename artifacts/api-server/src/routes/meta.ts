@@ -131,6 +131,7 @@ router.post("/meta/push/:campaignId", async (req, res): Promise<void> => {
         dailyBudget: adset.budget ? Number(adset.budget) : (campaign.dailyBudget ? Number(campaign.dailyBudget) / Math.max(adsets.length, 1) : 50000),
         optimizationGoal: adset.optimizationEvent || "LEAD",
         billingEvent: "IMPRESSIONS",
+        placement: campaign.placement || "facebook",
         targetingLocation: adset.location || undefined,
         targetingAgeMin: adset.ageMin || undefined,
         targetingAgeMax: adset.ageMax || undefined,
@@ -153,6 +154,7 @@ router.post("/meta/push/:campaignId", async (req, res): Promise<void> => {
           description: creative.description || "",
           linkUrl: creative.destinationUrl || undefined,
           callToActionType: creative.cta || "Contact Us",
+          placement: campaign.placement || "facebook",
         });
 
         const metaAdId = await createMetaAd({

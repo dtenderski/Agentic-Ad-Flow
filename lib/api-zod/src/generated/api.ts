@@ -37,6 +37,8 @@ export const GetDashboardSummaryResponse = zod.object({
  * Returns the most recently active/created campaigns
  * @summary Get recent campaigns
  */
+export const getRecentCampaignsResponsePlacementDefault = `facebook`;
+
 export const GetRecentCampaignsResponseItem = zod.object({
   "id": zod.number(),
   "businessId": zod.number(),
@@ -45,6 +47,7 @@ export const GetRecentCampaignsResponseItem = zod.object({
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
   "status": zod.string().describe('draft | review | approved | active | learning | optimizing | scaling | paused | completed'),
+  "placement": zod.string().default(getRecentCampaignsResponsePlacementDefault).describe('facebook | instagram | whatsapp | all'),
   "budgetType": zod.string().nullish().describe('daily | lifetime'),
   "dailyBudget": zod.number().nullish(),
   "lifetimeBudget": zod.number().nullish(),
@@ -485,6 +488,8 @@ export const ListCampaignsQueryParams = zod.object({
   "status": zod.coerce.string().optional()
 })
 
+export const listCampaignsResponsePlacementDefault = `facebook`;
+
 export const ListCampaignsResponseItem = zod.object({
   "id": zod.number(),
   "businessId": zod.number(),
@@ -493,6 +498,7 @@ export const ListCampaignsResponseItem = zod.object({
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
   "status": zod.string().describe('draft | review | approved | active | learning | optimizing | scaling | paused | completed'),
+  "placement": zod.string().default(listCampaignsResponsePlacementDefault).describe('facebook | instagram | whatsapp | all'),
   "budgetType": zod.string().nullish().describe('daily | lifetime'),
   "dailyBudget": zod.number().nullish(),
   "lifetimeBudget": zod.number().nullish(),
@@ -513,13 +519,14 @@ export const ListCampaignsResponse = zod.array(ListCampaignsResponseItem)
  * @summary Create a campaign draft
  */
 
-
+export const createCampaignBodyPlacementDefault = `facebook`;
 
 export const CreateCampaignBody = zod.object({
   "businessId": zod.number(),
   "blueprintId": zod.number().optional(),
   "campaignName": zod.string().min(1),
   "objective": zod.string(),
+  "placement": zod.string().default(createCampaignBodyPlacementDefault).describe('facebook | instagram | whatsapp | all'),
   "budgetType": zod.string().optional(),
   "dailyBudget": zod.number().optional(),
   "lifetimeBudget": zod.number().optional(),
@@ -529,6 +536,8 @@ export const CreateCampaignBody = zod.object({
   "campaignBudgetOptimization": zod.boolean().optional()
 })
 
+export const createCampaignResponsePlacementDefault = `facebook`;
+
 export const CreateCampaignResponse = zod.object({
   "id": zod.number(),
   "businessId": zod.number(),
@@ -537,6 +546,7 @@ export const CreateCampaignResponse = zod.object({
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
   "status": zod.string().describe('draft | review | approved | active | learning | optimizing | scaling | paused | completed'),
+  "placement": zod.string().default(createCampaignResponsePlacementDefault).describe('facebook | instagram | whatsapp | all'),
   "budgetType": zod.string().nullish().describe('daily | lifetime'),
   "dailyBudget": zod.number().nullish(),
   "lifetimeBudget": zod.number().nullish(),
@@ -559,6 +569,8 @@ export const GetCampaignParams = zod.object({
   "campaignId": zod.coerce.number()
 })
 
+export const getCampaignResponsePlacementDefault = `facebook`;
+
 export const GetCampaignResponse = zod.object({
   "id": zod.number(),
   "businessId": zod.number(),
@@ -567,6 +579,7 @@ export const GetCampaignResponse = zod.object({
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
   "status": zod.string().describe('draft | review | approved | active | learning | optimizing | scaling | paused | completed'),
+  "placement": zod.string().default(getCampaignResponsePlacementDefault).describe('facebook | instagram | whatsapp | all'),
   "budgetType": zod.string().nullish().describe('daily | lifetime'),
   "dailyBudget": zod.number().nullish(),
   "lifetimeBudget": zod.number().nullish(),
@@ -593,12 +606,15 @@ export const UpdateCampaignBody = zod.object({
   "campaignName": zod.string().optional(),
   "objective": zod.string().optional(),
   "status": zod.string().optional(),
+  "placement": zod.string().optional().describe('facebook | instagram | whatsapp | all'),
   "budgetType": zod.string().optional(),
   "dailyBudget": zod.number().optional(),
   "lifetimeBudget": zod.number().optional(),
   "startDate": zod.string().optional(),
   "endDate": zod.string().optional()
 })
+
+export const updateCampaignResponsePlacementDefault = `facebook`;
 
 export const UpdateCampaignResponse = zod.object({
   "id": zod.number(),
@@ -608,6 +624,7 @@ export const UpdateCampaignResponse = zod.object({
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
   "status": zod.string().describe('draft | review | approved | active | learning | optimizing | scaling | paused | completed'),
+  "placement": zod.string().default(updateCampaignResponsePlacementDefault).describe('facebook | instagram | whatsapp | all'),
   "budgetType": zod.string().nullish().describe('daily | lifetime'),
   "dailyBudget": zod.number().nullish(),
   "lifetimeBudget": zod.number().nullish(),
@@ -645,6 +662,8 @@ export const ApproveCampaignBody = zod.object({
   "notes": zod.string().optional()
 })
 
+export const approveCampaignResponsePlacementDefault = `facebook`;
+
 export const ApproveCampaignResponse = zod.object({
   "id": zod.number(),
   "businessId": zod.number(),
@@ -653,6 +672,7 @@ export const ApproveCampaignResponse = zod.object({
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
   "status": zod.string().describe('draft | review | approved | active | learning | optimizing | scaling | paused | completed'),
+  "placement": zod.string().default(approveCampaignResponsePlacementDefault).describe('facebook | instagram | whatsapp | all'),
   "budgetType": zod.string().nullish().describe('daily | lifetime'),
   "dailyBudget": zod.number().nullish(),
   "lifetimeBudget": zod.number().nullish(),

@@ -21,6 +21,7 @@ export const campaignsTable = pgTable("campaigns", {
   campaignBudgetOptimization: boolean("campaign_budget_optimization").default(false),
   createdByAgent: boolean("created_by_agent").default(false),
   approvedByUser: boolean("approved_by_user").default(false),
+  placement: text("placement").notNull().default("facebook"), // facebook | instagram | whatsapp | all
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

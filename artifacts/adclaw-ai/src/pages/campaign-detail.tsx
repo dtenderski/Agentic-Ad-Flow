@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Target, Edit, Play, Pause, ExternalLink, Settings, GitMerge, FileImage, Loader2, Zap } from "lucide-react";
-import { SiFacebook } from "react-icons/si";
+import { Target, Edit, Play, Pause, ExternalLink, Settings, GitMerge, FileImage, Loader2, Zap, Globe } from "lucide-react";
+import { SiFacebook, SiInstagram, SiWhatsapp } from "react-icons/si";
 import { useGetCampaign, useListAdSets, useListCreatives, getGetCampaignQueryKey, getListAdSetsQueryKey, usePushToMeta, useUpdateAdSet, useGetMetaCampaignInsights, getGetMetaCampaignInsightsQueryKey } from "@workspace/api-client-react";
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +15,35 @@ import { InterestPicker } from "@/components/interest-picker";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
+
+function PlacementBadge({ placement }: { placement: string }) {
+  switch (placement) {
+    case "instagram":
+      return (
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full bg-pink-500/10 text-pink-400 border border-pink-500/20">
+          <SiInstagram className="w-3 h-3" /> Instagram
+        </span>
+      );
+    case "whatsapp":
+      return (
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <SiWhatsapp className="w-3 h-3" /> WhatsApp (CTWA)
+        </span>
+      );
+    case "all":
+      return (
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20">
+          <Globe className="w-3 h-3" /> All Placements
+        </span>
+      );
+    default:
+      return (
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+          <SiFacebook className="w-3 h-3" /> Facebook
+        </span>
+      );
+  }
+}
 
 export default function CampaignDetail() {
   const [, params] = useRoute("/campaigns/:id");
@@ -87,6 +116,9 @@ export default function CampaignDetail() {
               </>
             )}
           </p>
+          <div className="mt-2">
+            <PlacementBadge placement={campaign.placement ?? "facebook"} />
+          </div>
         </div>
         
         <div className="flex items-center gap-3">
