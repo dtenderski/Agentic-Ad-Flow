@@ -16,7 +16,7 @@ import { PLATFORM_CONFIG, type AdPlatform } from "@/components/platform-badge";
 const PLATFORMS: { value: AdPlatform; description: string; available: boolean }[] = [
   { value: "meta", description: "Facebook, Instagram, WhatsApp CTWA", available: true },
   { value: "google", description: "Search, Display, Shopping, YouTube", available: true },
-  { value: "tiktok", description: "In-Feed, TopView, Spark Ads", available: false },
+  { value: "tiktok", description: "In-Feed, Video Views, Lead Gen", available: true },
   { value: "linkedin", description: "Sponsored Content, Lead Gen Forms", available: false },
 ];
 

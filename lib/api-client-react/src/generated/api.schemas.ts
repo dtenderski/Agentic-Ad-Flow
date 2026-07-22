@@ -270,6 +270,52 @@ export interface GooglePushResult {
   note?: string | null;
 }
 
+export interface TikTokValidationResult {
+  valid: boolean;
+  /** @nullable */
+  advertiserId?: string | null;
+  /** @nullable */
+  advertiserName?: string | null;
+  /** @nullable */
+  currency?: string | null;
+  /** @nullable */
+  error?: string | null;
+}
+
+export interface TikTokCampaignInsight {
+  tiktokCampaignId: string;
+  campaignName: string;
+  impressions: number;
+  clicks: number;
+  /** Click-through rate (0–100, TikTok returns as percentage) */
+  ctr: number;
+  /** Cost per click in account currency */
+  cpc: number;
+  conversions: number;
+  /** Total spend in account currency */
+  spend: number;
+  /** Video play actions (started) */
+  videoViews: number;
+  /** 2-second video views */
+  videoWatched2s: number;
+  /** Fraction of impressions where video was watched to 100% (0–1) */
+  videoCompletionRate: number;
+  dateStart: string;
+  dateStop: string;
+}
+
+export interface TikTokPushResult {
+  success: boolean;
+  message: string;
+  tiktokCampaignId: string;
+  /** @nullable */
+  adGroupId?: string | null;
+  /** @nullable */
+  adId?: string | null;
+  /** @nullable */
+  note?: string | null;
+}
+
 export interface Campaign {
   id: number;
   businessId: number;
@@ -277,6 +323,8 @@ export interface Campaign {
   metaCampaignId?: string | null;
   /** @nullable */
   googleCampaignId?: string | null;
+  /** @nullable */
+  tiktokCampaignId?: string | null;
   /** @nullable */
   blueprintId?: number | null;
   campaignName: string;
@@ -716,6 +764,11 @@ datePreset?: string;
 };
 
 export type GetGoogleCampaignInsightsParams = {
+campaignId: number;
+datePreset?: string;
+};
+
+export type GetTikTokCampaignInsightsParams = {
 campaignId: number;
 datePreset?: string;
 };

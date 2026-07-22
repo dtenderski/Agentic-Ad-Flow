@@ -34,6 +34,8 @@ tags:
     description: Meta Ads API integration
   - name: google
     description: Google Ads & YouTube API integration
+  - name: tiktok
+    description: TikTok Ads API integration
   - name: copilot
     description: AI Copilot scheduled reports and commands
 
@@ -970,6 +972,76 @@ paths:
         "500":
           description: Google Ads API error
 
+  # ─── TikTok Ads API ───────────────────────────────────────────────────────────
+  /tiktok/validate:
+    get:
+      tags: [tiktok]
+      operationId: validateTikTok
+      summary: Validate TikTok Ads credentials
+      responses:
+        "200":
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TikTokValidationResult"
+
+  /tiktok/insights/campaign:
+    get:
+      tags: [tiktok]
+      operationId: getTikTokCampaignInsights
+      summary: Get per-campaign TikTok Ads performance insights
+      parameters:
+        - name: campaignId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: datePreset
+          in: query
+          required: false
+          schema:
+            type: string
+            default: last_7d
+      responses:
+        "200":
+          description: Campaign insight metrics, or null when no data
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/TikTokCampaignInsight"
+                  - type: "null"
+        "400":
+          description: Campaign not pushed to TikTok yet, or missing credentials
+        "404":
+          description: Campaign not found
+
+  /tiktok/push/{campaignId}:
+    post:
+      tags: [tiktok]
+      operationId: pushToTikTok
+      summary: Push approved campaign to TikTok Ads Manager
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Push result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TikTokPushResult"
+        "400":
+          description: Campaign not approved, already pushed, or missing credentials
+        "404":
+          description: Campaign not found
+        "500":
+          description: TikTok API error
+
   # ─── Copilot ─────────────────────────────────────────────────────────────────
   /copilot/reports:
     get:
@@ -1418,6 +1490,76 @@ components:
         note:
           type: ["string", "null"]
 
+    # ─── TikTok Ads Schemas ──────────────────────────────────────────────────────
+    TikTokValidationResult:
+      type: object
+      required: [valid]
+      properties:
+        valid:
+          type: boolean
+        advertiserId:
+          type: ["string", "null"]
+        advertiserName:
+          type: ["string", "null"]
+        currency:
+          type: ["string", "null"]
+        error:
+          type: ["string", "null"]
+
+    TikTokCampaignInsight:
+      type: object
+      required: [tiktokCampaignId, campaignName, impressions, clicks, ctr, cpc, conversions, spend, videoViews, videoWatched2s, videoCompletionRate, dateStart, dateStop]
+      properties:
+        tiktokCampaignId:
+          type: string
+        campaignName:
+          type: string
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          type: number
+          description: Click-through rate (0–100, TikTok returns as percentage)
+        cpc:
+          type: number
+          description: Cost per click in account currency
+        conversions:
+          type: integer
+        spend:
+          type: number
+          description: Total spend in account currency
+        videoViews:
+          type: integer
+          description: Video play actions (started)
+        videoWatched2s:
+          type: integer
+          description: 2-second video views
+        videoCompletionRate:
+          type: number
+          description: Fraction of impressions where video was watched to 100% (0–1)
+        dateStart:
+          type: string
+        dateStop:
+          type: string
+
+    TikTokPushResult:
+      type: object
+      required: [success, message, tiktokCampaignId]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        tiktokCampaignId:
+          type: string
+        adGroupId:
+          type: ["string", "null"]
+        adId:
+          type: ["string", "null"]
+        note:
+          type: ["string", "null"]
+
     # ─── Campaign ────────────────────────────────────────────────────────────────
     Campaign:
       type: object
@@ -1430,6 +1572,8 @@ components:
         metaCampaignId:
           type: ["string", "null"]
         googleCampaignId:
+          type: ["string", "null"]
+        tiktokCampaignId:
           type: ["string", "null"]
         blueprintId:
           type: ["integer", "null"]

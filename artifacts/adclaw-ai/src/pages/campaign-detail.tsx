@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Target, Edit, Play, Pause, ExternalLink, Settings, GitMerge, FileImage, Loader2, Zap, Globe, Lock } from "lucide-react";
-import { SiFacebook, SiInstagram, SiWhatsapp, SiGoogle } from "react-icons/si";
-import { useGetCampaign, useListAdSets, useListCreatives, getGetCampaignQueryKey, getListAdSetsQueryKey, usePushToMeta, usePushToGoogle, useUpdateAdSet, useGetMetaCampaignInsights, getGetMetaCampaignInsightsQueryKey, useGetGoogleCampaignInsights, getGetGoogleCampaignInsightsQueryKey } from "@workspace/api-client-react";
+import { SiFacebook, SiInstagram, SiWhatsapp, SiGoogle, SiTiktok } from "react-icons/si";
+import { useGetCampaign, useListAdSets, useListCreatives, getGetCampaignQueryKey, getListAdSetsQueryKey, usePushToMeta, usePushToGoogle, usePushToTikTok, useUpdateAdSet, useGetMetaCampaignInsights, getGetMetaCampaignInsightsQueryKey, useGetGoogleCampaignInsights, getGetGoogleCampaignInsightsQueryKey, useGetTikTokCampaignInsights, getGetTikTokCampaignInsightsQueryKey } from "@workspace/api-client-react";
 import { PlatformBadge, PLATFORM_CONFIG } from "@/components/platform-badge";
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -62,6 +62,7 @@ export default function CampaignDetail() {
 
   const pushToMeta = usePushToMeta();
   const pushToGoogle = usePushToGoogle();
+  const pushToTikTok = usePushToTikTok();
 
   const handlePushToMeta = () => {
     pushToMeta.mutate(
@@ -100,6 +101,28 @@ export default function CampaignDetail() {
           toast({
             title: "Error pushing to Google",
             description: (error as Error).message || "Failed to push campaign to Google Ads.",
+            variant: "destructive",
+          });
+        }
+      }
+    );
+  };
+
+  const handlePushToTikTok = () => {
+    pushToTikTok.mutate(
+      { campaignId: id },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getGetCampaignQueryKey(id) });
+          toast({
+            title: "Pushed to TikTok Ads",
+            description: "Campaign created in DISABLE state. Upload your video and activate in TikTok Ads Manager.",
+          });
+        },
+        onError: (error: unknown) => {
+          toast({
+            title: "Error pushing to TikTok",
+            description: (error as Error).message || "Failed to push campaign to TikTok Ads.",
             variant: "destructive",
           });
         }
@@ -179,7 +202,20 @@ export default function CampaignDetail() {
               );
             }
 
-            if (platform !== "meta" && platform !== "google" && !campaign.metaCampaignId) {
+            if (platform === "tiktok" && !campaign.tiktokCampaignId) {
+              return (
+                <Button
+                  onClick={handlePushToTikTok}
+                  disabled={pushToTikTok.isPending}
+                  className="gap-2 bg-black hover:bg-zinc-800 text-white border-transparent"
+                >
+                  {pushToTikTok.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Icon className="w-4 h-4" />}
+                  Push to TikTok Ads
+                </Button>
+              );
+            }
+
+            if (platform !== "meta" && platform !== "google" && platform !== "tiktok") {
               return (
                 <Button disabled className="gap-2 opacity-60" title="API integration coming soon">
                   <Lock className="w-4 h-4" />
@@ -203,6 +239,12 @@ export default function CampaignDetail() {
               {campaign.googleCampaignId}
             </Badge>
           )}
+          {campaign.tiktokCampaignId && (
+            <Badge variant="outline" className="bg-zinc-500/10 text-zinc-300 border-zinc-500/20 px-3 py-1 flex items-center gap-2">
+              <SiTiktok className="w-3 h-3" />
+              {campaign.tiktokCampaignId}
+            </Badge>
+          )}
 
           <Button variant="outline" size="icon">
             <Settings className="w-4 h-4" />
@@ -218,6 +260,13 @@ export default function CampaignDetail() {
             <Button variant="outline" className="gap-2" asChild>
               <a href="https://ads.google.com" target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="w-4 h-4" /> Open in Google Ads
+              </a>
+            </Button>
+          )}
+          {campaign.platform === "tiktok" && (
+            <Button variant="outline" className="gap-2" asChild>
+              <a href="https://ads.tiktok.com" target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="w-4 h-4" /> Open in TikTok Ads Manager
               </a>
             </Button>
           )}
@@ -249,7 +298,16 @@ export default function CampaignDetail() {
             <span>Push this campaign to Google Ads to see live performance metrics here.</span>
           </div>
         )}
-        {(campaign.platform !== "meta" && campaign.platform !== "google") && (
+        {campaign.tiktokCampaignId && campaign.platform === "tiktok" && (
+          <LiveTikTokPerformanceCard campaignId={id} tiktokCampaignId={campaign.tiktokCampaignId} />
+        )}
+        {campaign.platform === "tiktok" && !campaign.tiktokCampaignId && (
+          <div className="mb-6 p-4 rounded-lg border border-zinc-500/20 bg-zinc-500/5 flex items-center gap-3 text-sm text-muted-foreground">
+            <SiTiktok className="w-4 h-4 shrink-0 text-zinc-400" />
+            <span>Push this campaign to TikTok Ads to see live performance metrics here.</span>
+          </div>
+        )}
+        {(campaign.platform !== "meta" && campaign.platform !== "google" && campaign.platform !== "tiktok") && (
           <div className="mb-6 p-4 rounded-lg border border-border bg-secondary/10 flex items-center gap-3 text-sm text-muted-foreground">
             <Lock className="w-4 h-4 shrink-0" />
             <span>
@@ -459,6 +517,74 @@ function EditAdSetModal({ adSet, campaignId }: { adSet: any; campaignId: number 
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function LiveTikTokPerformanceCard({ campaignId, tiktokCampaignId }: { campaignId: number; tiktokCampaignId: string }) {
+  const { data: insights, isLoading } = useGetTikTokCampaignInsights(
+    { campaignId, datePreset: "last_7d" },
+    { query: { enabled: !!tiktokCampaignId, queryKey: getGetTikTokCampaignInsightsQueryKey({ campaignId, datePreset: "last_7d" }) } }
+  );
+
+  return (
+    <Card className="mb-6 bg-secondary/10 border-zinc-500/20">
+      <CardContent className="p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-zinc-500/20 rounded-full">
+            <SiTiktok className="w-4 h-4 text-zinc-300" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-sm">Live TikTok Ads Performance</h3>
+            <p className="text-xs text-muted-foreground">Last 7 days · TikTok Marketing API</p>
+          </div>
+        </div>
+
+        {isLoading ? (
+          <div className="flex gap-8 px-4">
+            <div className="h-8 w-72 bg-secondary/50 rounded animate-pulse" />
+          </div>
+        ) : !insights ? (
+          <div className="text-sm text-muted-foreground px-4">
+            No performance data yet — activate the campaign and allow 24h for data to populate.
+          </div>
+        ) : (
+          <div className="flex items-center gap-6 px-4 flex-wrap">
+            <div>
+              <div className="text-xs text-muted-foreground">Spend</div>
+              <div className="text-sm font-bold">{formatCurrency(insights.spend || 0)}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Impressions</div>
+              <div className="text-sm font-bold">{(insights.impressions || 0).toLocaleString()}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Clicks</div>
+              <div className="text-sm font-bold">{(insights.clicks || 0).toLocaleString()}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">CTR</div>
+              <div className="text-sm font-bold">{Number(insights.ctr || 0).toFixed(2)}%</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">CPC</div>
+              <div className="text-sm font-bold">{formatCurrency(insights.cpc || 0)}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Video Views</div>
+              <div className="text-sm font-bold">{(insights.videoViews || 0).toLocaleString()}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Completion</div>
+              <div className="text-sm font-bold">{(Number(insights.videoCompletionRate || 0) * 100).toFixed(1)}%</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Conversions</div>
+              <div className="text-sm font-bold">{(insights.conversions || 0).toLocaleString()}</div>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

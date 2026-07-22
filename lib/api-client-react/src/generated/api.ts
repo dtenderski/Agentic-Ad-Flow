@@ -44,6 +44,7 @@ import type {
   GetGoogleCampaignInsightsParams,
   GetMetaAccountInsightsParams,
   GetMetaCampaignInsightsParams,
+  GetTikTokCampaignInsightsParams,
   GoogleCampaignInsight,
   GooglePushResult,
   GoogleValidationResult,
@@ -62,7 +63,10 @@ import type {
   Product,
   ProductInput,
   ProductUpdate,
-  SearchMetaInterestsParams
+  SearchMetaInterestsParams,
+  TikTokCampaignInsight,
+  TikTokPushResult,
+  TikTokValidationResult
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -3715,6 +3719,238 @@ export const usePushToGoogle = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getPushToGoogleMutationOptions(options));
+    }
+
+export const getValidateTikTokUrl = () => {
+
+
+
+
+  return `/api/tiktok/validate`
+}
+
+/**
+ * @summary Validate TikTok Ads credentials
+ */
+export const validateTikTok = async ( options?: RequestInit): Promise<TikTokValidationResult> => {
+
+  return customFetch<TikTokValidationResult>(getValidateTikTokUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getValidateTikTokQueryKey = () => {
+    return [
+    `/api/tiktok/validate`
+    ] as const;
+    }
+
+
+export const getValidateTikTokQueryOptions = <TData = Awaited<ReturnType<typeof validateTikTok>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof validateTikTok>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getValidateTikTokQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof validateTikTok>>> = ({ signal }) => validateTikTok({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof validateTikTok>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ValidateTikTokQueryResult = NonNullable<Awaited<ReturnType<typeof validateTikTok>>>
+export type ValidateTikTokQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Validate TikTok Ads credentials
+ */
+
+export function useValidateTikTok<TData = Awaited<ReturnType<typeof validateTikTok>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof validateTikTok>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getValidateTikTokQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetTikTokCampaignInsightsUrl = (params: GetTikTokCampaignInsightsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/tiktok/insights/campaign?${stringifiedParams}` : `/api/tiktok/insights/campaign`
+}
+
+/**
+ * @summary Get per-campaign TikTok Ads performance insights
+ */
+export const getTikTokCampaignInsights = async (params: GetTikTokCampaignInsightsParams, options?: RequestInit): Promise<TikTokCampaignInsight | null> => {
+
+  return customFetch<TikTokCampaignInsight | null>(getGetTikTokCampaignInsightsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTikTokCampaignInsightsQueryKey = (params?: GetTikTokCampaignInsightsParams,) => {
+    return [
+    `/api/tiktok/insights/campaign`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetTikTokCampaignInsightsQueryOptions = <TData = Awaited<ReturnType<typeof getTikTokCampaignInsights>>, TError = ErrorType<void>>(params: GetTikTokCampaignInsightsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTikTokCampaignInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTikTokCampaignInsightsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTikTokCampaignInsights>>> = ({ signal }) => getTikTokCampaignInsights(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTikTokCampaignInsights>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTikTokCampaignInsightsQueryResult = NonNullable<Awaited<ReturnType<typeof getTikTokCampaignInsights>>>
+export type GetTikTokCampaignInsightsQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get per-campaign TikTok Ads performance insights
+ */
+
+export function useGetTikTokCampaignInsights<TData = Awaited<ReturnType<typeof getTikTokCampaignInsights>>, TError = ErrorType<void>>(
+ params: GetTikTokCampaignInsightsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTikTokCampaignInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTikTokCampaignInsightsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getPushToTikTokUrl = (campaignId: number,) => {
+
+
+
+
+  return `/api/tiktok/push/${campaignId}`
+}
+
+/**
+ * @summary Push approved campaign to TikTok Ads Manager
+ */
+export const pushToTikTok = async (campaignId: number, options?: RequestInit): Promise<TikTokPushResult> => {
+
+  return customFetch<TikTokPushResult>(getPushToTikTokUrl(campaignId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPushToTikTokMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pushToTikTok>>, TError,{campaignId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof pushToTikTok>>, TError,{campaignId: number}, TContext> => {
+
+const mutationKey = ['pushToTikTok'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof pushToTikTok>>, {campaignId: number}> = (props) => {
+          const {campaignId} = props ?? {};
+
+          return  pushToTikTok(campaignId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PushToTikTokMutationResult = NonNullable<Awaited<ReturnType<typeof pushToTikTok>>>
+
+    export type PushToTikTokMutationError = ErrorType<void>
+
+    /**
+ * @summary Push approved campaign to TikTok Ads Manager
+ */
+export const usePushToTikTok = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pushToTikTok>>, TError,{campaignId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof pushToTikTok>>,
+        TError,
+        {campaignId: number},
+        TContext
+      > => {
+      return useMutation(getPushToTikTokMutationOptions(options));
     }
 
 export const getListCopilotReportsUrl = () => {

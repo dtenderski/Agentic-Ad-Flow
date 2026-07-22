@@ -45,6 +45,7 @@ export const GetRecentCampaignsResponseItem = zod.object({
   "businessId": zod.number(),
   "metaCampaignId": zod.string().nullish(),
   "googleCampaignId": zod.string().nullish(),
+  "tiktokCampaignId": zod.string().nullish(),
   "blueprintId": zod.number().nullish(),
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
@@ -499,6 +500,7 @@ export const ListCampaignsResponseItem = zod.object({
   "businessId": zod.number(),
   "metaCampaignId": zod.string().nullish(),
   "googleCampaignId": zod.string().nullish(),
+  "tiktokCampaignId": zod.string().nullish(),
   "blueprintId": zod.number().nullish(),
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
@@ -552,6 +554,7 @@ export const CreateCampaignResponse = zod.object({
   "businessId": zod.number(),
   "metaCampaignId": zod.string().nullish(),
   "googleCampaignId": zod.string().nullish(),
+  "tiktokCampaignId": zod.string().nullish(),
   "blueprintId": zod.number().nullish(),
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
@@ -588,6 +591,7 @@ export const GetCampaignResponse = zod.object({
   "businessId": zod.number(),
   "metaCampaignId": zod.string().nullish(),
   "googleCampaignId": zod.string().nullish(),
+  "tiktokCampaignId": zod.string().nullish(),
   "blueprintId": zod.number().nullish(),
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
@@ -637,6 +641,7 @@ export const UpdateCampaignResponse = zod.object({
   "businessId": zod.number(),
   "metaCampaignId": zod.string().nullish(),
   "googleCampaignId": zod.string().nullish(),
+  "tiktokCampaignId": zod.string().nullish(),
   "blueprintId": zod.number().nullish(),
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
@@ -688,6 +693,7 @@ export const ApproveCampaignResponse = zod.object({
   "businessId": zod.number(),
   "metaCampaignId": zod.string().nullish(),
   "googleCampaignId": zod.string().nullish(),
+  "tiktokCampaignId": zod.string().nullish(),
   "blueprintId": zod.number().nullish(),
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
@@ -1256,6 +1262,62 @@ export const PushToGoogleResponse = zod.object({
   "message": zod.string(),
   "googleCampaignId": zod.string(),
   "adGroupId": zod.string().nullish(),
+  "note": zod.string().nullish()
+})
+
+
+/**
+ * @summary Validate TikTok Ads credentials
+ */
+export const ValidateTikTokResponse = zod.object({
+  "valid": zod.boolean(),
+  "advertiserId": zod.string().nullish(),
+  "advertiserName": zod.string().nullish(),
+  "currency": zod.string().nullish(),
+  "error": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get per-campaign TikTok Ads performance insights
+ */
+export const getTikTokCampaignInsightsQueryDatePresetDefault = `last_7d`;
+
+export const GetTikTokCampaignInsightsQueryParams = zod.object({
+  "campaignId": zod.coerce.number(),
+  "datePreset": zod.coerce.string().default(getTikTokCampaignInsightsQueryDatePresetDefault)
+})
+
+export const GetTikTokCampaignInsightsResponse = zod.union([zod.object({
+  "tiktokCampaignId": zod.string(),
+  "campaignName": zod.string(),
+  "impressions": zod.number(),
+  "clicks": zod.number(),
+  "ctr": zod.number().describe('Click-through rate (0–100, TikTok returns as percentage)'),
+  "cpc": zod.number().describe('Cost per click in account currency'),
+  "conversions": zod.number(),
+  "spend": zod.number().describe('Total spend in account currency'),
+  "videoViews": zod.number().describe('Video play actions (started)'),
+  "videoWatched2s": zod.number().describe('2-second video views'),
+  "videoCompletionRate": zod.number().describe('Fraction of impressions where video was watched to 100% (0–1)'),
+  "dateStart": zod.string(),
+  "dateStop": zod.string()
+}),zod.null()])
+
+
+/**
+ * @summary Push approved campaign to TikTok Ads Manager
+ */
+export const PushToTikTokParams = zod.object({
+  "campaignId": zod.coerce.number()
+})
+
+export const PushToTikTokResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string(),
+  "tiktokCampaignId": zod.string(),
+  "adGroupId": zod.string().nullish(),
+  "adId": zod.string().nullish(),
   "note": zod.string().nullish()
 })
 

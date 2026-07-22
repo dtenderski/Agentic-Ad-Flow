@@ -12,6 +12,7 @@ import memoryRouter from "./memory";
 import dashboardRouter from "./dashboard";
 import metaRouter from "./meta";
 import googleRouter from "./google";
+import tiktokRouter from "./tiktok";
 import copilotRouter from "./copilot";
 
 const router: IRouter = Router();
@@ -29,6 +30,7 @@ router.use(approvalsRouter);
 router.use(memoryRouter);
 router.use(metaRouter);
 router.use(googleRouter);
+router.use(tiktokRouter);
 router.use(copilotRouter);
 
 export default router;
