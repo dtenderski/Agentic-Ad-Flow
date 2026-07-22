@@ -37,10 +37,16 @@ import type {
   CreativeInput,
   CreativeUpdate,
   DashboardSummary,
+  GetMetaAccountInsightsParams,
+  GetMetaCampaignInsightsParams,
   HealthStatus,
   ListCampaignsParams,
+  MetaAccountInsight,
+  MetaCampaignInsight,
   MetaInterestSearchResult,
   MetaPushResult,
+  MetaTokenInfo,
+  MetaTokenRefreshResult,
   MetaValidationResult,
   PipelineInput,
   PipelineRun,
@@ -2995,6 +3001,322 @@ export function useSearchMetaInterests<TData = Awaited<ReturnType<typeof searchM
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getSearchMetaInterestsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetMetaTokenInfoUrl = () => {
+
+
+
+
+  return `/api/meta/token/info`
+}
+
+/**
+ * @summary Get Meta access token health and expiry info
+ */
+export const getMetaTokenInfo = async ( options?: RequestInit): Promise<MetaTokenInfo> => {
+
+  return customFetch<MetaTokenInfo>(getGetMetaTokenInfoUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMetaTokenInfoQueryKey = () => {
+    return [
+    `/api/meta/token/info`
+    ] as const;
+    }
+
+
+export const getGetMetaTokenInfoQueryOptions = <TData = Awaited<ReturnType<typeof getMetaTokenInfo>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMetaTokenInfo>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMetaTokenInfoQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMetaTokenInfo>>> = ({ signal }) => getMetaTokenInfo({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMetaTokenInfo>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMetaTokenInfoQueryResult = NonNullable<Awaited<ReturnType<typeof getMetaTokenInfo>>>
+export type GetMetaTokenInfoQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get Meta access token health and expiry info
+ */
+
+export function useGetMetaTokenInfo<TData = Awaited<ReturnType<typeof getMetaTokenInfo>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMetaTokenInfo>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMetaTokenInfoQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRefreshMetaTokenUrl = () => {
+
+
+
+
+  return `/api/meta/token/refresh`
+}
+
+/**
+ * @summary Exchange current token for a fresh long-lived token (60 days)
+ */
+export const refreshMetaToken = async ( options?: RequestInit): Promise<MetaTokenRefreshResult> => {
+
+  return customFetch<MetaTokenRefreshResult>(getRefreshMetaTokenUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getRefreshMetaTokenMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshMetaToken>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof refreshMetaToken>>, TError,void, TContext> => {
+
+const mutationKey = ['refreshMetaToken'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof refreshMetaToken>>, void> = () => {
+
+
+          return  refreshMetaToken(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RefreshMetaTokenMutationResult = NonNullable<Awaited<ReturnType<typeof refreshMetaToken>>>
+
+    export type RefreshMetaTokenMutationError = ErrorType<void>
+
+    /**
+ * @summary Exchange current token for a fresh long-lived token (60 days)
+ */
+export const useRefreshMetaToken = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshMetaToken>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof refreshMetaToken>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getRefreshMetaTokenMutationOptions(options));
+    }
+
+export const getGetMetaAccountInsightsUrl = (params?: GetMetaAccountInsightsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/meta/insights/account?${stringifiedParams}` : `/api/meta/insights/account`
+}
+
+/**
+ * @summary Get account-level ad performance insights
+ */
+export const getMetaAccountInsights = async (params?: GetMetaAccountInsightsParams, options?: RequestInit): Promise<MetaAccountInsight | null> => {
+
+  return customFetch<MetaAccountInsight | null>(getGetMetaAccountInsightsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMetaAccountInsightsQueryKey = (params?: GetMetaAccountInsightsParams,) => {
+    return [
+    `/api/meta/insights/account`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMetaAccountInsightsQueryOptions = <TData = Awaited<ReturnType<typeof getMetaAccountInsights>>, TError = ErrorType<unknown>>(params?: GetMetaAccountInsightsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMetaAccountInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMetaAccountInsightsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMetaAccountInsights>>> = ({ signal }) => getMetaAccountInsights(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMetaAccountInsights>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMetaAccountInsightsQueryResult = NonNullable<Awaited<ReturnType<typeof getMetaAccountInsights>>>
+export type GetMetaAccountInsightsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get account-level ad performance insights
+ */
+
+export function useGetMetaAccountInsights<TData = Awaited<ReturnType<typeof getMetaAccountInsights>>, TError = ErrorType<unknown>>(
+ params?: GetMetaAccountInsightsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMetaAccountInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMetaAccountInsightsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetMetaCampaignInsightsUrl = (params: GetMetaCampaignInsightsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/meta/insights/campaign?${stringifiedParams}` : `/api/meta/insights/campaign`
+}
+
+/**
+ * @summary Get per-campaign ad performance insights from Meta
+ */
+export const getMetaCampaignInsights = async (params: GetMetaCampaignInsightsParams, options?: RequestInit): Promise<MetaCampaignInsight | null> => {
+
+  return customFetch<MetaCampaignInsight | null>(getGetMetaCampaignInsightsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMetaCampaignInsightsQueryKey = (params?: GetMetaCampaignInsightsParams,) => {
+    return [
+    `/api/meta/insights/campaign`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMetaCampaignInsightsQueryOptions = <TData = Awaited<ReturnType<typeof getMetaCampaignInsights>>, TError = ErrorType<void>>(params: GetMetaCampaignInsightsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMetaCampaignInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMetaCampaignInsightsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMetaCampaignInsights>>> = ({ signal }) => getMetaCampaignInsights(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMetaCampaignInsights>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMetaCampaignInsightsQueryResult = NonNullable<Awaited<ReturnType<typeof getMetaCampaignInsights>>>
+export type GetMetaCampaignInsightsQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get per-campaign ad performance insights from Meta
+ */
+
+export function useGetMetaCampaignInsights<TData = Awaited<ReturnType<typeof getMetaCampaignInsights>>, TError = ErrorType<void>>(
+ params: GetMetaCampaignInsightsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMetaCampaignInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMetaCampaignInsightsQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

@@ -111,6 +111,205 @@ export async function searchMetaInterests(
   }));
 }
 
+// ─── Token Info & Refresh ─────────────────────────────────────────────────────
+
+export async function getMetaTokenInfo(): Promise<{
+  valid: boolean;
+  expiresAt?: string;
+  daysRemaining?: number;
+  scopes?: string[];
+  error?: string;
+}> {
+  const accessToken = process.env.META_ACCESS_TOKEN;
+  const appId = process.env.META_APP_ID;
+  const appSecret = process.env.META_APP_SECRET;
+  if (!accessToken || !appId || !appSecret) {
+    return { valid: false, error: "META_ACCESS_TOKEN, META_APP_ID and META_APP_SECRET must be set" };
+  }
+  try {
+    const appToken = `${appId}|${appSecret}`;
+    const qs = new URLSearchParams({ input_token: accessToken, access_token: appToken });
+    const url = `${META_BASE}/debug_token?${qs}`;
+    const res = await fetch(url);
+    const data = (await res.json()) as {
+      data?: {
+        is_valid: boolean;
+        expires_at?: number;
+        scopes?: string[];
+        error?: { message: string };
+      };
+      error?: { message: string };
+    };
+    if (!res.ok || data.error) {
+      return { valid: false, error: data.error?.message ?? "Token debug failed" };
+    }
+    const d = data.data;
+    if (!d) return { valid: false, error: "No token data returned" };
+    if (!d.is_valid) return { valid: false, error: "Token is invalid or expired" };
+
+    const expiresAt = d.expires_at ? new Date(d.expires_at * 1000).toISOString() : undefined;
+    const daysRemaining = d.expires_at
+      ? Math.max(0, Math.floor((d.expires_at * 1000 - Date.now()) / (1000 * 60 * 60 * 24)))
+      : undefined;
+
+    return { valid: true, expiresAt, daysRemaining, scopes: d.scopes };
+  } catch (err) {
+    return { valid: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+export async function refreshMetaToken(): Promise<{
+  success: boolean;
+  expiresAt?: string;
+  note?: string;
+  error?: string;
+}> {
+  const accessToken = process.env.META_ACCESS_TOKEN;
+  const appId = process.env.META_APP_ID;
+  const appSecret = process.env.META_APP_SECRET;
+  if (!accessToken || !appId || !appSecret) {
+    return { success: false, error: "META_ACCESS_TOKEN, META_APP_ID and META_APP_SECRET must be set" };
+  }
+  try {
+    const qs = new URLSearchParams({
+      grant_type: "fb_exchange_token",
+      client_id: appId,
+      client_secret: appSecret,
+      fb_exchange_token: accessToken,
+    });
+    const url = `https://graph.facebook.com/oauth/access_token?${qs}`;
+    const res = await fetch(url);
+    const data = (await res.json()) as {
+      access_token?: string;
+      expires_in?: number;
+      error?: { message: string };
+    };
+    if (!res.ok || data.error) {
+      return { success: false, error: data.error?.message ?? "Token refresh failed" };
+    }
+    if (!data.access_token) {
+      return { success: false, error: "No access token returned" };
+    }
+    // Update token in-process so the current server instance starts using it immediately.
+    // The operator must also update META_ACCESS_TOKEN in Replit Secrets for persistence after restart.
+    process.env.META_ACCESS_TOKEN = data.access_token;
+    const expiresAt = data.expires_in
+      ? new Date(Date.now() + data.expires_in * 1000).toISOString()
+      : undefined;
+    logger.info({ expiresAt }, "Meta access token refreshed in-process");
+    return {
+      success: true,
+      expiresAt,
+      note: "Token active for this server session. Update META_ACCESS_TOKEN in Replit Secrets to persist across restarts.",
+    };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+// ─── Insights ─────────────────────────────────────────────────────────────────
+
+export interface MetaInsightMetrics {
+  spend: number;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  cpc: number;
+  cpm: number;
+  leads: number;
+  purchases: number;
+  reach: number;
+  frequency: number;
+}
+
+export interface MetaCampaignInsight extends MetaInsightMetrics {
+  campaignId: string;
+  campaignName: string;
+  dateStart: string;
+  dateStop: string;
+}
+
+export interface MetaAccountInsight extends MetaInsightMetrics {
+  dateStart: string;
+  dateStop: string;
+  cpl: number;      // cost per lead
+  roas: number;     // purchases / spend (approximate, needs revenue data for true ROAS)
+}
+
+function parseActions(actions: { action_type: string; value: string }[] | undefined, type: string): number {
+  const hit = (actions ?? []).find(a => a.action_type === type);
+  return hit ? parseFloat(hit.value) || 0 : 0;
+}
+
+function parseInsightRow(row: Record<string, unknown>): MetaInsightMetrics {
+  const actions = row.actions as { action_type: string; value: string }[] | undefined;
+  const spend = parseFloat(String(row.spend ?? "0")) || 0;
+  const impressions = parseInt(String(row.impressions ?? "0"), 10) || 0;
+  const clicks = parseInt(String(row.clicks ?? "0"), 10) || 0;
+  const ctr = parseFloat(String(row.ctr ?? "0")) || 0;
+  const cpc = parseFloat(String(row.cpc ?? "0")) || 0;
+  const cpm = parseFloat(String(row.cpm ?? "0")) || 0;
+  const reach = parseInt(String(row.reach ?? "0"), 10) || 0;
+  const frequency = parseFloat(String(row.frequency ?? "0")) || 0;
+  const leads = parseActions(actions, "lead") || parseActions(actions, "onsite_conversion.lead_grouped");
+  const purchases = parseActions(actions, "purchase") || parseActions(actions, "offsite_conversion.fb_pixel_purchase");
+  return { spend, impressions, clicks, ctr, cpc, cpm, reach, frequency, leads, purchases };
+}
+
+const INSIGHT_FIELDS = "spend,impressions,clicks,ctr,cpc,cpm,reach,frequency,actions";
+
+export async function getAdAccountInsights(
+  datePreset: string = "last_7d"
+): Promise<MetaAccountInsight | null> {
+  try {
+    const { accountId } = getMetaConfig();
+    const data = await metaGet<{ data: Record<string, unknown>[] }>(
+      `${accountId}/insights`,
+      { fields: INSIGHT_FIELDS, date_preset: datePreset, level: "account" }
+    );
+    if (!data.data || data.data.length === 0) return null;
+    const row = data.data[0];
+    const metrics = parseInsightRow(row);
+    const cpl = metrics.leads > 0 ? metrics.spend / metrics.leads : 0;
+    const roas = metrics.spend > 0 ? metrics.purchases / (metrics.spend / 1000) : 0; // rough ROAS proxy
+    return {
+      ...metrics,
+      cpl,
+      roas,
+      dateStart: String(row.date_start ?? ""),
+      dateStop: String(row.date_stop ?? ""),
+    };
+  } catch (err) {
+    logger.error({ err }, "Failed to fetch account insights");
+    return null;
+  }
+}
+
+export async function getMetaCampaignInsights(
+  metaCampaignId: string,
+  datePreset: string = "last_7d"
+): Promise<MetaCampaignInsight | null> {
+  try {
+    const data = await metaGet<{ data: Record<string, unknown>[] }>(
+      `${metaCampaignId}/insights`,
+      { fields: `campaign_id,campaign_name,${INSIGHT_FIELDS}`, date_preset: datePreset }
+    );
+    if (!data.data || data.data.length === 0) return null;
+    const row = data.data[0];
+    const metrics = parseInsightRow(row);
+    return {
+      ...metrics,
+      campaignId: String(row.campaign_id ?? metaCampaignId),
+      campaignName: String(row.campaign_name ?? ""),
+      dateStart: String(row.date_start ?? ""),
+      dateStop: String(row.date_stop ?? ""),
+    };
+  } catch (err) {
+    logger.error({ err, metaCampaignId }, "Failed to fetch campaign insights");
+    return null;
+  }
+}
+
 // ─── Validation ───────────────────────────────────────────────────────────────
 
 export async function validateMetaCredentials(): Promise<{

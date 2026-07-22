@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Target, Edit, Play, Pause, ExternalLink, Settings, GitMerge, FileImage, Loader2 } from "lucide-react";
+import { Target, Edit, Play, Pause, ExternalLink, Settings, GitMerge, FileImage, Loader2, Zap } from "lucide-react";
 import { SiFacebook } from "react-icons/si";
-import { useGetCampaign, useListAdSets, useListCreatives, getGetCampaignQueryKey, getListAdSetsQueryKey, usePushToMeta, useUpdateAdSet } from "@workspace/api-client-react";
+import { useGetCampaign, useListAdSets, useListCreatives, getGetCampaignQueryKey, getListAdSetsQueryKey, usePushToMeta, useUpdateAdSet, useGetMetaCampaignInsights, getGetMetaCampaignInsightsQueryKey } from "@workspace/api-client-react";
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -40,7 +40,7 @@ export default function CampaignDetail() {
           queryClient.invalidateQueries({ queryKey: getGetCampaignQueryKey(id) });
           toast({
             title: "Success",
-            description: `Successfully pushed to Meta Ads. Campaign ID: ${result.metaCampaignId}`,
+            description: `Successfully pushed to Meta Ads Manager. Campaign is live in PAUSED state pending review.`,
             variant: "default",
           });
         },
@@ -135,6 +135,10 @@ export default function CampaignDetail() {
           <GitMerge className="w-5 h-5 text-muted-foreground" />
           <h2 className="text-xl font-bold">Ad Sets & Creatives</h2>
         </div>
+
+        {campaign.metaCampaignId && (
+          <LiveMetaPerformanceCard campaignId={id} metaCampaignId={campaign.metaCampaignId} />
+        )}
 
         {loadingAdSets ? (
           <div className="animate-pulse h-32 bg-card rounded-lg" />
@@ -337,5 +341,59 @@ function EditAdSetModal({ adSet, campaignId }: { adSet: any; campaignId: number 
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function LiveMetaPerformanceCard({ campaignId, metaCampaignId }: { campaignId: number, metaCampaignId: string }) {
+  const { data: insights, isLoading } = useGetMetaCampaignInsights(
+    { campaignId, datePreset: "last_7d" },
+    { query: { enabled: !!metaCampaignId, queryKey: getGetMetaCampaignInsightsQueryKey({ campaignId, datePreset: "last_7d" }) } }
+  );
+
+  return (
+    <Card className="mb-6 bg-secondary/10">
+      <CardContent className="p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/20 rounded-full">
+            <Zap className="w-4 h-4 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-sm">Live Meta Performance</h3>
+            <p className="text-xs text-muted-foreground">Last 7 days</p>
+          </div>
+        </div>
+        
+        {isLoading ? (
+          <div className="flex gap-8 px-4">
+            <div className="h-8 w-64 bg-secondary/50 rounded animate-pulse" />
+          </div>
+        ) : !insights ? (
+          <div className="text-sm text-muted-foreground px-4">
+            No performance data yet — campaign may need 24h after activation.
+          </div>
+        ) : (
+          <div className="flex items-center gap-8 px-4">
+            <div>
+              <div className="text-xs text-muted-foreground">Spend</div>
+              <div className="text-sm font-bold">{formatCurrency(insights.spend || 0)}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Leads</div>
+              <div className="text-sm font-bold">{Math.round(insights.leads || 0)}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">CPL</div>
+              <div className="text-sm font-bold">
+                {(insights.leads && insights.leads > 0) ? formatCurrency(insights.spend / insights.leads) : "—"}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">CTR</div>
+              <div className="text-sm font-bold">{Number(insights.ctr || 0).toFixed(2)}%</div>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

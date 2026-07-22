@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useSearchMetaInterests } from "@workspace/api-client-react";
+import { useSearchMetaInterests, getSearchMetaInterestsQueryKey } from "@workspace/api-client-react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +21,7 @@ export function InterestPicker({ value = [], onChange, className }: InterestPick
 
   const { data, isLoading, isFetching } = useSearchMetaInterests(
     { q: debouncedQuery },
-    { query: { enabled: debouncedQuery.length >= 2 } }
+    { query: { enabled: debouncedQuery.length >= 2, queryKey: getSearchMetaInterestsQueryKey({ q: debouncedQuery }) } }
   );
 
   const formatAudience = (num?: number | null) => {

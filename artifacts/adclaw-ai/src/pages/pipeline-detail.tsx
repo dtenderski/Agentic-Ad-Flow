@@ -15,7 +15,7 @@ export default function PipelineDetail() {
     query: {
       enabled: !!id,
       queryKey: getGetPipelineRunQueryKey(id),
-      refetchInterval: (data) => data?.status === 'running' || data?.status === 'pending' ? 2000 : false
+      refetchInterval: (query) => { const d = query.state.data; return d?.status === 'running' || d?.status === 'pending' ? 2000 : false; }
     }
   });
 

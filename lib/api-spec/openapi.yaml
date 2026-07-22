@@ -777,6 +777,87 @@ paths:
               schema:
                 $ref: "#/components/schemas/MetaInterestSearchResult"
 
+  /meta/token/info:
+    get:
+      tags: [meta]
+      operationId: getMetaTokenInfo
+      summary: Get Meta access token health and expiry info
+      responses:
+        "200":
+          description: Token info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetaTokenInfo"
+
+  /meta/token/refresh:
+    post:
+      tags: [meta]
+      operationId: refreshMetaToken
+      summary: Exchange current token for a fresh long-lived token (60 days)
+      responses:
+        "200":
+          description: New token issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetaTokenRefreshResult"
+        "500":
+          description: Refresh failed
+
+  /meta/insights/account:
+    get:
+      tags: [meta]
+      operationId: getMetaAccountInsights
+      summary: Get account-level ad performance insights
+      parameters:
+        - name: datePreset
+          in: query
+          required: false
+          schema:
+            type: string
+            default: last_7d
+      responses:
+        "200":
+          description: Account insight metrics, or null when no campaigns ran in the period
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/MetaAccountInsight"
+                  - type: "null"
+
+  /meta/insights/campaign:
+    get:
+      tags: [meta]
+      operationId: getMetaCampaignInsights
+      summary: Get per-campaign ad performance insights from Meta
+      parameters:
+        - name: campaignId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: datePreset
+          in: query
+          required: false
+          schema:
+            type: string
+            default: last_7d
+      responses:
+        "200":
+          description: Campaign insight metrics, or null when campaign has no data in the period
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/MetaCampaignInsight"
+                  - type: "null"
+        "400":
+          description: Campaign not pushed to Meta yet
+        "404":
+          description: Campaign not found
+
   /meta/validate:
     get:
       tags: [meta]
@@ -1498,6 +1579,127 @@ components:
           type: string
 
     # ─── Meta Ads ─────────────────────────────────────────────────────────────────
+    MetaTokenInfo:
+      type: object
+      required: [valid]
+      properties:
+        valid:
+          type: boolean
+        expiresAt:
+          type: ["string", "null"]
+        daysRemaining:
+          type: ["integer", "null"]
+        scopes:
+          type: ["array", "null"]
+          items:
+            type: string
+        error:
+          type: ["string", "null"]
+
+    MetaTokenRefreshResult:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        expiresAt:
+          type: ["string", "null"]
+        note:
+          type: ["string", "null"]
+        error:
+          type: ["string", "null"]
+
+    MetaInsightMetrics:
+      type: object
+      required: [spend, impressions, clicks, ctr, cpc, cpm, leads, purchases, reach, frequency]
+      properties:
+        spend:
+          type: number
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          type: number
+        cpc:
+          type: number
+        cpm:
+          type: number
+        leads:
+          type: number
+        purchases:
+          type: number
+        reach:
+          type: integer
+        frequency:
+          type: number
+
+    MetaAccountInsight:
+      type: object
+      required: [spend, impressions, clicks, ctr, cpc, cpm, leads, purchases, reach, frequency, dateStart, dateStop, cpl, roas]
+      properties:
+        spend:
+          type: number
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          type: number
+        cpc:
+          type: number
+        cpm:
+          type: number
+        leads:
+          type: number
+        purchases:
+          type: number
+        reach:
+          type: integer
+        frequency:
+          type: number
+        dateStart:
+          type: string
+        dateStop:
+          type: string
+        cpl:
+          type: number
+        roas:
+          type: number
+
+    MetaCampaignInsight:
+      type: object
+      required: [spend, impressions, clicks, ctr, cpc, cpm, leads, purchases, reach, frequency, campaignId, campaignName, dateStart, dateStop]
+      properties:
+        spend:
+          type: number
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          type: number
+        cpc:
+          type: number
+        cpm:
+          type: number
+        leads:
+          type: number
+        purchases:
+          type: number
+        reach:
+          type: integer
+        frequency:
+          type: number
+        campaignId:
+          type: string
+        campaignName:
+          type: string
+        dateStart:
+          type: string
+        dateStop:
+          type: string
+
     MetaInterestItem:
       type: object
       required: [id, name]

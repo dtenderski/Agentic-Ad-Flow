@@ -1,17 +1,51 @@
 import * as React from "react"
-import { Activity, Briefcase, Plus, CopyPlus, Play, CheckCircle, Database, Server, Settings, Home, Target, MapPin, Search } from "lucide-react"
+import { Activity, Briefcase, Plus, CopyPlus, Play, CheckCircle, Database, Server, Settings, Home, Target, MapPin, Search, RefreshCw, Loader2 } from "lucide-react"
 import { Link, useLocation } from "wouter"
 import { cn } from "@/lib/utils"
-import { useValidateMeta } from "@workspace/api-client-react"
+import { useValidateMeta, useGetMetaTokenInfo, useRefreshMetaToken, getGetMetaTokenInfoQueryKey, getValidateMetaQueryKey, getGetMetaTokenInfoQueryKey as getTokenQueryKey } from "@workspace/api-client-react"
+import { useQueryClient } from "@tanstack/react-query"
+import { useToast } from "@/hooks/use-toast"
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const [location] = useLocation()
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
   
   const { data: metaStatus, isLoading: loadingMeta } = useValidateMeta({
-    query: {
-      retry: false,
-    }
+    query: { retry: false, queryKey: getValidateMetaQueryKey() }
   });
+
+  const { data: tokenInfo } = useGetMetaTokenInfo({
+    query: { queryKey: getTokenQueryKey() }
+  });
+  const refreshMutation = useRefreshMetaToken();
+
+  const handleRefreshToken = () => {
+    refreshMutation.mutate(undefined, {
+      onSuccess: (data) => {
+        if (data.success) {
+          toast({
+            title: "Token refreshed!",
+            description: `Token active until ${data.expiresAt ? new Date(data.expiresAt).toLocaleDateString() : "—"}. Update META_ACCESS_TOKEN in Replit Secrets to persist.`,
+          });
+          queryClient.invalidateQueries({ queryKey: getGetMetaTokenInfoQueryKey() });
+        } else {
+          toast({
+            title: "Refresh failed",
+            description: data.error || "Unknown error",
+            variant: "destructive"
+          });
+        }
+      },
+      onError: (error: unknown) => {
+        toast({
+          title: "Refresh failed",
+          description: error instanceof Error ? error.message : "Unknown error",
+          variant: "destructive"
+        });
+      }
+    });
+  };
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: Home },
@@ -60,12 +94,34 @@ export function Shell({ children }: { children: React.ReactNode }) {
               Checking Meta...
             </div>
           ) : metaStatus?.valid ? (
-            <div className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-emerald-500 bg-emerald-500/10 rounded-md" title={metaStatus.adAccountName || "Meta Ads Account"}>
-              <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-              <div className="truncate flex-1 text-xs">
-                <div>Meta Connected</div>
-                <div className="text-[10px] opacity-80 truncate">{metaStatus.adAccountName}</div>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-emerald-500 bg-emerald-500/10 rounded-md" title={metaStatus.adAccountName || "Meta Ads Account"}>
+                <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                <div className="truncate flex-1 text-xs">
+                  <div>Meta Connected</div>
+                  <div className="text-[10px] opacity-80 truncate">{metaStatus.adAccountName}</div>
+                </div>
               </div>
+              
+              {tokenInfo?.daysRemaining != null && tokenInfo.daysRemaining <= 7 && (
+                <div className="flex items-center justify-between gap-2 px-3 py-1.5 mt-1 text-xs font-medium text-orange-500 bg-orange-500/10 rounded-md border border-orange-500/20">
+                  <div className="truncate">
+                    {refreshMutation.isPending ? "Refreshing..." : `Token expires in ${tokenInfo.daysRemaining} days`}
+                  </div>
+                  <button 
+                    onClick={handleRefreshToken}
+                    disabled={refreshMutation.isPending}
+                    className="p-1 hover:bg-orange-500/20 rounded-md transition-colors disabled:opacity-50 shrink-0"
+                    title="Refresh Token"
+                  >
+                    {refreshMutation.isPending ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <RefreshCw className="w-3.5 h-3.5" />
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-destructive bg-destructive/10 rounded-md" title={metaStatus?.error || "Connection error"}>

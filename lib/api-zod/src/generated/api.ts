@@ -1055,6 +1055,84 @@ export const SearchMetaInterestsResponse = zod.object({
 
 
 /**
+ * @summary Get Meta access token health and expiry info
+ */
+export const GetMetaTokenInfoResponse = zod.object({
+  "valid": zod.boolean(),
+  "expiresAt": zod.string().nullish(),
+  "daysRemaining": zod.number().nullish(),
+  "scopes": zod.array(zod.string()).nullish(),
+  "error": zod.string().nullish()
+})
+
+
+/**
+ * @summary Exchange current token for a fresh long-lived token (60 days)
+ */
+export const RefreshMetaTokenResponse = zod.object({
+  "success": zod.boolean(),
+  "expiresAt": zod.string().nullish(),
+  "note": zod.string().nullish(),
+  "error": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get account-level ad performance insights
+ */
+export const getMetaAccountInsightsQueryDatePresetDefault = `last_7d`;
+
+export const GetMetaAccountInsightsQueryParams = zod.object({
+  "datePreset": zod.coerce.string().default(getMetaAccountInsightsQueryDatePresetDefault)
+})
+
+export const GetMetaAccountInsightsResponse = zod.union([zod.object({
+  "spend": zod.number(),
+  "impressions": zod.number(),
+  "clicks": zod.number(),
+  "ctr": zod.number(),
+  "cpc": zod.number(),
+  "cpm": zod.number(),
+  "leads": zod.number(),
+  "purchases": zod.number(),
+  "reach": zod.number(),
+  "frequency": zod.number(),
+  "dateStart": zod.string(),
+  "dateStop": zod.string(),
+  "cpl": zod.number(),
+  "roas": zod.number()
+}),zod.null()])
+
+
+/**
+ * @summary Get per-campaign ad performance insights from Meta
+ */
+export const getMetaCampaignInsightsQueryDatePresetDefault = `last_7d`;
+
+export const GetMetaCampaignInsightsQueryParams = zod.object({
+  "campaignId": zod.coerce.number(),
+  "datePreset": zod.coerce.string().default(getMetaCampaignInsightsQueryDatePresetDefault)
+})
+
+export const GetMetaCampaignInsightsResponse = zod.union([zod.object({
+  "spend": zod.number(),
+  "impressions": zod.number(),
+  "clicks": zod.number(),
+  "ctr": zod.number(),
+  "cpc": zod.number(),
+  "cpm": zod.number(),
+  "leads": zod.number(),
+  "purchases": zod.number(),
+  "reach": zod.number(),
+  "frequency": zod.number(),
+  "campaignId": zod.string(),
+  "campaignName": zod.string(),
+  "dateStart": zod.string(),
+  "dateStop": zod.string()
+}),zod.null()])
+
+
+/**
  * @summary Validate Meta Ads credentials
  */
 export const ValidateMetaResponse = zod.object({

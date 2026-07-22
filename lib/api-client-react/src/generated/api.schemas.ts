@@ -494,6 +494,75 @@ export interface AgentMemory {
   updatedAt?: string;
 }
 
+export interface MetaTokenInfo {
+  valid: boolean;
+  /** @nullable */
+  expiresAt?: string | null;
+  /** @nullable */
+  daysRemaining?: number | null;
+  /** @nullable */
+  scopes?: string[] | null;
+  /** @nullable */
+  error?: string | null;
+}
+
+export interface MetaTokenRefreshResult {
+  success: boolean;
+  /** @nullable */
+  expiresAt?: string | null;
+  /** @nullable */
+  note?: string | null;
+  /** @nullable */
+  error?: string | null;
+}
+
+export interface MetaInsightMetrics {
+  spend: number;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  cpc: number;
+  cpm: number;
+  leads: number;
+  purchases: number;
+  reach: number;
+  frequency: number;
+}
+
+export interface MetaAccountInsight {
+  spend: number;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  cpc: number;
+  cpm: number;
+  leads: number;
+  purchases: number;
+  reach: number;
+  frequency: number;
+  dateStart: string;
+  dateStop: string;
+  cpl: number;
+  roas: number;
+}
+
+export interface MetaCampaignInsight {
+  spend: number;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  cpc: number;
+  cpm: number;
+  leads: number;
+  purchases: number;
+  reach: number;
+  frequency: number;
+  campaignId: string;
+  campaignName: string;
+  dateStart: string;
+  dateStop: string;
+}
+
 export interface MetaInterestItem {
   id: string;
   name: string;
@@ -545,5 +614,14 @@ status?: string;
 
 export type SearchMetaInterestsParams = {
 q: string;
+};
+
+export type GetMetaAccountInsightsParams = {
+datePreset?: string;
+};
+
+export type GetMetaCampaignInsightsParams = {
+campaignId: number;
+datePreset?: string;
 };
 

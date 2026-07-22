@@ -9,7 +9,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/toast"; // wait, don't have useToast built yet. Will build below.
+import { useToast } from "@/hooks/use-toast";
 
 const businessSchema = z.object({
   businessName: z.string().min(2, "Business name is required"),

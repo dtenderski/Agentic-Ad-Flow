@@ -8,6 +8,10 @@ import {
   createMetaAdCreative,
   createMetaAd,
   searchMetaInterests,
+  getAdAccountInsights,
+  getMetaCampaignInsights,
+  getMetaTokenInfo,
+  refreshMetaToken,
 } from "../lib/meta-ads";
 import { PushToMetaParams } from "@workspace/api-zod";
 
@@ -24,6 +28,50 @@ router.get("/meta/interests/search", async (req, res): Promise<void> => {
     req.log.error({ err }, "Meta interest search failed");
     res.status(500).json({ error: err instanceof Error ? err.message : "Search failed" });
   }
+});
+
+// ─── Token Info ───────────────────────────────────────────────────────────────
+router.get("/meta/token/info", async (_req, res): Promise<void> => {
+  const result = await getMetaTokenInfo();
+  res.json(result);
+});
+
+// ─── Token Refresh ────────────────────────────────────────────────────────────
+router.post("/meta/token/refresh", async (_req, res): Promise<void> => {
+  const result = await refreshMetaToken();
+  if (!result.success) {
+    res.status(500).json(result);
+    return;
+  }
+  res.json(result);
+});
+
+// ─── Account-level Insights ───────────────────────────────────────────────────
+router.get("/meta/insights/account", async (req, res): Promise<void> => {
+  const datePreset = String(req.query.datePreset ?? "last_7d");
+  const result = await getAdAccountInsights(datePreset);
+  if (!result) {
+    res.json(null);
+    return;
+  }
+  res.json(result);
+});
+
+// ─── Campaign-level Insights (by local campaign ID) ───────────────────────────
+router.get("/meta/insights/campaign", async (req, res): Promise<void> => {
+  const campaignId = parseInt(String(req.query.campaignId ?? ""), 10);
+  if (isNaN(campaignId)) { res.status(400).json({ error: "Invalid campaignId" }); return; }
+
+  const [campaign] = await db.select().from(campaignsTable).where(eq(campaignsTable.id, campaignId));
+  if (!campaign) { res.status(404).json({ error: "Campaign not found" }); return; }
+  if (!campaign.metaCampaignId) {
+    res.status(400).json({ error: "Campaign has not been pushed to Meta yet" });
+    return;
+  }
+
+  const datePreset = String(req.query.datePreset ?? "last_7d");
+  const result = await getMetaCampaignInsights(campaign.metaCampaignId, datePreset);
+  res.json(result);
 });
 
 // ─── Validate Meta credentials ────────────────────────────────────────────────

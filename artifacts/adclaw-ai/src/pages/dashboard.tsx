@@ -1,4 +1,4 @@
-import { useGetDashboardSummary, useGetPipelineActivity, useGetRecentCampaigns } from "@workspace/api-client-react";
+import { useGetDashboardSummary, useGetPipelineActivity, useGetRecentCampaigns, useGetMetaAccountInsights, useValidateMeta, getValidateMetaQueryKey, getGetMetaAccountInsightsQueryKey } from "@workspace/api-client-react";
 import { Shell } from "@/components/layout/Shell";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,11 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Play, TrendingUp, Activity, CheckCircle, Clock, Zap } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
+import { formatCurrency } from "@/lib/utils";
 
 export default function Dashboard() {
   const { data: summary } = useGetDashboardSummary();
   const { data: pipelineRuns } = useGetPipelineActivity();
   const { data: campaigns } = useGetRecentCampaigns();
+  
+  const { data: metaStatus } = useValidateMeta({
+    query: { retry: false, queryKey: getValidateMetaQueryKey() }
+  });
+
+  const { data: metaInsights, isLoading: loadingMetaInsights } = useGetMetaAccountInsights(
+    { datePreset: "last_7d" },
+    { query: { refetchInterval: 5 * 60 * 1000, queryKey: getGetMetaAccountInsightsQueryKey({ datePreset: "last_7d" }) } }
+  );
 
   const mockChartData = [
     { name: "Mon", value: 12 },
@@ -90,6 +100,66 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {metaStatus && !metaStatus.valid ? (
+        <Card className="border-warning bg-warning/5">
+          <CardContent className="p-6 flex items-center gap-3">
+            <Zap className="h-5 w-5 text-warning" />
+            <p className="text-sm text-warning font-medium">Meta not connected — connect in sidebar.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="bg-card">
+          <CardHeader>
+            <CardTitle className="text-lg">Meta Ads Performance (Last 7 Days)</CardTitle>
+            <CardDescription>
+              {metaInsights?.dateStart && metaInsights?.dateStop 
+                ? `${metaInsights.dateStart} – ${metaInsights.dateStop}`
+                : "Account level metrics"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loadingMetaInsights ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="h-24 bg-secondary/30 rounded-lg animate-pulse" />
+                ))}
+              </div>
+            ) : !metaInsights ? (
+              <div className="text-center py-6 text-muted-foreground text-sm bg-secondary/10 rounded-lg">
+                No Meta campaigns active in the last 7 days.
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="bg-secondary/30 rounded-lg p-4">
+                  <div className="text-xs text-muted-foreground mb-1">Total Spend</div>
+                  <div className="text-2xl font-bold">{formatCurrency(metaInsights.spend || 0)}</div>
+                </div>
+                <div className="bg-secondary/30 rounded-lg p-4">
+                  <div className="text-xs text-muted-foreground mb-1">Total Leads</div>
+                  <div className="text-2xl font-bold">{Math.round(metaInsights.leads || 0)}</div>
+                </div>
+                <div className="bg-secondary/30 rounded-lg p-4">
+                  <div className="text-xs text-muted-foreground mb-1">Cost per Lead</div>
+                  <div className="text-2xl font-bold">{formatCurrency(metaInsights.cpl || 0)}</div>
+                </div>
+                <div className="bg-secondary/30 rounded-lg p-4">
+                  <div className="text-xs text-muted-foreground mb-1">Click-through Rate</div>
+                  <div className="text-2xl font-bold">{Number(metaInsights.ctr || 0).toFixed(2)}%</div>
+                </div>
+                <div className="bg-secondary/30 rounded-lg p-4">
+                  <div className="text-xs text-muted-foreground mb-1">Impressions</div>
+                  <div className="text-2xl font-bold">{(metaInsights.impressions || 0).toLocaleString()}</div>
+                </div>
+                <div className="bg-secondary/30 rounded-lg p-4">
+                  <div className="text-xs text-muted-foreground mb-1">Unique Reach</div>
+                  <div className="text-2xl font-bold">{(metaInsights.reach || 0).toLocaleString()}</div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Col - Activity */}
