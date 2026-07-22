@@ -43,7 +43,7 @@ const EXAMPLE_COMMANDS = [
   "What's the overall account performance today?",
 ];
 
-function ReportCard({ report }: { report: { id: number; type: string; response: string; createdAt: string; metaData?: string | null } }) {
+function ReportCard({ report }: { report: { id: number; type: string; prompt: string; response: string; createdAt: string; metaData?: string | null } }) {
   const config = TYPE_CONFIG[report.type as keyof typeof TYPE_CONFIG] ?? TYPE_CONFIG.command_response;
   const Icon = config.icon;
   const date = new Date(report.createdAt);
@@ -78,6 +78,12 @@ function ReportCard({ report }: { report: { id: number; type: string; response: 
         </div>
       </CardHeader>
       <CardContent className="pt-0">
+        {report.type === "command_response" && report.prompt && (
+          <div className="mb-3 px-3 py-2 rounded-md bg-muted/40 border border-border/50">
+            <p className="text-xs text-muted-foreground/70 font-medium uppercase tracking-wider mb-0.5">You asked</p>
+            <p className="text-sm text-muted-foreground italic">{report.prompt}</p>
+          </div>
+        )}
         <div className="prose prose-sm prose-invert max-w-none text-foreground/90 leading-relaxed [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:text-foreground [&_h3]:text-sm [&_h3]:font-medium [&_strong]:text-foreground [&_ul]:text-sm [&_li]:text-sm [&_p]:text-sm">
           <ReactMarkdown>{report.response}</ReactMarkdown>
         </div>
