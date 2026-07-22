@@ -1,0 +1,2 @@
+- [AdClaw AI architecture](adclaw-ai-arch.md) — MultiClaw+OpenClaw stack: React+Vite frontend, Express 5 API, PostgreSQL+Drizzle, Orval codegen from OpenAPI spec
+- [Orval Zod looseObject fix](orval-zod-fix.md) — blueprint `type: object` fields must be `type: string` (JSON strings) to avoid zod.looseObject() codegen error in Zod 3.25.x

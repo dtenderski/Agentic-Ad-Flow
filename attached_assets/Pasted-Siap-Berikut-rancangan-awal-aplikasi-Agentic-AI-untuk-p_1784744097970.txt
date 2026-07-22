@@ -1,0 +1,1200 @@
+Siap. Berikut rancangan awal aplikasi **Agentic AI untuk pemasangan iklan Facebook/Meta Ads** yang powerful, efektif, dan berorientasi konversi, dengan pendekatan **MultiClaw–OpenClaw**.
+
+---
+
+# Blueprint Aplikasi Agentic AI untuk Meta Ads Conversion System
+
+## 1. Tujuan Utama Aplikasi
+
+Aplikasi ini dirancang untuk membantu pengguna membuat, mengelola, mengoptimalkan, dan mengevaluasi iklan Facebook/Instagram secara lebih cerdas dengan bantuan **Agentic AI**.
+
+Fokus utamanya:
+
+1. **Menciptakan iklan yang tepat sasaran**
+2. **Meningkatkan conversion rate**
+3. **Mengurangi pemborosan budget**
+4. **Membantu pengguna non-teknis membuat campaign yang profesional**
+5. **Mengadopsi struktur field, form, dan logika kerja Meta Ads**
+6. **Menggunakan sistem MultiClaw–OpenClaw sebagai arsitektur agen AI**
+
+---
+
+# 2. Prinsip Dasar Sistem
+
+Aplikasi ini tidak sekadar “generator iklan”, tetapi menjadi **AI Advertising Operating System**.
+
+Artinya, sistem bukan hanya membuat copywriting, tetapi juga:
+
+- membaca tujuan bisnis,
+- memilih objective campaign,
+- menyusun audience,
+- membuat creative angle,
+- membuat variasi headline,
+- membuat primary text,
+- menyusun CTA,
+- memberi rekomendasi budget,
+- membaca hasil performa,
+- memberi saran optimasi,
+- dan menjalankan siklus pembelajaran berkelanjutan.
+
+---
+
+# 3. Arsitektur Agentic AI: MultiClaw–OpenClaw
+
+## A. MultiClaw Layer
+
+**MultiClaw** adalah lapisan multi-agen yang bekerja seperti “tim spesialis iklan”.
+
+Setiap claw/agen memiliki fungsi berbeda.
+
+### 1. Business Diagnosis Agent
+
+Tugas:
+
+- memahami produk/jasa,
+- membaca target market,
+- mengidentifikasi pain point,
+- menentukan value proposition,
+- menyusun positioning iklan.
+
+Input utama:
+
+- nama produk,
+- kategori bisnis,
+- deskripsi produk,
+- harga,
+- lokasi bisnis,
+- target pelanggan,
+- masalah pelanggan,
+- keunggulan produk,
+- testimoni,
+- kompetitor.
+
+Output:
+
+- ringkasan bisnis,
+- buyer persona,
+- unique selling proposition,
+- offer angle,
+- pesan utama iklan.
+
+---
+
+### 2. Campaign Strategy Agent
+
+Tugas:
+
+- menentukan objective Meta Ads,
+- memilih struktur campaign,
+- menyarankan funnel,
+- menentukan jenis campaign yang paling sesuai.
+
+Mengadopsi objective Meta Ads seperti:
+
+- Awareness
+- Traffic
+- Engagement
+- Leads
+- App Promotion
+- Sales
+
+Output:
+
+- rekomendasi campaign objective,
+- alasan pemilihan objective,
+- funnel strategy,
+- campaign naming convention,
+- campaign structure.
+
+Contoh:
+
+> Jika tujuan adalah mendapatkan prospek WhatsApp, sistem akan merekomendasikan objective **Leads** atau **Engagement to Messaging**, tergantung strategi dan integrasi yang tersedia.
+> 
+
+---
+
+### 3. Audience Intelligence Agent
+
+Tugas:
+
+- menyusun target audience,
+- membuat segmentasi cold/warm/hot audience,
+- memberi rekomendasi interest,
+- membuat custom audience,
+- membuat lookalike audience jika data tersedia.
+
+Field yang diadopsi dari Meta Ads:
+
+- lokasi,
+- usia,
+- gender,
+- bahasa,
+- minat,
+- perilaku,
+- custom audience,
+- lookalike audience,
+- exclusions,
+- advantage detailed targeting,
+- broad targeting.
+
+Output:
+
+- audience profile,
+- targeting recommendation,
+- exclusion strategy,
+- audience size estimation logic,
+- segmentasi testing.
+
+---
+
+### 4. Creative & Copywriting Agent
+
+Tugas:
+
+- membuat variasi iklan,
+- membuat primary text,
+- headline,
+- description,
+- CTA,
+- angle visual,
+- script video,
+- storyboard,
+- caption,
+- hooks.
+
+Mengadopsi field Meta Ads seperti:
+
+- Primary Text
+- Headline
+- Description
+- Call to Action
+- Destination URL
+- Display Link
+- Creative Format
+- Image/Video Asset
+- Carousel Card
+- Lead Form Intro
+- Instant Form Questions
+
+Output:
+
+- 5–10 variasi primary text,
+- 5 headline,
+- 3 CTA,
+- 3 creative angle,
+- 1 konsep visual utama,
+- 1 konsep video pendek,
+- 1 versi hard selling,
+- 1 versi soft selling,
+- 1 versi edukatif,
+- 1 versi testimoni.
+
+---
+
+### 5. Offer Engineering Agent
+
+Tugas:
+
+- merancang penawaran yang lebih mudah menghasilkan konversi.
+
+Contoh offer:
+
+- diskon terbatas,
+- konsultasi gratis,
+- bonus,
+- trial,
+- free assessment,
+- paket bundling,
+- lead magnet,
+- voucher,
+- garansi,
+- scarcity,
+- urgency.
+
+Output:
+
+- struktur offer,
+- alasan psikologis,
+- risiko klaim berlebihan,
+- rekomendasi wording,
+- konversi yang diharapkan.
+
+---
+
+### 6. Landing & Conversion Agent
+
+Tugas:
+
+- mengevaluasi halaman tujuan,
+- memastikan kesesuaian iklan dengan landing page,
+- memberi rekomendasi form,
+- menyusun lead capture.
+
+Elemen yang diperiksa:
+
+- headline landing page,
+- value proposition,
+- CTA,
+- form,
+- WhatsApp button,
+- testimoni,
+- trust signal,
+- pricing,
+- FAQ,
+- loading speed,
+- mobile friendliness.
+
+Output:
+
+- landing page checklist,
+- rekomendasi form,
+- rekomendasi CTA,
+- conversion risk,
+- improvement priority.
+
+---
+
+### 7. Budget & Bidding Agent
+
+Tugas:
+
+- memberi rekomendasi budget,
+- menentukan strategi bidding,
+- membagi budget testing,
+- memberi estimasi fase pembelajaran.
+
+Field Meta Ads yang diadopsi:
+
+- daily budget,
+- lifetime budget,
+- bid strategy,
+- campaign budget optimization,
+- ad set budget,
+- schedule,
+- optimization event,
+- attribution setting.
+
+Output:
+
+- budget testing,
+- budget scaling,
+- bidding strategy,
+- jadwal campaign,
+- batas minimal data evaluasi.
+
+---
+
+### 8. Compliance & Policy Guard Agent
+
+Tugas:
+
+- memeriksa kepatuhan terhadap kebijakan Meta Ads,
+- menghindari wording yang berisiko ditolak,
+- menghindari klaim berlebihan,
+- mencegah targeting sensitif,
+- memberi alternatif copy yang aman.
+
+Hal yang diperiksa:
+
+- klaim kesehatan,
+- klaim finansial,
+- before-after,
+- atribut personal sensitif,
+- diskriminasi,
+- clickbait,
+- misleading claim,
+- penggunaan kata “kamu punya masalah ini?” secara sensitif.
+
+Output:
+
+- policy risk score,
+- bagian yang berisiko,
+- alternatif copy,
+- status layak publish/revisi.
+
+---
+
+### 9. Performance Analyst Agent
+
+Tugas:
+
+- membaca data performa iklan,
+- menganalisis KPI,
+- memberi rekomendasi optimasi.
+
+Metric Meta Ads yang digunakan:
+
+- impressions,
+- reach,
+- frequency,
+- CPM,
+- CTR,
+- CPC,
+- landing page views,
+- leads,
+- purchases,
+- cost per result,
+- ROAS,
+- conversion rate,
+- engagement rate,
+- video watch time.
+
+Output:
+
+- insight performa,
+- iklan yang harus dimatikan,
+- iklan yang harus dinaikkan budget,
+- audience yang perlu diperbaiki,
+- creative fatigue warning,
+- rekomendasi A/B testing berikutnya.
+
+---
+
+### 10. Human-in-the-Loop Gate Agent
+
+Tugas:
+
+- memastikan keputusan penting tetap disetujui manusia.
+
+Gate persetujuan:
+
+1. sebelum campaign dibuat,
+2. sebelum budget dijalankan,
+3. sebelum iklan dipublish,
+4. sebelum scaling,
+5. sebelum menghentikan iklan besar,
+6. sebelum mengubah strategi campaign utama.
+
+Output:
+
+- status approval,
+- catatan revisi,
+- keputusan final,
+- audit trail.
+
+---
+
+# 4. OpenClaw Layer
+
+Jika **MultiClaw** adalah tim spesialis, maka **OpenClaw** adalah sistem orkestrasi terbuka yang menghubungkan agen-agen tersebut.
+
+OpenClaw bertugas:
+
+- mengatur alur kerja,
+- membuka integrasi ke Meta Ads API,
+- membuka koneksi ke CRM,
+- membaca data performa,
+- menerima feedback manusia,
+- menyimpan audit trail,
+- mengatur memory,
+- menjalankan loop optimasi.
+
+---
+
+## Struktur OpenClaw
+
+### 1. Input Layer
+
+Sumber input:
+
+- form pengguna,
+- database produk,
+- database customer,
+- hasil riset audience,
+- Meta Ads account,
+- pixel/conversion API,
+- landing page,
+- CRM,
+- WhatsApp leads,
+- Google Sheet,
+- Notion database.
+
+---
+
+### 2. Reasoning Layer
+
+Di sini agen menganalisis:
+
+- siapa target market,
+- apa tujuan campaign,
+- apa penawaran terbaik,
+- apa pesan paling kuat,
+- audience mana yang layak diuji,
+- budget berapa yang realistis,
+- creative mana yang paling potensial.
+
+---
+
+### 3. Decision Gate Layer
+
+Sistem membuat rekomendasi, tetapi keputusan penting tetap melalui gate:
+
+- Draft
+- Review
+- Approved
+- Ready to Publish
+- Active
+- Learning
+- Optimizing
+- Scaling
+- Paused
+- Completed
+
+---
+
+### 4. Execution Layer
+
+Tugas execution layer:
+
+- membuat campaign draft,
+- membuat ad set,
+- membuat ad creative,
+- memasukkan audience,
+- memasukkan budget,
+- memasukkan CTA,
+- menghubungkan landing page,
+- mengaktifkan tracking,
+- mengirim ke Meta Ads untuk publish.
+
+---
+
+### 5. Monitoring Layer
+
+Sistem memantau:
+
+- CPM terlalu tinggi,
+- CTR rendah,
+- CPC mahal,
+- frequency tinggi,
+- leads tidak berkualitas,
+- cost per lead naik,
+- creative fatigue,
+- budget tidak terserap,
+- iklan masuk learning limited.
+
+---
+
+### 6. Learning Layer
+
+Sistem belajar dari:
+
+- iklan yang menang,
+- iklan yang gagal,
+- audience terbaik,
+- headline terbaik,
+- CTA terbaik,
+- landing page terbaik,
+- waktu tayang terbaik,
+- penawaran terbaik.
+
+Hasil pembelajaran masuk ke **Campaign Memory**.
+
+---
+
+# 5. Field/Form Utama yang Diadopsi dari Meta Ads
+
+## A. Campaign Form
+
+| Field | Fungsi |
+| --- | --- |
+| Campaign Name | Nama campaign |
+| Buying Type | Auction/Reservation |
+| Campaign Objective | Awareness, Traffic, Engagement, Leads, Sales |
+| Special Ad Category | Housing, Employment, Credit, Social Issues |
+| Campaign Budget Optimization | Aktif/nonaktif |
+| Daily/Lifetime Budget | Budget harian/total |
+| Campaign Schedule | Jadwal campaign |
+| A/B Test | Aktif/nonaktif |
+
+---
+
+## B. Ad Set Form
+
+| Field | Fungsi |
+| --- | --- |
+| Ad Set Name | Nama ad set |
+| Conversion Location | Website, App, Messaging, Calls, Leads |
+| Performance Goal | Tujuan optimasi |
+| Pixel/Event | Tracking konversi |
+| Budget & Schedule | Budget dan jadwal |
+| Audience | Target audience |
+| Location | Lokasi target |
+| Age | Usia |
+| Gender | Gender |
+| Language | Bahasa |
+| Detailed Targeting | Interest/behavior |
+| Custom Audience | Audience dari data sendiri |
+| Lookalike Audience | Audience serupa |
+| Placements | Facebook, Instagram, Messenger, Audience Network |
+| Optimization Event | Lead, Purchase, Add to Cart, Contact |
+| Attribution Setting | Window atribusi |
+
+---
+
+## C. Ad Creative Form
+
+| Field | Fungsi |
+| --- | --- |
+| Ad Name | Nama iklan |
+| Facebook Page | Page yang digunakan |
+| Instagram Account | Akun IG |
+| Format | Single image, video, carousel, collection |
+| Media | Gambar/video |
+| Primary Text | Teks utama |
+| Headline | Judul |
+| Description | Deskripsi |
+| CTA | Learn More, Sign Up, WhatsApp, Buy Now |
+| Destination | Website, WhatsApp, Messenger, Instant Form |
+| URL Parameters | Tracking UTM |
+| Display Link | Link tampilan |
+
+---
+
+## D. Lead Form Fields
+
+Jika campaign memakai Lead Ads, aplikasi bisa mengadopsi field:
+
+| Field | Fungsi |
+| --- | --- |
+| Form Name | Nama form |
+| Intro | Pembuka |
+| Questions | Pertanyaan lead |
+| Full Name | Nama lengkap |
+| Email | Email |
+| Phone Number | Nomor HP |
+| City | Kota |
+| Custom Question | Pertanyaan khusus |
+| Privacy Policy URL | Link kebijakan privasi |
+| Thank You Screen | Halaman terima kasih |
+| CTA Button | Tombol lanjutan |
+
+---
+
+# 6. Alur Kerja Aplikasi
+
+## Tahap 1 — Business Input
+
+Pengguna mengisi:
+
+- nama bisnis,
+- produk/jasa,
+- target market,
+- lokasi,
+- harga,
+- keunggulan,
+- tujuan iklan,
+- budget,
+- link website/WhatsApp,
+- aset gambar/video,
+- testimoni,
+- promosi.
+
+---
+
+## Tahap 2 — AI Diagnosis
+
+Agen menganalisis:
+
+- produk,
+- pasar,
+- masalah customer,
+- daya tarik offer,
+- kemungkinan objective,
+- risiko policy,
+- potensi konversi.
+
+Output:
+
+- diagnosis bisnis,
+- rekomendasi funnel,
+- campaign objective,
+- audience awal,
+- creative angle.
+
+---
+
+## Tahap 3 — Campaign Builder
+
+Sistem membuat draft:
+
+- campaign,
+- ad set,
+- ad creative,
+- copywriting,
+- CTA,
+- targeting,
+- budget,
+- tracking.
+
+---
+
+## Tahap 4 — Human Review
+
+Pengguna melihat:
+
+- struktur campaign,
+- target audience,
+- copy iklan,
+- visual direction,
+- budget,
+- estimasi performa,
+- risiko policy.
+
+Lalu memilih:
+
+- approve,
+- revisi,
+- regenerate,
+- simpan draft,
+- publish.
+
+---
+
+## Tahap 5 — Publish to Meta Ads
+
+Setelah disetujui:
+
+- sistem mengirim campaign ke Meta Ads,
+- membuat campaign/ad set/ad,
+- menyimpan campaign ID,
+- mengaktifkan tracking,
+- menyimpan audit trail.
+
+---
+
+## Tahap 6 — Performance Monitoring
+
+Sistem membaca performa secara berkala:
+
+- 3 jam,
+- 6 jam,
+- 12 jam,
+- 24 jam,
+- 3 hari,
+- 7 hari.
+
+---
+
+## Tahap 7 — Optimization Loop
+
+Agen memberi rekomendasi:
+
+- matikan iklan lemah,
+- naikkan budget iklan pemenang,
+- ganti headline,
+- ganti visual,
+- ubah audience,
+- buat lookalike,
+- buat retargeting,
+- ubah CTA,
+- perbaiki landing page.
+
+---
+
+# 7. Database Utama Aplikasi
+
+## 1. Business Profile Database
+
+Menyimpan data bisnis pengguna:
+
+- business_id
+- user_id
+- business_name
+- industry
+- product_category
+- location
+- website
+- WhatsApp
+- target_market
+- value_proposition
+- brand_voice
+- compliance_notes
+
+---
+
+## 2. Product/Offer Database
+
+Menyimpan produk dan penawaran:
+
+- product_id
+- business_id
+- product_name
+- description
+- price
+- promo
+- benefit
+- pain_point
+- proof
+- guarantee
+- CTA
+- landing_page_url
+
+---
+
+## 3. Campaign Database
+
+Menyimpan campaign:
+
+- campaign_id
+- meta_campaign_id
+- business_id
+- objective
+- campaign_name
+- status
+- budget_type
+- daily_budget
+- lifetime_budget
+- start_date
+- end_date
+- approval_status
+- created_by_agent
+- approved_by_user
+
+---
+
+## 4. Ad Set Database
+
+Menyimpan ad set:
+
+- adset_id
+- meta_adset_id
+- campaign_id
+- audience_name
+- location
+- age_min
+- age_max
+- gender
+- language
+- interests
+- custom_audience
+- lookalike_audience
+- placement
+- optimization_event
+- attribution_setting
+- budget
+
+---
+
+## 5. Creative Database
+
+Menyimpan materi iklan:
+
+- creative_id
+- adset_id
+- ad_name
+- format
+- media_url
+- primary_text
+- headline
+- description
+- CTA
+- destination_url
+- UTM
+- policy_score
+- creative_score
+
+---
+
+## 6. Performance Database
+
+Menyimpan performa iklan:
+
+- performance_id
+- campaign_id
+- adset_id
+- ad_id
+- date
+- impressions
+- reach
+- frequency
+- CPM
+- CTR
+- CPC
+- leads
+- purchases
+- cost_per_result
+- ROAS
+- conversion_rate
+- recommendation
+
+---
+
+## 7. Agent Memory Database
+
+Menyimpan pembelajaran agen:
+
+- memory_id
+- business_id
+- winning_audience
+- winning_copy
+- winning_headline
+- winning_CTA
+- winning_offer
+- failed_pattern
+- policy_issue
+- optimization_history
+- learning_summary
+
+---
+
+# 8. Mode Kerja Aplikasi
+
+## Mode 1 — Assisted Campaign Builder
+
+Untuk pengguna pemula.
+
+AI memandu pengguna langkah demi langkah:
+
+1. isi data bisnis,
+2. pilih tujuan,
+3. AI buat campaign,
+4. pengguna review,
+5. publish.
+
+---
+
+## Mode 2 — Expert Mode
+
+Untuk advertiser berpengalaman.
+
+Pengguna bisa mengatur sendiri:
+
+- objective,
+- audience,
+- bidding,
+- placement,
+- attribution,
+- event,
+- budget,
+- eksperimen A/B.
+
+AI hanya memberi rekomendasi dan warning.
+
+---
+
+## Mode 3 — Autopilot with Approval
+
+AI mengelola campaign secara otomatis, tetapi semua keputusan penting tetap perlu approval.
+
+Contoh:
+
+- menaikkan budget,
+- menghentikan ad set,
+- membuat creative baru,
+- mengubah audience.
+
+---
+
+## Mode 4 — Full Analysis Mode
+
+AI hanya menganalisis data iklan dan memberi rekomendasi tanpa melakukan perubahan.
+
+---
+
+# 9. Sistem Skoring AI
+
+Setiap campaign diberi skor sebelum publish.
+
+## A. Conversion Readiness Score
+
+Mengukur kesiapan campaign menghasilkan konversi.
+
+Faktor:
+
+- kejelasan offer,
+- kecocokan audience,
+- kekuatan copy,
+- kualitas CTA,
+- landing page,
+- trust signal,
+- tracking,
+- relevansi objective.
+
+Skor: 0–100
+
+---
+
+## B. Policy Risk Score
+
+Mengukur risiko ditolak oleh Meta.
+
+Faktor:
+
+- klaim berlebihan,
+- konten sensitif,
+- targeting sensitif,
+- wording personal attribute,
+- misleading claim.
+
+Skor:
+
+- 0–30: aman
+- 31–60: perlu review
+- 61–100: berisiko tinggi
+
+---
+
+## C. Creative Strength Score
+
+Mengukur potensi kekuatan materi iklan.
+
+Faktor:
+
+- hook,
+- clarity,
+- emotional trigger,
+- visual direction,
+- headline,
+- CTA,
+- uniqueness,
+- relevance.
+
+---
+
+## D. Funnel Fit Score
+
+Mengukur kesesuaian antara:
+
+- objective,
+- audience,
+- offer,
+- landing page,
+- CTA,
+- conversion event.
+
+---
+
+# 10. Contoh Workflow Agentic AI
+
+## Input Pengguna
+
+> Saya menjual jasa pelatihan K3 untuk perusahaan konstruksi. Target saya HRD, HSE Manager, dan kontraktor di Jakarta. Saya ingin mendapatkan leads WhatsApp. Budget Rp150.000/hari.
+> 
+
+---
+
+## Output Sistem
+
+### Campaign Recommendation
+
+- Objective: Leads atau Engagement to Messaging
+- Conversion Location: WhatsApp
+- Audience: HRD, HSE Manager, Construction Manager, kontraktor
+- Location: Jakarta, Bekasi, Tangerang, Depok
+- Age: 25–55
+- Placement: Advantage+ Placement
+- Budget: Rp150.000/hari
+- Testing: 3 ad set × 2 creative
+
+---
+
+### Creative Angle
+
+1. Kepatuhan regulasi K3
+2. Mengurangi risiko kecelakaan kerja
+3. Sertifikasi dan peningkatan kompetensi
+4. Audit dan persiapan SMK3
+5. Pelatihan praktis untuk tim proyek
+
+---
+
+### Primary Text Contoh
+
+> Perusahaan konstruksi Anda membutuhkan pelatihan K3 yang praktis, terarah, dan sesuai kebutuhan lapangan?
+> 
+
+> 
+> 
+
+> Kami membantu tim proyek, HSE, dan manajemen memahami penerapan K3 dengan pendekatan yang mudah dipahami dan relevan untuk dunia konstruksi.
+> 
+
+> 
+> 
+
+> Konsultasikan kebutuhan pelatihan K3 perusahaan Anda sekarang.
+> 
+
+---
+
+### Headline
+
+> Pelatihan K3 untuk Perusahaan Konstruksi
+> 
+
+---
+
+### CTA
+
+> Hubungi Kami
+> 
+
+---
+
+### Human Gate
+
+Status:
+
+> Menunggu persetujuan pengguna sebelum campaign dikirim ke Meta Ads.
+> 
+
+---
+
+# 11. Prinsip Anti-Fabrikasi dan Audit Trail
+
+Karena sistem memakai Agentic AI, perlu ada mekanisme pengaman.
+
+## A. Anti-Fabrikasi
+
+AI tidak boleh mengarang:
+
+- data performa,
+- testimoni,
+- sertifikasi,
+- angka ROI,
+- klaim “terbukti meningkatkan penjualan 300%” tanpa bukti,
+- izin resmi,
+- partner resmi Meta,
+- legal claim.
+
+Jika data tidak tersedia, AI harus menandai:
+
+> Data belum tersedia. Perlu input pengguna.
+> 
+
+---
+
+## B. Evidence-Based Recommendation
+
+Setiap rekomendasi harus menyertakan alasan:
+
+- berdasarkan data campaign,
+- berdasarkan input bisnis,
+- berdasarkan performa historis,
+- berdasarkan best practice,
+- berdasarkan policy risk.
+
+---
+
+## C. Audit Trail
+
+Setiap perubahan disimpan:
+
+- siapa yang mengubah,
+- agen mana yang memberi rekomendasi,
+- kapan perubahan dibuat,
+- alasan perubahan,
+- data pendukung,
+- status approval.
+
+---
+
+# 12. Modul Minimum Viable Product / MVP
+
+Untuk versi awal, aplikasi bisa dibangun dengan modul berikut:
+
+## MVP 1 — AI Campaign Generator
+
+Fitur:
+
+- input bisnis,
+- rekomendasi objective,
+- audience generator,
+- copywriting generator,
+- headline generator,
+- CTA generator,
+- policy checker,
+- campaign score.
+
+---
+
+## MVP 2 — Meta Ads Draft Builder
+
+Fitur tambahan:
+
+- struktur campaign,
+- ad set,
+- creative,
+- budget,
+- placement,
+- form lead ads,
+- export ke format Meta Ads.
+
+---
+
+## MVP 3 — Meta Ads API Integration
+
+Fitur tambahan:
+
+- koneksi akun Meta Ads,
+- publish campaign,
+- sinkronisasi campaign ID,
+- baca performa,
+- update status.
+
+---
+
+## MVP 4 — Optimization Agent
+
+Fitur tambahan:
+
+- monitoring performa,
+- rekomendasi pause/scale,
+- A/B testing,
+- creative refresh,
+- audience refinement,
+- conversion learning.
+
+---
+
+# 13. Struktur Menu Aplikasi
+
+Rekomendasi menu:
+
+1. **Dashboard**
+2. **Business Profile**
+3. **Products & Offers**
+4. **Campaign Builder**
+5. **Audience Builder**
+6. **Creative Studio**
+7. **Lead Form Builder**
+8. **Policy Checker**
+9. **Budget Planner**
+10. **Performance Monitor**
+11. **AI Recommendations**
+12. **Approval Center**
+13. **Agent Memory**
+14. **Settings & Meta Integration**
+
+---
+
+# 14. Konsep Nama Aplikasi
+
+Beberapa opsi nama:
+
+1. **AdClaw AI**
+2. **MetaClaw Ads**
+3. **OpenClaw Ads Engine**
+4. **ConversionClaw**
+5. **ClawReach AI**
+6. **AdGenius Claw**
+7. **FunnelClaw AI**
+8. **ClawPilot Ads**
+9. **KonversiClaw**
+10. **IklanCerdas AI**
+
+Nama yang paling selaras dengan MultiClaw–OpenClaw:
+
+> **AdClaw AI — Agentic Meta Ads Conversion Engine**
+> 
+
+---
+
+# 15. Ringkasan Positioning Produk
+
+**AdClaw AI** adalah aplikasi Agentic AI untuk membantu bisnis membuat, menjalankan, dan mengoptimalkan iklan Facebook/Instagram secara lebih efektif dengan mengadopsi struktur Meta Ads, sistem multi-agen MultiClaw–OpenClaw, human approval gate, policy checker, dan conversion optimization loop.
+
+Tagline:
+
+> **Bukan sekadar membuat iklan, tetapi membangun mesin konversi berbasis Agentic AI.**
+>

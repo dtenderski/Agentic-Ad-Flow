@@ -3,13 +3,34 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: AdClaw AI - Agentic Meta Ads Blueprint & Conversion Engine API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: businesses
+    description: Business profile management
+  - name: products
+    description: Product and offer management
+  - name: campaigns
+    description: Campaign management
+  - name: adsets
+    description: Ad set management
+  - name: creatives
+    description: Ad creative management
+  - name: pipeline
+    description: AI pipeline orchestration
+  - name: blueprints
+    description: Generated ad blueprints
+  - name: approvals
+    description: Human approval gate
+  - name: memory
+    description: Agent memory and learning
+  - name: dashboard
+    description: Dashboard summary and analytics
+
 paths:
   /healthz:
     get:
@@ -24,6 +45,716 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ─── Dashboard ───────────────────────────────────────────────────────────────
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard overview
+      description: Returns aggregate stats across campaigns, creatives, and pipeline runs
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/recent-campaigns:
+    get:
+      operationId: getRecentCampaigns
+      tags: [dashboard]
+      summary: Get recent campaigns
+      description: Returns the most recently active/created campaigns
+      responses:
+        "200":
+          description: List of recent campaigns
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Campaign"
+
+  /dashboard/pipeline-activity:
+    get:
+      operationId: getPipelineActivity
+      tags: [dashboard]
+      summary: Get recent pipeline activity
+      description: Returns recent pipeline runs with their statuses
+      responses:
+        "200":
+          description: Pipeline activity feed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PipelineRun"
+
+  # ─── Businesses ──────────────────────────────────────────────────────────────
+  /businesses:
+    get:
+      operationId: listBusinesses
+      tags: [businesses]
+      summary: List all business profiles
+      responses:
+        "200":
+          description: List of businesses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Business"
+    post:
+      operationId: createBusiness
+      tags: [businesses]
+      summary: Create a new business profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusinessInput"
+      responses:
+        "201":
+          description: Business created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Business"
+
+  /businesses/{businessId}:
+    get:
+      operationId: getBusiness
+      tags: [businesses]
+      summary: Get a business profile
+      parameters:
+        - name: businessId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Business profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Business"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateBusiness
+      tags: [businesses]
+      summary: Update a business profile
+      parameters:
+        - name: businessId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusinessUpdate"
+      responses:
+        "200":
+          description: Business updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Business"
+    delete:
+      operationId: deleteBusiness
+      tags: [businesses]
+      summary: Delete a business profile
+      parameters:
+        - name: businessId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── Products ─────────────────────────────────────────────────────────────────
+  /businesses/{businessId}/products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List products for a business
+      parameters:
+        - name: businessId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a product for a business
+      parameters:
+        - name: businessId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/{productId}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a product
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update a product
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      summary: Delete a product
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── Pipeline (AI Orchestration) ─────────────────────────────────────────────
+  /pipeline/run:
+    post:
+      operationId: runPipeline
+      tags: [pipeline]
+      summary: Run the MultiClaw-OpenClaw AI pipeline
+      description: Triggers the AI agents pipeline to generate a full ads blueprint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PipelineInput"
+      responses:
+        "201":
+          description: Pipeline started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PipelineRun"
+
+  /pipeline:
+    get:
+      operationId: listPipelineRuns
+      tags: [pipeline]
+      summary: List all pipeline runs
+      responses:
+        "200":
+          description: List of pipeline runs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PipelineRun"
+
+  /pipeline/{pipelineId}:
+    get:
+      operationId: getPipelineRun
+      tags: [pipeline]
+      summary: Get a pipeline run and its results
+      parameters:
+        - name: pipelineId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Pipeline run details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PipelineRunDetail"
+        "404":
+          description: Not found
+
+  # ─── Blueprints ───────────────────────────────────────────────────────────────
+  /blueprints:
+    get:
+      operationId: listBlueprints
+      tags: [blueprints]
+      summary: List all generated blueprints
+      responses:
+        "200":
+          description: List of blueprints
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Blueprint"
+
+  /blueprints/{blueprintId}:
+    get:
+      operationId: getBlueprint
+      tags: [blueprints]
+      summary: Get a blueprint
+      parameters:
+        - name: blueprintId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Blueprint with full content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Blueprint"
+        "404":
+          description: Not found
+
+  # ─── Campaigns ────────────────────────────────────────────────────────────────
+  /campaigns:
+    get:
+      operationId: listCampaigns
+      tags: [campaigns]
+      summary: List all campaigns
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of campaigns
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Campaign"
+    post:
+      operationId: createCampaign
+      tags: [campaigns]
+      summary: Create a campaign draft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CampaignInput"
+      responses:
+        "201":
+          description: Campaign created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Campaign"
+
+  /campaigns/{campaignId}:
+    get:
+      operationId: getCampaign
+      tags: [campaigns]
+      summary: Get a campaign
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Campaign
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Campaign"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateCampaign
+      tags: [campaigns]
+      summary: Update a campaign
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CampaignUpdate"
+      responses:
+        "200":
+          description: Campaign updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Campaign"
+    delete:
+      operationId: deleteCampaign
+      tags: [campaigns]
+      summary: Delete a campaign
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /campaigns/{campaignId}/approve:
+    post:
+      operationId: approveCampaign
+      tags: [campaigns, approvals]
+      summary: Approve a campaign (human gate)
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApprovalDecision"
+      responses:
+        "200":
+          description: Campaign approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Campaign"
+
+  /campaigns/{campaignId}/adsets:
+    get:
+      operationId: listAdSets
+      tags: [adsets]
+      summary: List ad sets for a campaign
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of ad sets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdSet"
+    post:
+      operationId: createAdSet
+      tags: [adsets]
+      summary: Create an ad set for a campaign
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdSetInput"
+      responses:
+        "201":
+          description: Ad set created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdSet"
+
+  /adsets/{adsetId}:
+    get:
+      operationId: getAdSet
+      tags: [adsets]
+      summary: Get an ad set
+      parameters:
+        - name: adsetId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Ad set
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdSet"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateAdSet
+      tags: [adsets]
+      summary: Update an ad set
+      parameters:
+        - name: adsetId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdSetUpdate"
+      responses:
+        "200":
+          description: Ad set updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdSet"
+    delete:
+      operationId: deleteAdSet
+      tags: [adsets]
+      summary: Delete an ad set
+      parameters:
+        - name: adsetId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /adsets/{adsetId}/creatives:
+    get:
+      operationId: listCreatives
+      tags: [creatives]
+      summary: List creatives for an ad set
+      parameters:
+        - name: adsetId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of creatives
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Creative"
+    post:
+      operationId: createCreative
+      tags: [creatives]
+      summary: Create a creative for an ad set
+      parameters:
+        - name: adsetId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreativeInput"
+      responses:
+        "201":
+          description: Creative created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Creative"
+
+  /creatives/{creativeId}:
+    get:
+      operationId: getCreative
+      tags: [creatives]
+      summary: Get a creative
+      parameters:
+        - name: creativeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Creative
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Creative"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateCreative
+      tags: [creatives]
+      summary: Update a creative
+      parameters:
+        - name: creativeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreativeUpdate"
+      responses:
+        "200":
+          description: Creative updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Creative"
+    delete:
+      operationId: deleteCreative
+      tags: [creatives]
+      summary: Delete a creative
+      parameters:
+        - name: creativeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── Approvals ────────────────────────────────────────────────────────────────
+  /approvals:
+    get:
+      operationId: listApprovals
+      tags: [approvals]
+      summary: List all pending approvals
+      responses:
+        "200":
+          description: List of approvals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Approval"
+
+  # ─── Agent Memory ─────────────────────────────────────────────────────────────
+  /memory:
+    get:
+      operationId: listMemories
+      tags: [memory]
+      summary: List agent memories
+      responses:
+        "200":
+          description: List of agent memories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AgentMemory"
+
+  /memory/{businessId}:
+    get:
+      operationId: getBusinessMemory
+      tags: [memory]
+      summary: Get agent memory for a business
+      parameters:
+        - name: businessId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Agent memory for business
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentMemory"
+        "404":
+          description: Not found
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +765,674 @@ components:
       required:
         - status
 
+    # ─── Dashboard ──────────────────────────────────────────────────────────────
+    DashboardSummary:
+      type: object
+      required: [totalBusinesses, totalCampaigns, totalBlueprints, pendingApprovals, activeCampaigns, draftCampaigns, pipelineRunsToday, conversionReadinessAvg]
+      properties:
+        totalBusinesses:
+          type: integer
+        totalCampaigns:
+          type: integer
+        totalBlueprints:
+          type: integer
+        pendingApprovals:
+          type: integer
+        activeCampaigns:
+          type: integer
+        draftCampaigns:
+          type: integer
+        pipelineRunsToday:
+          type: integer
+        conversionReadinessAvg:
+          type: number
+
+    # ─── Business ───────────────────────────────────────────────────────────────
+    Business:
+      type: object
+      required: [id, businessName, industry, createdAt]
+      properties:
+        id:
+          type: integer
+        businessName:
+          type: string
+        industry:
+          type: string
+        productCategory:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+        whatsapp:
+          type: ["string", "null"]
+        targetMarket:
+          type: ["string", "null"]
+        valueProposition:
+          type: ["string", "null"]
+        brandVoice:
+          type: ["string", "null"]
+        complianceNotes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    BusinessInput:
+      type: object
+      required: [businessName, industry]
+      properties:
+        businessName:
+          type: string
+          minLength: 1
+        industry:
+          type: string
+          minLength: 1
+        productCategory:
+          type: string
+        location:
+          type: string
+        website:
+          type: string
+        whatsapp:
+          type: string
+        targetMarket:
+          type: string
+        valueProposition:
+          type: string
+        brandVoice:
+          type: string
+        complianceNotes:
+          type: string
+
+    BusinessUpdate:
+      type: object
+      properties:
+        businessName:
+          type: string
+        industry:
+          type: string
+        productCategory:
+          type: string
+        location:
+          type: string
+        website:
+          type: string
+        whatsapp:
+          type: string
+        targetMarket:
+          type: string
+        valueProposition:
+          type: string
+        brandVoice:
+          type: string
+        complianceNotes:
+          type: string
+
+    # ─── Product ─────────────────────────────────────────────────────────────────
+    Product:
+      type: object
+      required: [id, businessId, productName, createdAt]
+      properties:
+        id:
+          type: integer
+        businessId:
+          type: integer
+        productName:
+          type: string
+        description:
+          type: ["string", "null"]
+        price:
+          type: ["number", "null"]
+        promo:
+          type: ["string", "null"]
+        benefit:
+          type: ["string", "null"]
+        painPoint:
+          type: ["string", "null"]
+        proof:
+          type: ["string", "null"]
+        guarantee:
+          type: ["string", "null"]
+        cta:
+          type: ["string", "null"]
+        landingPageUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    ProductInput:
+      type: object
+      required: [productName]
+      properties:
+        productName:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        price:
+          type: number
+        promo:
+          type: string
+        benefit:
+          type: string
+        painPoint:
+          type: string
+        proof:
+          type: string
+        guarantee:
+          type: string
+        cta:
+          type: string
+        landingPageUrl:
+          type: string
+
+    ProductUpdate:
+      type: object
+      properties:
+        productName:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        promo:
+          type: string
+        benefit:
+          type: string
+        painPoint:
+          type: string
+        proof:
+          type: string
+        guarantee:
+          type: string
+        cta:
+          type: string
+        landingPageUrl:
+          type: string
+
+    # ─── Pipeline ─────────────────────────────────────────────────────────────────
+    PipelineInput:
+      type: object
+      required: [businessId, productId, campaignGoal, budget]
+      properties:
+        businessId:
+          type: integer
+        productId:
+          type: integer
+        campaignGoal:
+          type: string
+          description: "e.g. leads, sales, awareness, traffic"
+        budget:
+          type: number
+          description: Daily budget in local currency
+        targetLocation:
+          type: string
+        targetAgeMin:
+          type: integer
+        targetAgeMax:
+          type: integer
+        additionalContext:
+          type: string
+
+    PipelineRun:
+      type: object
+      required: [id, businessId, productId, status, createdAt]
+      properties:
+        id:
+          type: integer
+        businessId:
+          type: integer
+        productId:
+          type: integer
+        campaignGoal:
+          type: string
+        budget:
+          type: number
+        status:
+          type: string
+          description: "pending | running | completed | failed"
+        agentLog:
+          type: ["string", "null"]
+        blueprintId:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+        completedAt:
+          type: ["string", "null"]
+
+    PipelineRunDetail:
+      type: object
+      required: [id, businessId, productId, status, createdAt]
+      properties:
+        id:
+          type: integer
+        businessId:
+          type: integer
+        productId:
+          type: integer
+        campaignGoal:
+          type: string
+        budget:
+          type: number
+        status:
+          type: string
+        agentLog:
+          type: ["string", "null"]
+        blueprintId:
+          type: ["integer", "null"]
+        blueprint:
+          $ref: "#/components/schemas/Blueprint"
+        createdAt:
+          type: string
+        completedAt:
+          type: ["string", "null"]
+
+    # ─── Blueprint ───────────────────────────────────────────────────────────────
+    Blueprint:
+      type: object
+      required: [id, pipelineRunId, title, createdAt]
+      properties:
+        id:
+          type: integer
+        pipelineRunId:
+          type: integer
+        title:
+          type: string
+        businessContext:
+          type: ["string", "null"]
+          description: Business diagnosis section (JSON string)
+        campaignStrategy:
+          type: ["string", "null"]
+          description: Campaign strategy recommendation (JSON string)
+        audiencePlan:
+          type: ["string", "null"]
+          description: Audience intelligence blueprint (JSON string)
+        offerStrategy:
+          type: ["string", "null"]
+          description: Offer engineering blueprint (JSON string)
+        creativeBlueprint:
+          type: ["string", "null"]
+          description: Creative copy and angle blueprint (JSON string)
+        budgetPlan:
+          type: ["string", "null"]
+          description: Budget and testing plan (JSON string)
+        policyReview:
+          type: ["string", "null"]
+          description: Compliance and policy risk assessment (JSON string)
+        conversionReadinessScore:
+          type: ["integer", "null"]
+          description: 0-100 score
+        policyRiskScore:
+          type: ["integer", "null"]
+          description: 0-100 score
+        creativeStrengthScore:
+          type: ["integer", "null"]
+          description: 0-100 score
+        funnelFitScore:
+          type: ["integer", "null"]
+          description: 0-100 score
+        approvalStatus:
+          type: string
+          description: "draft | needs_revision | approved | published"
+        createdAt:
+          type: string
+
+    # ─── Campaign ────────────────────────────────────────────────────────────────
+    Campaign:
+      type: object
+      required: [id, businessId, campaignName, objective, status, createdAt]
+      properties:
+        id:
+          type: integer
+        businessId:
+          type: integer
+        metaCampaignId:
+          type: ["string", "null"]
+        blueprintId:
+          type: ["integer", "null"]
+        campaignName:
+          type: string
+        objective:
+          type: string
+          description: "AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES"
+        status:
+          type: string
+          description: "draft | review | approved | active | learning | optimizing | scaling | paused | completed"
+        budgetType:
+          type: ["string", "null"]
+          description: "daily | lifetime"
+        dailyBudget:
+          type: ["number", "null"]
+        lifetimeBudget:
+          type: ["number", "null"]
+        startDate:
+          type: ["string", "null"]
+        endDate:
+          type: ["string", "null"]
+        approvalStatus:
+          type: string
+          description: "pending | approved | rejected"
+        specialAdCategory:
+          type: ["boolean", "null"]
+        campaignBudgetOptimization:
+          type: ["boolean", "null"]
+        createdByAgent:
+          type: ["boolean", "null"]
+        approvedByUser:
+          type: ["boolean", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    CampaignInput:
+      type: object
+      required: [businessId, campaignName, objective]
+      properties:
+        businessId:
+          type: integer
+        blueprintId:
+          type: integer
+        campaignName:
+          type: string
+          minLength: 1
+        objective:
+          type: string
+        budgetType:
+          type: string
+        dailyBudget:
+          type: number
+        lifetimeBudget:
+          type: number
+        startDate:
+          type: string
+        endDate:
+          type: string
+        specialAdCategory:
+          type: boolean
+        campaignBudgetOptimization:
+          type: boolean
+
+    CampaignUpdate:
+      type: object
+      properties:
+        campaignName:
+          type: string
+        objective:
+          type: string
+        status:
+          type: string
+        budgetType:
+          type: string
+        dailyBudget:
+          type: number
+        lifetimeBudget:
+          type: number
+        startDate:
+          type: string
+        endDate:
+          type: string
+
+    # ─── Ad Set ──────────────────────────────────────────────────────────────────
+    AdSet:
+      type: object
+      required: [id, campaignId, adsetName, createdAt]
+      properties:
+        id:
+          type: integer
+        campaignId:
+          type: integer
+        metaAdsetId:
+          type: ["string", "null"]
+        adsetName:
+          type: string
+        audienceName:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        ageMin:
+          type: ["integer", "null"]
+        ageMax:
+          type: ["integer", "null"]
+        gender:
+          type: ["string", "null"]
+        language:
+          type: ["string", "null"]
+        interests:
+          type: ["string", "null"]
+          description: JSON stringified array of interests
+        customAudience:
+          type: ["string", "null"]
+        lookalikAudience:
+          type: ["string", "null"]
+        placement:
+          type: ["string", "null"]
+          description: "advantage_plus | manual"
+        optimizationEvent:
+          type: ["string", "null"]
+          description: "LEAD | PURCHASE | ADD_TO_CART | CONTACT"
+        attributionSetting:
+          type: ["string", "null"]
+        budget:
+          type: ["number", "null"]
+        conversionLocation:
+          type: ["string", "null"]
+          description: "WEBSITE | APP | MESSAGING | CALLS | LEADS"
+        createdAt:
+          type: string
+
+    AdSetInput:
+      type: object
+      required: [adsetName]
+      properties:
+        adsetName:
+          type: string
+          minLength: 1
+        audienceName:
+          type: string
+        location:
+          type: string
+        ageMin:
+          type: integer
+        ageMax:
+          type: integer
+        gender:
+          type: string
+        language:
+          type: string
+        interests:
+          type: string
+        placement:
+          type: string
+        optimizationEvent:
+          type: string
+        attributionSetting:
+          type: string
+        budget:
+          type: number
+        conversionLocation:
+          type: string
+
+    AdSetUpdate:
+      type: object
+      properties:
+        adsetName:
+          type: string
+        audienceName:
+          type: string
+        location:
+          type: string
+        ageMin:
+          type: integer
+        ageMax:
+          type: integer
+        gender:
+          type: string
+        language:
+          type: string
+        interests:
+          type: string
+        placement:
+          type: string
+        optimizationEvent:
+          type: string
+        attributionSetting:
+          type: string
+        budget:
+          type: number
+        conversionLocation:
+          type: string
+
+    # ─── Creative ────────────────────────────────────────────────────────────────
+    Creative:
+      type: object
+      required: [id, adsetId, adName, createdAt]
+      properties:
+        id:
+          type: integer
+        adsetId:
+          type: integer
+        adName:
+          type: string
+        format:
+          type: ["string", "null"]
+          description: "single_image | video | carousel | collection"
+        mediaUrl:
+          type: ["string", "null"]
+        primaryText:
+          type: ["string", "null"]
+        headline:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        cta:
+          type: ["string", "null"]
+        destinationUrl:
+          type: ["string", "null"]
+        utmParams:
+          type: ["string", "null"]
+        policyScore:
+          type: ["integer", "null"]
+          description: 0-100
+        creativeScore:
+          type: ["integer", "null"]
+          description: 0-100
+        angle:
+          type: ["string", "null"]
+          description: "problem_solution | benefit | testimonial | hard_selling | soft_selling | educational"
+        createdAt:
+          type: string
+
+    CreativeInput:
+      type: object
+      required: [adName]
+      properties:
+        adName:
+          type: string
+          minLength: 1
+        format:
+          type: string
+        mediaUrl:
+          type: string
+        primaryText:
+          type: string
+        headline:
+          type: string
+        description:
+          type: string
+        cta:
+          type: string
+        destinationUrl:
+          type: string
+        utmParams:
+          type: string
+        angle:
+          type: string
+
+    CreativeUpdate:
+      type: object
+      properties:
+        adName:
+          type: string
+        format:
+          type: string
+        mediaUrl:
+          type: string
+        primaryText:
+          type: string
+        headline:
+          type: string
+        description:
+          type: string
+        cta:
+          type: string
+        destinationUrl:
+          type: string
+        utmParams:
+          type: string
+        angle:
+          type: string
+
+    # ─── Approvals ────────────────────────────────────────────────────────────────
+    Approval:
+      type: object
+      required: [id, entityType, entityId, status, createdAt]
+      properties:
+        id:
+          type: integer
+        entityType:
+          type: string
+          description: "campaign | blueprint | adset | creative"
+        entityId:
+          type: integer
+        status:
+          type: string
+          description: "pending | approved | rejected"
+        reviewerNotes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        reviewedAt:
+          type: ["string", "null"]
+
+    ApprovalDecision:
+      type: object
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          description: "approved | rejected"
+        notes:
+          type: string
+
+    # ─── Agent Memory ─────────────────────────────────────────────────────────────
+    AgentMemory:
+      type: object
+      required: [id, businessId, createdAt]
+      properties:
+        id:
+          type: integer
+        businessId:
+          type: integer
+        winningAudience:
+          type: ["string", "null"]
+        winningCopy:
+          type: ["string", "null"]
+        winningHeadline:
+          type: ["string", "null"]
+        winningCta:
+          type: ["string", "null"]
+        winningOffer:
+          type: ["string", "null"]
+        failedPattern:
+          type: ["string", "null"]
+        policyIssue:
+          type: ["string", "null"]
+        optimizationHistory:
+          type: ["string", "null"]
+        learningSummary:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string

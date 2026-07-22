@@ -1,0 +1,1105 @@
+Baik, kita lanjutkan ke level yang lebih operasional: **bagaimana Research Blueprint diubah menjadi konfigurasi fitur aplikasi dan konfigurasi Meta Ads secara otomatis**.
+
+Bagian ini penting supaya framework tidak berhenti sebagai konsep, tetapi menjadi **mesin kerja aplikasi**.
+
+---
+
+# 16. Research-to-Ads Configuration Engine
+
+## 16.1 Definisi
+
+**Research-to-Ads Configuration Engine** adalah mesin yang menerjemahkan hasil riset menjadi konfigurasi campaign, ad set, creative, lead form, budget, dan optimasi Meta Ads.
+
+Dengan kata lain:
+
+> Riset tidak hanya menghasilkan dokumen, tetapi menghasilkan parameter yang bisa langsung dipakai oleh fitur aplikasi.
+> 
+
+---
+
+## 16.2 Alur Kerja Utama
+
+```mermaid
+flowchart TD
+    A[Research Blueprint] --> B[Decision Rule Engine]
+    B --> C[Campaign Config Generator]
+    B --> D[Audience Config Generator]
+    B --> E[Offer Config Generator]
+    B --> F[Creative Config Generator]
+    B --> G[Lead Form / Funnel Config Generator]
+    B --> H[Budget Config Generator]
+    B --> I[Policy Config Generator]
+
+    C --> J[Meta Ads Draft Blueprint]
+    D --> J
+    E --> J
+    F --> J
+    G --> J
+    H --> J
+    I --> J
+
+    J --> K[Human Review]
+    K --> L[Approved Ads Configuration]
+    L --> M[Meta Ads Execution]
+```
+
+---
+
+# 17. Decision Rule Engine
+
+## 17.1 Fungsi
+
+Decision Rule Engine adalah “otak aturan” yang membaca hasil riset dan menentukan konfigurasi iklan.
+
+Ia menjawab pertanyaan:
+
+1. Objective apa yang paling tepat?
+2. Audience mana yang harus diuji?
+3. Offer mana yang paling kuat?
+4. Creative angle apa yang cocok?
+5. CTA apa yang paling sesuai?
+6. Funnel apa yang harus dipakai?
+7. Budget awal berapa?
+8. Apa risiko kebijakan?
+9. Apa struktur testing terbaik?
+
+---
+
+# 18. Contoh Aturan Keputusan
+
+## 18.1 Aturan Berdasarkan Awareness Level
+
+| Awareness Level | Strategi Iklan | Objective | Creative Angle | CTA |
+| --- | --- | --- | --- | --- |
+| Unaware | Edukasi masalah | Awareness / Engagement | Problem education | Learn More |
+| Problem-aware | Edukasi solusi | Traffic / Leads | Solution discovery | Pelajari Solusi |
+| Solution-aware | Bandingkan solusi | Leads / Sales | Comparison / proof | Konsultasi |
+| Product-aware | Dorong tindakan | Leads / Sales | Offer / proof | Daftar / Hubungi |
+| Most-aware | Konversi langsung | Sales / Leads | Promo / urgency | Beli / Klaim |
+
+---
+
+## 18.2 Aturan Berdasarkan Harga Produk
+
+| Harga | Karakter Keputusan | Funnel Disarankan | CTA |
+| --- | --- | --- | --- |
+| Rendah | Impulsif | Direct sale | Buy Now |
+| Menengah | Perlu penjelasan | Landing page / WhatsApp | Learn More / Chat |
+| Tinggi | Perlu konsultasi | Lead form / consultation | Book Consultation |
+| Enterprise | Multi-step decision | Lead nurturing | Request Proposal |
+
+---
+
+## 18.3 Aturan Berdasarkan Kompleksitas Produk
+
+| Kompleksitas | Strategi |
+| --- | --- |
+| Sederhana | Copy singkat, visual produk, CTA langsung |
+| Menengah | Benefit + proof + FAQ |
+| Tinggi | Edukasi, webinar, konsultasi, lead magnet |
+| Regulatif | Compliance messaging + trust signal |
+
+---
+
+## 18.4 Aturan Berdasarkan Data Audience
+
+| Kondisi Data | Strategi Audience |
+| --- | --- |
+| Tidak ada data | Cold broad + interest testing |
+| Ada traffic website | Retargeting website visitors |
+| Ada customer list | Custom audience + lookalike |
+| Ada engagement IG/FB | Warm audience retargeting |
+| Ada purchase data | Lookalike buyer + sales objective |
+
+---
+
+## 18.5 Aturan Berdasarkan Funnel Readiness
+
+| Kesiapan Funnel | Rekomendasi |
+| --- | --- |
+| Landing page belum siap | Gunakan Lead Form / WhatsApp |
+| Landing page siap tapi pixel belum aktif | Traffic/Leads dulu, setup pixel |
+| Landing page + pixel aktif | Conversion/Sales |
+| CRM aktif | Leads + automated follow-up |
+| WhatsApp aktif | Click to WhatsApp / messaging campaign |
+
+---
+
+# 19. Configuration Mapping Matrix
+
+Bagian ini menjadi jembatan antara riset dan fitur aplikasi.
+
+## 19.1 Mapping Research ke Campaign Configuration
+
+| Research Signal | Campaign Config |
+| --- | --- |
+| Tujuan: awareness | Objective: Awareness |
+| Tujuan: kunjungan website | Objective: Traffic |
+| Tujuan: interaksi | Objective: Engagement |
+| Tujuan: prospek | Objective: Leads |
+| Tujuan: penjualan online | Objective: Sales |
+| Produk mahal | Leads / Consultation Funnel |
+| Produk murah | Sales / Direct Response |
+| Pasar dingin | Awareness / Engagement first |
+| Audience sudah hangat | Retargeting / Sales |
+| Banyak edukasi dibutuhkan | Leads dengan lead magnet |
+
+---
+
+## 19.2 Mapping Research ke Ad Set Configuration
+
+| Research Signal | Ad Set Config |
+| --- | --- |
+| Wilayah potensial | Location targeting |
+| Persona dominan | Audience cluster |
+| Usia pembeli | Age range |
+| Bahasa pasar | Language |
+| Interest relevan | Detailed targeting |
+| Existing customer | Custom audience |
+| Similar buyer | Lookalike audience |
+| Segment B2B | Job role / industry interest |
+| Segment lokal | Radius/location targeting |
+| Audience terlalu luas | Segmentasi ad set |
+| Audience terlalu sempit | Broad/Advantage targeting |
+
+---
+
+## 19.3 Mapping Research ke Creative Configuration
+
+| Research Signal | Creative Config |
+| --- | --- |
+| Pain point kuat | Problem-solution hook |
+| Benefit jelas | Benefit-led copy |
+| Banyak objection | Objection-handling copy |
+| Butuh bukti | Testimonial/proof creative |
+| Produk visual | Image/video demo |
+| Produk kompleks | Explainer video/carousel |
+| Kompetitor generik | Differentiation angle |
+| Trust rendah | Trust signal creative |
+| Urgency valid | Limited-time offer copy |
+| Audience cold | Educational creative |
+| Audience hot | Offer-driven creative |
+
+---
+
+## 19.4 Mapping Research ke Lead Form Configuration
+
+| Research Signal | Lead Form Config |
+| --- | --- |
+| Lead volume prioritas | Form pendek |
+| Lead quality prioritas | Form dengan qualifying question |
+| Produk mahal | Tambahkan budget/need question |
+| B2B | Tambahkan nama perusahaan/jabatan |
+| Lokasi penting | Tambahkan kota/provinsi |
+| Konsultasi | Tambahkan jadwal/kebutuhan |
+| Banyak leads tidak valid | Tambahkan pertanyaan filter |
+| Follow-up WhatsApp | Nomor HP wajib |
+
+---
+
+## 19.5 Mapping Research ke Budget Configuration
+
+| Research Signal | Budget Config |
+| --- | --- |
+| Data minim | Budget testing kecil-menengah |
+| Banyak audience cluster | Budget dibagi per cluster |
+| Creative belum terbukti | Budget A/B testing |
+| Offer sudah terbukti | Budget scale bertahap |
+| Produk margin tinggi | Budget test lebih agresif |
+| Funnel belum siap | Budget dibatasi dulu |
+| Policy risk tinggi | Jangan publish sebelum revisi |
+| Seasonality tinggi | Budget dinaikkan saat momentum |
+
+---
+
+# 20. Ads Blueprint Generator
+
+## 20.1 Fungsi
+
+Setelah Decision Rule Engine bekerja, sistem menghasilkan **Ads Blueprint**.
+
+Ads Blueprint adalah dokumen konfigurasi lengkap yang dapat digunakan untuk:
+
+1. review manusia,
+2. setup manual di Meta Ads Manager,
+3. export ke spreadsheet,
+4. generate payload Meta Ads API,
+5. disimpan sebagai template campaign,
+6. digunakan ulang untuk campaign berikutnya.
+
+---
+
+# 21. Struktur Ads Blueprint Final
+
+```markdown
+# Meta Ads Blueprint
+
+## 1. Research Summary
+- Produk:
+- Pasar:
+- Audience:
+- Kompetitor:
+- Offer:
+- Funnel:
+- Risiko:
+
+## 2. Strategic Recommendation
+- Campaign objective:
+- Funnel strategy:
+- Main audience:
+- Main offer:
+- Main creative angle:
+- Conversion path:
+
+## 3. Campaign Configuration
+- Campaign name:
+- Buying type:
+- Objective:
+- Special ad category:
+- Campaign budget optimization:
+- Budget type:
+- Daily/lifetime budget:
+- Schedule:
+- A/B test:
+
+## 4. Ad Set Configuration
+- Ad set name:
+- Conversion location:
+- Performance goal:
+- Pixel/event:
+- Audience:
+- Location:
+- Age:
+- Gender:
+- Language:
+- Detailed targeting:
+- Custom audience:
+- Lookalike audience:
+- Placements:
+- Optimization event:
+- Attribution setting:
+
+## 5. Creative Configuration
+- Ad name:
+- Format:
+- Media direction:
+- Primary text:
+- Headline:
+- Description:
+- CTA:
+- Destination:
+- Display link:
+- URL parameters:
+- Creative variant:
+
+## 6. Lead Form / Funnel Configuration
+- Form name:
+- Intro:
+- Questions:
+- Privacy policy:
+- Thank you screen:
+- CTA after submit:
+- Landing page notes:
+
+## 7. Budget & Testing Plan
+- Testing duration:
+- Number of ad sets:
+- Number of creatives:
+- Budget per ad set:
+- KPI threshold:
+- Pause rule:
+- Scale rule:
+- Refresh rule:
+
+## 8. Policy & Compliance Review
+- Risk score:
+- Risky wording:
+- Required revision:
+- Safer alternative:
+- Approval status:
+
+## 9. Human Approval
+- Reviewer:
+- Decision:
+- Notes:
+- Approved date:
+
+## 10. Execution Notes
+- Setup checklist:
+- Tracking checklist:
+- Follow-up checklist:
+- Monitoring schedule:
+```
+
+---
+
+# 22. Blueprint-to-Feature Flow dalam Aplikasi
+
+## 22.1 Research Center ke Campaign Builder
+
+Research Center menghasilkan:
+
+- objective recommendation,
+- funnel stage,
+- awareness level,
+- market timing.
+
+Lalu Campaign Builder mengisi otomatis:
+
+- campaign objective,
+- campaign name,
+- buying type,
+- budget type,
+- schedule,
+- A/B testing mode.
+
+---
+
+## 22.2 Research Center ke Audience Builder
+
+Audience Research menghasilkan:
+
+- persona,
+- location,
+- age,
+- language,
+- interest,
+- behavior,
+- funnel stage.
+
+Lalu Audience Builder membuat:
+
+- cold audience,
+- warm audience,
+- hot audience,
+- exclusion audience,
+- retargeting audience,
+- lookalike audience jika data tersedia.
+
+---
+
+## 22.3 Research Center ke Creative Studio
+
+Product, audience, competitor, dan offer research menghasilkan:
+
+- pain point,
+- benefit,
+- proof,
+- objection,
+- differentiator,
+- hook,
+- emotional trigger,
+- CTA.
+
+Lalu Creative Studio membuat:
+
+- primary text,
+- headline,
+- description,
+- video script,
+- image direction,
+- carousel card,
+- copy variants,
+- policy-safe wording.
+
+---
+
+## 22.4 Research Center ke Lead Form Builder
+
+Audience dan funnel research menghasilkan:
+
+- jenis lead yang dicari,
+- kualitas lead,
+- pertanyaan filter,
+- CTA lanjutan,
+- follow-up path.
+
+Lalu Lead Form Builder membuat:
+
+- form name,
+- intro,
+- field wajib,
+- custom question,
+- thank you message,
+- WhatsApp follow-up.
+
+---
+
+## 22.5 Research Center ke Budget Planner
+
+Market, audience, funnel, dan offer research menghasilkan:
+
+- tingkat kompetisi,
+- kesiapan funnel,
+- kekuatan offer,
+- jumlah variasi testing.
+
+Lalu Budget Planner membuat:
+
+- daily budget,
+- testing budget,
+- budget split,
+- scale rule,
+- pause rule,
+- learning phase expectation.
+
+---
+
+# 23. Contoh Kasus Transformasi Riset ke Blueprint
+
+## 23.1 Input Riset
+
+Misalnya produk:
+
+> Pelatihan K3 untuk perusahaan konstruksi.
+> 
+
+Hasil riset:
+
+- target: HRD, HSE Manager, Project Manager,
+- lokasi: Jabodetabek,
+- pain point: butuh pelatihan K3 untuk compliance dan keselamatan proyek,
+- produk bersifat B2B,
+- keputusan pembelian tidak impulsif,
+- butuh konsultasi,
+- harga menengah-tinggi,
+- kompetitor banyak memakai pesan “sertifikasi”,
+- celah positioning: pelatihan praktis berbasis kebutuhan proyek,
+- funnel terbaik: WhatsApp consultation / Lead Form,
+- objective: Leads,
+- creative angle: compliance + practical safety + project readiness.
+
+---
+
+## 23.2 Output Campaign Blueprint
+
+| Komponen | Rekomendasi |
+| --- | --- |
+| Objective | Leads |
+| Conversion Location | Instant Form / WhatsApp |
+| Audience | HRD, HSE, Project Manager, kontraktor |
+| Location | Jakarta, Bekasi, Depok, Tangerang |
+| Age | 25–55 |
+| Creative Angle | Pelatihan K3 praktis untuk proyek konstruksi |
+| Offer | Konsultasi kebutuhan pelatihan gratis |
+| CTA | Hubungi Kami / Daftar Konsultasi |
+| Budget | Rp150.000/hari untuk testing |
+| Testing | 3 ad set × 2 creative |
+| Lead Form | Nama, perusahaan, jabatan, WhatsApp, kebutuhan pelatihan |
+| Policy Risk | Rendah-sedang, hindari klaim berlebihan |
+
+---
+
+## 23.3 Output Creative Blueprint
+
+### Primary Text 1 — Problem-Aware
+
+> Banyak perusahaan konstruksi membutuhkan pelatihan K3 yang tidak hanya formalitas, tetapi benar-benar relevan dengan kondisi proyek.
+> 
+
+> 
+> 
+
+> Kami membantu tim HRD, HSE, dan manajemen proyek menyusun kebutuhan pelatihan K3 yang lebih praktis, terarah, dan sesuai konteks pekerjaan.
+> 
+
+> 
+> 
+
+> Konsultasikan kebutuhan pelatihan K3 perusahaan Anda sekarang.
+> 
+
+### Headline
+
+> Pelatihan K3 untuk Proyek Konstruksi
+> 
+
+### Description
+
+> Praktis, terarah, dan sesuai kebutuhan perusahaan.
+> 
+
+### CTA
+
+> Hubungi Kami
+> 
+
+---
+
+## 23.4 Output Lead Form Blueprint
+
+| Field | Isi |
+| --- | --- |
+| Form Name | Konsultasi Pelatihan K3 Konstruksi |
+| Intro | Ceritakan kebutuhan pelatihan K3 perusahaan Anda |
+| Full Name | Wajib |
+| Phone Number | Wajib |
+| Email | Opsional |
+| Company Name | Wajib |
+| Position | Wajib |
+| Training Need | Custom question |
+| Location | Custom question |
+| Thank You Screen | Tim kami akan menghubungi Anda untuk konsultasi kebutuhan pelatihan |
+| CTA | Hubungi via WhatsApp |
+
+---
+
+# 24. Human-in-the-Loop di Tahap Riset
+
+Karena riset bisa memengaruhi seluruh konfigurasi iklan, perlu ada approval gate.
+
+## Gate 1 — Research Validation
+
+Sebelum blueprint iklan dibuat, pengguna harus memvalidasi:
+
+- apakah persona benar,
+- apakah pain point benar,
+- apakah kompetitor benar,
+- apakah offer sesuai,
+- apakah lokasi target benar,
+- apakah CTA sesuai proses bisnis.
+
+Status:
+
+- Draft Research
+- Need More Data
+- Validated
+- Rejected
+- Ready for Ads Blueprint
+
+---
+
+## Gate 2 — Ads Blueprint Approval
+
+Sebelum campaign dikonfigurasi:
+
+- objective,
+- audience,
+- budget,
+- creative,
+- lead form,
+- CTA,
+- funnel,
+- policy risk.
+
+Status:
+
+- Draft Ads Blueprint
+- Need Revision
+- Approved for Setup
+- Approved for Publish
+
+---
+
+# 25. Research Memory dan Learning Loop
+
+Setiap hasil riset harus disimpan agar aplikasi semakin cerdas.
+
+## 25.1 Research Memory
+
+Menyimpan:
+
+- persona yang pernah digunakan,
+- audience yang berhasil,
+- offer yang berhasil,
+- headline yang menang,
+- CTA yang menang,
+- competitor pattern,
+- landing page issue,
+- objection paling sering,
+- policy issue yang pernah muncul.
+
+---
+
+## 25.2 Performance Feedback ke Research
+
+Setelah iklan berjalan, data performa kembali memperbarui riset.
+
+```mermaid
+flowchart TD
+    A[Campaign Performance] --> B[Performance Analyst Agent]
+    B --> C[Learning Memory]
+    C --> D[Research Update]
+    D --> E[New Research Blueprint]
+    E --> F[New Ads Blueprint]
+```
+
+Contoh:
+
+| Data Performa | Update ke Riset |
+| --- | --- |
+| CTR rendah | Hook tidak kuat / audience kurang tepat |
+| Banyak klik tapi sedikit lead | Landing page atau form bermasalah |
+| CPL tinggi | Offer kurang kuat |
+| Lead tidak berkualitas | Pertanyaan form kurang menyaring |
+| Frequency tinggi | Audience terlalu sempit |
+| ROAS rendah | Funnel/closing perlu diperbaiki |
+
+---
+
+# 26. Data Model Lengkap Research-to-Ads
+
+## 26.1 Entity Utama
+
+```
+Business
+ └── Product
+      └── Research Project
+           ├── Product Research
+           ├── Market Research
+           ├── Audience Research
+           ├── Competitor Research
+           ├── Offer Research
+           ├── Creative Research
+           ├── Funnel Research
+           └── Research Blueprint
+                └── Ads Blueprint
+                     ├── Campaign Config
+                     ├── Ad Set Config
+                     ├── Creative Config
+                     ├── Lead Form Config
+                     ├── Budget Config
+                     └── Policy Review
+                          └── Campaign Execution
+                               └── Performance Data
+                                    └── Optimization Blueprint
+```
+
+---
+
+## 26.2 Status Lifecycle
+
+```
+Research Draft
+→ Research In Progress
+→ Research Completed
+→ Research Validated
+→ Ads Blueprint Generated
+→ Ads Blueprint Reviewed
+→ Approved for Setup
+→ Approved for Publish
+→ Published
+→ Learning
+→ Optimized
+→ Scaled
+→ Archived
+```
+
+---
+
+# 27. Format Konfigurasi JSON untuk Aplikasi
+
+Agar blueprint bisa dipakai oleh developer, sistem dapat menghasilkan struktur seperti ini:
+
+```json
+{
+  "research_blueprint": {
+    "product": {
+      "name": "Pelatihan K3 Konstruksi",
+      "category": "B2B Training",
+      "core_problem": "Perusahaan konstruksi membutuhkan pelatihan K3 yang relevan dan praktis",
+      "core_benefit": "Meningkatkan kesiapan tim proyek dalam penerapan K3",
+      "differentiator": "Pendekatan praktis berbasis kebutuhan proyek",
+      "proof": ["testimoni", "portfolio", "sertifikasi jika tersedia"],
+      "objections": ["harga", "jadwal", "relevansi materi"]
+    },
+    "audience": {
+      "personas": [
+        {
+          "name": "HSE Manager",
+          "age_range": "28-50",
+          "location": ["Jakarta", "Bekasi", "Tangerang", "Depok"],
+          "pain_points": ["kepatuhan K3", "risiko kecelakaan", "kebutuhan pelatihan tim"],
+          "buying_triggers": ["audit", "proyek baru", "insiden kerja", "kebutuhan sertifikasi"],
+          "funnel_stage": "problem-aware"
+        }
+      ]
+    },
+    "offer": {
+      "main_offer": "Konsultasi kebutuhan pelatihan K3 gratis",
+      "cta": "Hubungi Kami",
+      "urgency": "jadwal pelatihan terbatas per bulan",
+      "risk_reversal": "konsultasi awal tanpa biaya"
+    }
+  },
+  "ads_blueprint": {
+    "campaign": {
+      "objective": "Leads",
+      "buying_type": "Auction",
+      "budget_type": "Daily",
+      "daily_budget": 150000,
+      "special_ad_category": false
+    },
+    "ad_sets": [
+      {
+        "name": "HSE-HRD-Jabodetabek",
+        "conversion_location": "WhatsApp or Instant Form",
+        "location": ["Jakarta", "Bekasi", "Tangerang", "Depok"],
+        "age_min": 25,
+        "age_max": 55,
+        "audience_type": "Cold Interest",
+        "interests": ["Keselamatan dan Kesehatan Kerja", "Konstruksi", "Manajemen Proyek"],
+        "placements": "Advantage+ Placements",
+        "optimization_event": "Lead"
+      }
+    ],
+    "creatives": [
+      {
+        "format": "Single Image",
+        "angle": "Problem-Solution",
+        "primary_text": "Banyak perusahaan konstruksi membutuhkan pelatihan K3 yang tidak hanya formalitas, tetapi benar-benar relevan dengan kondisi proyek.",
+        "headline": "Pelatihan K3 untuk Proyek Konstruksi",
+        "description": "Praktis, terarah, dan sesuai kebutuhan perusahaan.",
+        "cta": "Contact Us"
+      }
+    ],
+    "lead_form": {
+      "name": "Konsultasi Pelatihan K3 Konstruksi",
+      "fields": ["Full Name", "Phone Number", "Company Name", "Position", "Training Need"],
+      "thank_you_message": "Tim kami akan menghubungi Anda untuk konsultasi kebutuhan pelatihan."
+    },
+    "testing_plan": {
+      "duration_days": 7,
+      "ad_set_count": 3,
+      "creative_per_ad_set": 2,
+      "pause_rule": "Pause creative if CTR is low and CPL exceeds target after sufficient data",
+      "scale_rule": "Increase budget gradually on winning ad set"
+    }
+  }
+}
+```
+
+---
+
+# 28. API/Integration Readiness
+
+Untuk integrasi dengan Meta Ads API, blueprint perlu disiapkan agar bisa menjadi payload.
+
+## 28.1 Level Campaign
+
+Field yang perlu disiapkan:
+
+- account_id,
+- name,
+- objective,
+- status,
+- special_ad_categories,
+- buying_type,
+- daily_budget/lifetime_budget jika campaign budget optimization digunakan.
+
+---
+
+## 28.2 Level Ad Set
+
+Field yang perlu disiapkan:
+
+- campaign_id,
+- name,
+- billing_event,
+- optimization_goal,
+- bid_strategy,
+- daily_budget/lifetime_budget,
+- targeting,
+- promoted_object,
+- start_time,
+- end_time,
+- status.
+
+---
+
+## 28.3 Level Ad Creative
+
+Field yang perlu disiapkan:
+
+- page_id,
+- instagram_actor_id,
+- object_story_spec,
+- link_data,
+- message,
+- headline,
+- description,
+- call_to_action,
+- image_hash/video_id,
+- url_tags.
+
+---
+
+## 28.4 Level Ad
+
+Field yang perlu disiapkan:
+
+- name,
+- adset_id,
+- creative_id,
+- status.
+
+---
+
+# 29. Modul Anti-Fabrikasi dalam Riset
+
+Ini penting agar AI tidak membuat data palsu.
+
+## Prinsip
+
+AI boleh:
+
+- menyimpulkan,
+- memberi hipotesis,
+- memberi rekomendasi,
+- membuat asumsi yang ditandai jelas.
+
+AI tidak boleh:
+
+- mengarang data pasar,
+- mengarang testimoni,
+- mengarang angka penjualan,
+- mengarang ROAS,
+- mengarang kompetitor,
+- mengarang klaim “terbukti”.
+
+---
+
+## Label Data
+
+Setiap hasil riset harus diberi label:
+
+| Label | Arti |
+| --- | --- |
+| User-provided | Diberikan pengguna |
+| Internal data | Dari data aplikasi/CRM |
+| Public research | Dari sumber publik |
+| Platform data | Dari Meta Ads/Pixel |
+| AI inference | Kesimpulan AI |
+| Needs validation | Perlu validasi manusia |
+
+---
+
+# 30. Research Evidence Table
+
+Setiap Research Blueprint sebaiknya memiliki tabel bukti.
+
+| Temuan | Sumber | Label | Confidence | Dampak ke Ads |
+| --- | --- | --- | --- | --- |
+| Audience utama HRD/HSE | Input pengguna | User-provided | Tinggi | Targeting & copy |
+| Produk butuh konsultasi | Analisis AI | AI inference | Sedang | CTA konsultasi |
+| Kompetitor fokus sertifikasi | Riset kompetitor | Public research | Sedang | Differentiation angle |
+| Landing page belum siap | Audit funnel | Internal review | Tinggi | Gunakan lead form |
+
+---
+
+# 31. Modul Socratic Research Interview
+
+Agar riset berkualitas, aplikasi bisa memakai gaya wawancara Socratic.
+
+## Fungsi
+
+Jika data belum cukup, AI tidak langsung membuat iklan, tetapi bertanya:
+
+- Apa bukti bahwa audience ini paling potensial?
+- Mengapa pelanggan memilih produk Anda dibanding kompetitor?
+- Apa keberatan yang paling sering muncul?
+- Apa yang terjadi jika pelanggan tidak membeli solusi ini?
+- Apa indikator bahwa lead ini berkualitas?
+- Apa proses follow-up setelah lead masuk?
+
+---
+
+## Contoh Alur Socratic
+
+```
+AI:
+Siapa pelanggan terbaik Anda saat ini?
+
+User:
+Perusahaan konstruksi menengah.
+
+AI:
+Apa ciri perusahaan konstruksi menengah yang paling sering membeli?
+
+User:
+Mereka biasanya sedang mulai proyek baru dan butuh pelatihan K3 cepat.
+
+AI:
+Apakah pemicu pembelian lebih sering karena audit, proyek baru, atau insiden kerja?
+
+User:
+Paling sering proyek baru dan kebutuhan dokumen.
+
+AI:
+Berarti campaign sebaiknya menarget pesan “kesiapan proyek dan kebutuhan pelatihan K3 yang cepat dan praktis”.
+```
+
+---
+
+# 32. Rekomendasi Struktur MVP Baru
+
+Dengan modul riset, MVP sebaiknya tidak langsung dimulai dari Ads Builder.
+
+## MVP 1 — Research Blueprint Generator
+
+Fitur:
+
+- research intake form,
+- product research,
+- audience research,
+- offer research,
+- competitor notes,
+- funnel readiness check,
+- research score,
+- research blueprint export.
+
+---
+
+## MVP 2 — Ads Blueprint Generator
+
+Fitur:
+
+- campaign recommendation,
+- audience mapping,
+- creative direction,
+- lead form blueprint,
+- budget testing plan,
+- policy check,
+- approval gate.
+
+---
+
+## MVP 3 — Meta Ads Setup Assistant
+
+Fitur:
+
+- field mapping ke Meta Ads,
+- campaign draft,
+- ad set draft,
+- creative draft,
+- export JSON/CSV,
+- manual setup checklist.
+
+---
+
+## MVP 4 — Meta Ads API Integration
+
+Fitur:
+
+- connect Meta Ads account,
+- create campaign draft,
+- publish with approval,
+- sync performance,
+- store campaign ID.
+
+---
+
+## MVP 5 — Optimization & Learning Agent
+
+Fitur:
+
+- performance monitoring,
+- optimization recommendation,
+- refresh blueprint,
+- winning pattern memory,
+- retargeting blueprint,
+- scaling plan.
+
+---
+
+# 33. Formula Besar Framework
+
+Framework ini bisa dirumuskan sebagai:
+
+```
+Research Intelligence
++ Agentic Reasoning
++ Meta Ads Field Mapping
++ Human Approval
++ Performance Learning
+= Conversion-Oriented Facebook Ads Blueprint
+```
+
+Atau dalam bahasa produk:
+
+> **Dari riset pasar menjadi konfigurasi iklan Meta Ads yang siap dieksekusi.**
+> 
+
+---
+
+# 34. Nama Framework yang Lebih Tepat
+
+Beberapa opsi nama:
+
+1. **Research-to-Ads Blueprint Framework**
+2. **Meta Ads Research Intelligence Framework**
+3. **AdClaw Research-to-Conversion Framework**
+4. **MultiClaw Meta Ads Blueprint Engine**
+5. **OpenClaw Research-to-Campaign Pipeline**
+6. **Conversion Blueprint Operating System**
+7. **Facebook Ads Research-to-Execution Framework**
+
+Rekomendasi paling kuat:
+
+> **AdClaw AI — Research-to-Conversion Meta Ads Framework**
+> 
+
+Karena mencakup:
+
+- riset,
+- blueprint,
+- konfigurasi,
+- eksekusi,
+- optimasi,
+- pembelajaran.
+
+---
+
+# 35. Definisi Final Framework
+
+Definisi konseptualnya:
+
+> **AdClaw AI Research-to-Conversion Framework** adalah framework Agentic AI berbasis MultiClaw–OpenClaw yang melakukan riset produk, pasar, audience, kompetitor, offer, creative, dan funnel, lalu mengubah hasil riset tersebut menjadi blueprint konfigurasi Meta Ads yang siap direview, dieksekusi, dimonitor, dan dioptimalkan untuk menghasilkan konversi.
+> 
+
+---
+
+# 36. Kalimat Positioning Produk
+
+Versi pendek:
+
+> **AdClaw AI membantu bisnis mengubah riset pasar menjadi blueprint iklan Facebook yang siap menghasilkan konversi.**
+> 
+
+Versi lebih kuat:
+
+> **AdClaw AI bukan sekadar pembuat iklan, tetapi mesin riset, strategi, konfigurasi, dan optimasi Meta Ads berbasis Agentic AI.**
+> 
+
+Versi enterprise:
+
+> **AdClaw AI adalah sistem operasi periklanan digital berbasis Agentic AI yang mengorkestrasi riset, perencanaan campaign, konfigurasi Meta Ads, human approval, dan performance learning dalam satu pipeline terintegrasi.**
+> 
+
+---
+
+# 37. Kesimpulan Lanjutan
+
+Dengan integrasi riset, aplikasi ini memiliki nilai yang jauh lebih tinggi.
+
+Karena banyak kegagalan iklan bukan terjadi di Ads Manager, tetapi terjadi **sebelum iklan dibuat**, yaitu karena:
+
+- produk belum jelas,
+- audience belum jelas,
+- offer lemah,
+- positioning generik,
+- copy tidak berbasis pain point,
+- landing page tidak siap,
+- tidak ada tracking,
+- tidak ada follow-up,
+- tidak ada validasi riset.
+
+Maka aplikasi ini harus dimulai dari:
+
+> **Research Center → Blueprint Center → Ads Builder → Approval Center → Performance Learning Center**
+> 
+
+Inilah yang menjadikan sistem ini lebih dari sekadar “tool iklan”, melainkan:
+
+> **framework lengkap untuk menghasilkan blueprint beriklan di Facebook/Meta Ads berbasis riset dan Agentic AI.**
+>
