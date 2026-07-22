@@ -12,6 +12,8 @@ export interface Campaign {
   /** @nullable */
   metaCampaignId?: string | null;
   /** @nullable */
+  googleCampaignId?: string | null;
+  /** @nullable */
   blueprintId?: number | null;
   campaignName: string;
   /** AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES */

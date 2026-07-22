@@ -15,7 +15,7 @@ import { PLATFORM_CONFIG, type AdPlatform } from "@/components/platform-badge";
 
 const PLATFORMS: { value: AdPlatform; description: string; available: boolean }[] = [
   { value: "meta", description: "Facebook, Instagram, WhatsApp CTWA", available: true },
-  { value: "google", description: "Search, Display, Shopping, YouTube", available: false },
+  { value: "google", description: "Search, Display, Shopping, YouTube", available: true },
   { value: "tiktok", description: "In-Feed, TopView, Spark Ads", available: false },
   { value: "linkedin", description: "Sponsored Content, Lead Gen Forms", available: false },
 ];
@@ -66,6 +66,7 @@ const OBJECTIVES = [
   { value: "ENGAGEMENT", label: "Engagement" },
   { value: "SALES", label: "Sales / Conversions" },
   { value: "APP_PROMOTION", label: "App Promotion" },
+  { value: "YOUTUBE_VIDEO", label: "YouTube Video (TrueView)", googleOnly: true },
 ];
 
 export default function CampaignsNew() {
@@ -261,7 +262,7 @@ export default function CampaignsNew() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {OBJECTIVES.map(o => (
+                    {OBJECTIVES.filter(o => !(o as {googleOnly?: boolean}).googleOnly || form.platform === "google").map(o => (
                       <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
                     ))}
                   </SelectContent>

@@ -234,11 +234,49 @@ export interface PipelineRunDetail {
   completedAt?: string | null;
 }
 
+export interface GoogleValidationResult {
+  valid: boolean;
+  /** @nullable */
+  customerId?: string | null;
+  /** @nullable */
+  currencyCode?: string | null;
+  /** @nullable */
+  error?: string | null;
+}
+
+export interface GoogleCampaignInsight {
+  googleCampaignId: string;
+  campaignName: string;
+  impressions: number;
+  clicks: number;
+  /** Click-through rate (0–1) */
+  ctr: number;
+  /** Average cost-per-click in account currency */
+  averageCpc: number;
+  conversions: number;
+  /** Total spend in account currency */
+  spend: number;
+  dateStart: string;
+  dateStop: string;
+}
+
+export interface GooglePushResult {
+  success: boolean;
+  message: string;
+  googleCampaignId: string;
+  /** @nullable */
+  adGroupId?: string | null;
+  /** @nullable */
+  note?: string | null;
+}
+
 export interface Campaign {
   id: number;
   businessId: number;
   /** @nullable */
   metaCampaignId?: string | null;
+  /** @nullable */
+  googleCampaignId?: string | null;
   /** @nullable */
   blueprintId?: number | null;
   campaignName: string;
@@ -673,6 +711,11 @@ datePreset?: string;
 };
 
 export type GetMetaCampaignInsightsParams = {
+campaignId: number;
+datePreset?: string;
+};
+
+export type GetGoogleCampaignInsightsParams = {
 campaignId: number;
 datePreset?: string;
 };

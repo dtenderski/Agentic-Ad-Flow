@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Target, Edit, Play, Pause, ExternalLink, Settings, GitMerge, FileImage, Loader2, Zap, Globe, Lock } from "lucide-react";
-import { SiFacebook, SiInstagram, SiWhatsapp } from "react-icons/si";
-import { useGetCampaign, useListAdSets, useListCreatives, getGetCampaignQueryKey, getListAdSetsQueryKey, usePushToMeta, useUpdateAdSet, useGetMetaCampaignInsights, getGetMetaCampaignInsightsQueryKey } from "@workspace/api-client-react";
+import { SiFacebook, SiInstagram, SiWhatsapp, SiGoogle } from "react-icons/si";
+import { useGetCampaign, useListAdSets, useListCreatives, getGetCampaignQueryKey, getListAdSetsQueryKey, usePushToMeta, usePushToGoogle, useUpdateAdSet, useGetMetaCampaignInsights, getGetMetaCampaignInsightsQueryKey, useGetGoogleCampaignInsights, getGetGoogleCampaignInsightsQueryKey } from "@workspace/api-client-react";
 import { PlatformBadge, PLATFORM_CONFIG } from "@/components/platform-badge";
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -61,23 +61,45 @@ export default function CampaignDetail() {
   });
 
   const pushToMeta = usePushToMeta();
+  const pushToGoogle = usePushToGoogle();
 
   const handlePushToMeta = () => {
     pushToMeta.mutate(
       { campaignId: id },
       {
-        onSuccess: (result) => {
+        onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getGetCampaignQueryKey(id) });
           toast({
-            title: "Success",
-            description: `Successfully pushed to Meta Ads Manager. Campaign is live in PAUSED state pending review.`,
-            variant: "default",
+            title: "Pushed to Meta Ads",
+            description: "Campaign is live in PAUSED state — review in Meta Ads Manager.",
           });
         },
-        onError: (error: any) => {
+        onError: (error: unknown) => {
           toast({
             title: "Error pushing to Meta",
-            description: error.message || "Failed to push campaign to Meta Ads.",
+            description: (error as Error).message || "Failed to push campaign to Meta Ads.",
+            variant: "destructive",
+          });
+        }
+      }
+    );
+  };
+
+  const handlePushToGoogle = () => {
+    pushToGoogle.mutate(
+      { campaignId: id },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getGetCampaignQueryKey(id) });
+          toast({
+            title: "Pushed to Google Ads",
+            description: "Campaign created in PAUSED state. Update ad copy and final URL in Google Ads Manager.",
+          });
+        },
+        onError: (error: unknown) => {
+          toast({
+            title: "Error pushing to Google",
+            description: (error as Error).message || "Failed to push campaign to Google Ads.",
             variant: "destructive",
           });
         }
@@ -126,12 +148,38 @@ export default function CampaignDetail() {
         </div>
         
         <div className="flex items-center gap-3">
-          {campaign.approvalStatus === "approved" && !campaign.metaCampaignId && (() => {
+          {campaign.approvalStatus === "approved" && (() => {
             const platform = (campaign.platform ?? "meta") as import("@/components/platform-badge").AdPlatform;
             const config = PLATFORM_CONFIG[platform] ?? PLATFORM_CONFIG.meta;
             const Icon = config.Icon;
-            const isMeta = platform === "meta";
-            if (!isMeta) {
+
+            if (platform === "meta" && !campaign.metaCampaignId) {
+              return (
+                <Button
+                  onClick={handlePushToMeta}
+                  disabled={pushToMeta.isPending}
+                  className="gap-2 bg-orange-500 hover:bg-orange-600 text-white border-transparent"
+                >
+                  {pushToMeta.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Icon className="w-4 h-4" />}
+                  Push to Meta Ads
+                </Button>
+              );
+            }
+
+            if (platform === "google" && !campaign.googleCampaignId) {
+              return (
+                <Button
+                  onClick={handlePushToGoogle}
+                  disabled={pushToGoogle.isPending}
+                  className="gap-2 bg-red-500 hover:bg-red-600 text-white border-transparent"
+                >
+                  {pushToGoogle.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Icon className="w-4 h-4" />}
+                  Push to Google Ads
+                </Button>
+              );
+            }
+
+            if (platform !== "meta" && platform !== "google" && !campaign.metaCampaignId) {
               return (
                 <Button disabled className="gap-2 opacity-60" title="API integration coming soon">
                   <Lock className="w-4 h-4" />
@@ -139,16 +187,8 @@ export default function CampaignDetail() {
                 </Button>
               );
             }
-            return (
-              <Button
-                onClick={handlePushToMeta}
-                disabled={pushToMeta.isPending}
-                className="gap-2 bg-orange-500 hover:bg-orange-600 text-white border-transparent"
-              >
-                {pushToMeta.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Icon className="w-4 h-4" />}
-                Push to Meta Ads
-              </Button>
-            );
+
+            return null;
           })()}
 
           {campaign.metaCampaignId && (
@@ -157,14 +197,27 @@ export default function CampaignDetail() {
               {campaign.metaCampaignId}
             </Badge>
           )}
-          
+          {campaign.googleCampaignId && (
+            <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20 px-3 py-1 flex items-center gap-2">
+              <SiGoogle className="w-3 h-3" />
+              {campaign.googleCampaignId}
+            </Badge>
+          )}
+
           <Button variant="outline" size="icon">
             <Settings className="w-4 h-4" />
           </Button>
           {(campaign.platform ?? "meta") === "meta" && (
             <Button variant="outline" className="gap-2" asChild>
               <a href={campaign.metaCampaignId ? `https://adsmanager.facebook.com/adsmanager/manage/campaigns?campaign_id=${campaign.metaCampaignId}` : "https://adsmanager.facebook.com"} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="w-4 h-4" /> Open in Ads Manager
+                <ExternalLink className="w-4 h-4" /> Open in Meta Ads Manager
+              </a>
+            </Button>
+          )}
+          {(campaign.platform ?? "meta") === "google" && (
+            <Button variant="outline" className="gap-2" asChild>
+              <a href="https://ads.google.com" target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="w-4 h-4" /> Open in Google Ads
               </a>
             </Button>
           )}
@@ -187,7 +240,16 @@ export default function CampaignDetail() {
         {campaign.metaCampaignId && (campaign.platform ?? "meta") === "meta" && (
           <LiveMetaPerformanceCard campaignId={id} metaCampaignId={campaign.metaCampaignId} />
         )}
-        {(campaign.platform ?? "meta") !== "meta" && (
+        {campaign.googleCampaignId && campaign.platform === "google" && (
+          <LiveGooglePerformanceCard campaignId={id} googleCampaignId={campaign.googleCampaignId} />
+        )}
+        {campaign.platform === "google" && !campaign.googleCampaignId && (
+          <div className="mb-6 p-4 rounded-lg border border-red-500/20 bg-red-500/5 flex items-center gap-3 text-sm text-muted-foreground">
+            <SiGoogle className="w-4 h-4 shrink-0 text-red-500" />
+            <span>Push this campaign to Google Ads to see live performance metrics here.</span>
+          </div>
+        )}
+        {(campaign.platform !== "meta" && campaign.platform !== "google") && (
           <div className="mb-6 p-4 rounded-lg border border-border bg-secondary/10 flex items-center gap-3 text-sm text-muted-foreground">
             <Lock className="w-4 h-4 shrink-0" />
             <span>
@@ -397,6 +459,66 @@ function EditAdSetModal({ adSet, campaignId }: { adSet: any; campaignId: number 
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function LiveGooglePerformanceCard({ campaignId, googleCampaignId }: { campaignId: number; googleCampaignId: string }) {
+  const { data: insights, isLoading } = useGetGoogleCampaignInsights(
+    { campaignId, datePreset: "last_7d" },
+    { query: { enabled: !!googleCampaignId, queryKey: getGetGoogleCampaignInsightsQueryKey({ campaignId, datePreset: "last_7d" }) } }
+  );
+
+  return (
+    <Card className="mb-6 bg-secondary/10 border-red-500/20">
+      <CardContent className="p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-red-500/20 rounded-full">
+            <SiGoogle className="w-4 h-4 text-red-500" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-sm">Live Google Ads Performance</h3>
+            <p className="text-xs text-muted-foreground">Last 7 days · Google Ads API</p>
+          </div>
+        </div>
+
+        {isLoading ? (
+          <div className="flex gap-8 px-4">
+            <div className="h-8 w-64 bg-secondary/50 rounded animate-pulse" />
+          </div>
+        ) : !insights ? (
+          <div className="text-sm text-muted-foreground px-4">
+            No performance data yet — campaign may need 24–48h after activation.
+          </div>
+        ) : (
+          <div className="flex items-center gap-8 px-4">
+            <div>
+              <div className="text-xs text-muted-foreground">Spend</div>
+              <div className="text-sm font-bold">{formatCurrency(insights.spend || 0)}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Impressions</div>
+              <div className="text-sm font-bold">{(insights.impressions || 0).toLocaleString()}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Clicks</div>
+              <div className="text-sm font-bold">{(insights.clicks || 0).toLocaleString()}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">CTR</div>
+              <div className="text-sm font-bold">{(Number(insights.ctr || 0) * 100).toFixed(2)}%</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Avg. CPC</div>
+              <div className="text-sm font-bold">{formatCurrency(insights.averageCpc || 0)}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Conversions</div>
+              <div className="text-sm font-bold">{Number(insights.conversions || 0).toFixed(1)}</div>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

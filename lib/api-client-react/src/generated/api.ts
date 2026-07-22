@@ -41,8 +41,12 @@ import type {
   CreativeInput,
   CreativeUpdate,
   DashboardSummary,
+  GetGoogleCampaignInsightsParams,
   GetMetaAccountInsightsParams,
   GetMetaCampaignInsightsParams,
+  GoogleCampaignInsight,
+  GooglePushResult,
+  GoogleValidationResult,
   HealthStatus,
   ListCampaignsParams,
   MetaAccountInsight,
@@ -3479,6 +3483,238 @@ export const usePushToMeta = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getPushToMetaMutationOptions(options));
+    }
+
+export const getValidateGoogleUrl = () => {
+
+
+
+
+  return `/api/google/validate`
+}
+
+/**
+ * @summary Validate Google Ads credentials
+ */
+export const validateGoogle = async ( options?: RequestInit): Promise<GoogleValidationResult> => {
+
+  return customFetch<GoogleValidationResult>(getValidateGoogleUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getValidateGoogleQueryKey = () => {
+    return [
+    `/api/google/validate`
+    ] as const;
+    }
+
+
+export const getValidateGoogleQueryOptions = <TData = Awaited<ReturnType<typeof validateGoogle>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof validateGoogle>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getValidateGoogleQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof validateGoogle>>> = ({ signal }) => validateGoogle({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof validateGoogle>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ValidateGoogleQueryResult = NonNullable<Awaited<ReturnType<typeof validateGoogle>>>
+export type ValidateGoogleQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Validate Google Ads credentials
+ */
+
+export function useValidateGoogle<TData = Awaited<ReturnType<typeof validateGoogle>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof validateGoogle>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getValidateGoogleQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetGoogleCampaignInsightsUrl = (params: GetGoogleCampaignInsightsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/google/insights/campaign?${stringifiedParams}` : `/api/google/insights/campaign`
+}
+
+/**
+ * @summary Get per-campaign Google Ads performance insights (GAQL)
+ */
+export const getGoogleCampaignInsights = async (params: GetGoogleCampaignInsightsParams, options?: RequestInit): Promise<GoogleCampaignInsight | null> => {
+
+  return customFetch<GoogleCampaignInsight | null>(getGetGoogleCampaignInsightsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetGoogleCampaignInsightsQueryKey = (params?: GetGoogleCampaignInsightsParams,) => {
+    return [
+    `/api/google/insights/campaign`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetGoogleCampaignInsightsQueryOptions = <TData = Awaited<ReturnType<typeof getGoogleCampaignInsights>>, TError = ErrorType<void>>(params: GetGoogleCampaignInsightsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getGoogleCampaignInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetGoogleCampaignInsightsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getGoogleCampaignInsights>>> = ({ signal }) => getGoogleCampaignInsights(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getGoogleCampaignInsights>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetGoogleCampaignInsightsQueryResult = NonNullable<Awaited<ReturnType<typeof getGoogleCampaignInsights>>>
+export type GetGoogleCampaignInsightsQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get per-campaign Google Ads performance insights (GAQL)
+ */
+
+export function useGetGoogleCampaignInsights<TData = Awaited<ReturnType<typeof getGoogleCampaignInsights>>, TError = ErrorType<void>>(
+ params: GetGoogleCampaignInsightsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getGoogleCampaignInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetGoogleCampaignInsightsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getPushToGoogleUrl = (campaignId: number,) => {
+
+
+
+
+  return `/api/google/push/${campaignId}`
+}
+
+/**
+ * @summary Push approved campaign to Google Ads Manager
+ */
+export const pushToGoogle = async (campaignId: number, options?: RequestInit): Promise<GooglePushResult> => {
+
+  return customFetch<GooglePushResult>(getPushToGoogleUrl(campaignId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPushToGoogleMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pushToGoogle>>, TError,{campaignId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof pushToGoogle>>, TError,{campaignId: number}, TContext> => {
+
+const mutationKey = ['pushToGoogle'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof pushToGoogle>>, {campaignId: number}> = (props) => {
+          const {campaignId} = props ?? {};
+
+          return  pushToGoogle(campaignId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PushToGoogleMutationResult = NonNullable<Awaited<ReturnType<typeof pushToGoogle>>>
+
+    export type PushToGoogleMutationError = ErrorType<void>
+
+    /**
+ * @summary Push approved campaign to Google Ads Manager
+ */
+export const usePushToGoogle = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pushToGoogle>>, TError,{campaignId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof pushToGoogle>>,
+        TError,
+        {campaignId: number},
+        TContext
+      > => {
+      return useMutation(getPushToGoogleMutationOptions(options));
     }
 
 export const getListCopilotReportsUrl = () => {

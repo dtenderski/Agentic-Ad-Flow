@@ -195,14 +195,22 @@ async function executeTool(toolUse: ToolInput): Promise<unknown> {
 
     case "get_insights": {
       const { campaign_id, date_preset = "today" } = toolUse.input;
-      // Find campaign by local ID or meta campaign ID
       const localId = parseInt(campaign_id, 10);
-      let metaCampaignId = campaign_id;
       if (!isNaN(localId)) {
         const [c] = await db.select().from(campaignsTable).where(eq(campaignsTable.id, localId));
-        if (c?.metaCampaignId) metaCampaignId = c.metaCampaignId;
+        if (c?.platform === "google" && c.googleCampaignId) {
+          const { getGoogleCampaignInsights } = await import("./google-ads");
+          const insights = await getGoogleCampaignInsights(c.googleCampaignId, date_preset);
+          return insights ?? { message: "No Google Ads data available for this period" };
+        }
+        if (c?.metaCampaignId) {
+          const insights = await getMetaCampaignInsights(c.metaCampaignId, date_preset);
+          return insights ?? { message: "No data available" };
+        }
+        return { message: "Campaign has not been pushed to an ad platform yet" };
       }
-      const insights = await getMetaCampaignInsights(metaCampaignId, date_preset);
+      // Fallback: treat as Meta campaign ID string
+      const insights = await getMetaCampaignInsights(campaign_id, date_preset);
       return insights ?? { message: "No data available" };
     }
 
