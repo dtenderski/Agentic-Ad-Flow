@@ -1,0 +1,23 @@
+kind = "mobile"
+previewPath = "/adclaw-mobile/"
+title = "AdClaw Mobile"
+version = "1.0.0"
+id = "artifacts/adclaw-mobile"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/adclaw-mobile/" ]
+localPort = 23997
+
+[services.development]
+run = "pnpm --filter @workspace/adclaw-mobile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/adclaw-mobile", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/adclaw-mobile", "run", "serve" ]
+
+[services.env]
+PORT = "23997"
+BASE_PATH = "/adclaw-mobile/"
