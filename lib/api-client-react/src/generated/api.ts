@@ -42,6 +42,7 @@ import type {
   CreativeUpdate,
   DashboardSummary,
   GetGoogleCampaignInsightsParams,
+  GetLinkedInCampaignInsightsParams,
   GetMetaAccountInsightsParams,
   GetMetaCampaignInsightsParams,
   GetTikTokCampaignInsightsParams,
@@ -49,6 +50,9 @@ import type {
   GooglePushResult,
   GoogleValidationResult,
   HealthStatus,
+  LinkedInCampaignInsight,
+  LinkedInPushResult,
+  LinkedInValidationResult,
   ListCampaignsParams,
   MetaAccountInsight,
   MetaCampaignInsight,
@@ -3951,6 +3955,238 @@ export const usePushToTikTok = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getPushToTikTokMutationOptions(options));
+    }
+
+export const getValidateLinkedInUrl = () => {
+
+
+
+
+  return `/api/linkedin/validate`
+}
+
+/**
+ * @summary Validate LinkedIn Ads credentials
+ */
+export const validateLinkedIn = async ( options?: RequestInit): Promise<LinkedInValidationResult> => {
+
+  return customFetch<LinkedInValidationResult>(getValidateLinkedInUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getValidateLinkedInQueryKey = () => {
+    return [
+    `/api/linkedin/validate`
+    ] as const;
+    }
+
+
+export const getValidateLinkedInQueryOptions = <TData = Awaited<ReturnType<typeof validateLinkedIn>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof validateLinkedIn>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getValidateLinkedInQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof validateLinkedIn>>> = ({ signal }) => validateLinkedIn({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof validateLinkedIn>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ValidateLinkedInQueryResult = NonNullable<Awaited<ReturnType<typeof validateLinkedIn>>>
+export type ValidateLinkedInQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Validate LinkedIn Ads credentials
+ */
+
+export function useValidateLinkedIn<TData = Awaited<ReturnType<typeof validateLinkedIn>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof validateLinkedIn>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getValidateLinkedInQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetLinkedInCampaignInsightsUrl = (params: GetLinkedInCampaignInsightsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/linkedin/insights/campaign?${stringifiedParams}` : `/api/linkedin/insights/campaign`
+}
+
+/**
+ * @summary Get per-campaign LinkedIn Ads performance insights
+ */
+export const getLinkedInCampaignInsights = async (params: GetLinkedInCampaignInsightsParams, options?: RequestInit): Promise<LinkedInCampaignInsight | null> => {
+
+  return customFetch<LinkedInCampaignInsight | null>(getGetLinkedInCampaignInsightsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLinkedInCampaignInsightsQueryKey = (params?: GetLinkedInCampaignInsightsParams,) => {
+    return [
+    `/api/linkedin/insights/campaign`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetLinkedInCampaignInsightsQueryOptions = <TData = Awaited<ReturnType<typeof getLinkedInCampaignInsights>>, TError = ErrorType<void>>(params: GetLinkedInCampaignInsightsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLinkedInCampaignInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLinkedInCampaignInsightsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLinkedInCampaignInsights>>> = ({ signal }) => getLinkedInCampaignInsights(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLinkedInCampaignInsights>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLinkedInCampaignInsightsQueryResult = NonNullable<Awaited<ReturnType<typeof getLinkedInCampaignInsights>>>
+export type GetLinkedInCampaignInsightsQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get per-campaign LinkedIn Ads performance insights
+ */
+
+export function useGetLinkedInCampaignInsights<TData = Awaited<ReturnType<typeof getLinkedInCampaignInsights>>, TError = ErrorType<void>>(
+ params: GetLinkedInCampaignInsightsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLinkedInCampaignInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLinkedInCampaignInsightsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getPushToLinkedInUrl = (campaignId: number,) => {
+
+
+
+
+  return `/api/linkedin/push/${campaignId}`
+}
+
+/**
+ * @summary Push approved campaign to LinkedIn Campaign Manager
+ */
+export const pushToLinkedIn = async (campaignId: number, options?: RequestInit): Promise<LinkedInPushResult> => {
+
+  return customFetch<LinkedInPushResult>(getPushToLinkedInUrl(campaignId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPushToLinkedInMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pushToLinkedIn>>, TError,{campaignId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof pushToLinkedIn>>, TError,{campaignId: number}, TContext> => {
+
+const mutationKey = ['pushToLinkedIn'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof pushToLinkedIn>>, {campaignId: number}> = (props) => {
+          const {campaignId} = props ?? {};
+
+          return  pushToLinkedIn(campaignId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PushToLinkedInMutationResult = NonNullable<Awaited<ReturnType<typeof pushToLinkedIn>>>
+
+    export type PushToLinkedInMutationError = ErrorType<void>
+
+    /**
+ * @summary Push approved campaign to LinkedIn Campaign Manager
+ */
+export const usePushToLinkedIn = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pushToLinkedIn>>, TError,{campaignId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof pushToLinkedIn>>,
+        TError,
+        {campaignId: number},
+        TContext
+      > => {
+      return useMutation(getPushToLinkedInMutationOptions(options));
     }
 
 export const getListCopilotReportsUrl = () => {

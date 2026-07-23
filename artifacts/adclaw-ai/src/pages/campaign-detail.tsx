@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Target, Edit, Play, Pause, ExternalLink, Settings, GitMerge, FileImage, Loader2, Zap, Globe, Lock } from "lucide-react";
+import { Target, Edit, Play, Pause, ExternalLink, Settings, GitMerge, FileImage, Loader2, Zap, Globe, Lock, Linkedin } from "lucide-react";
 import { SiFacebook, SiInstagram, SiWhatsapp, SiGoogle, SiTiktok } from "react-icons/si";
-import { useGetCampaign, useListAdSets, useListCreatives, getGetCampaignQueryKey, getListAdSetsQueryKey, usePushToMeta, usePushToGoogle, usePushToTikTok, useUpdateAdSet, useGetMetaCampaignInsights, getGetMetaCampaignInsightsQueryKey, useGetGoogleCampaignInsights, getGetGoogleCampaignInsightsQueryKey, useGetTikTokCampaignInsights, getGetTikTokCampaignInsightsQueryKey } from "@workspace/api-client-react";
+import { useGetCampaign, useListAdSets, useListCreatives, getGetCampaignQueryKey, getListAdSetsQueryKey, usePushToMeta, usePushToGoogle, usePushToTikTok, usePushToLinkedIn, useUpdateAdSet, useGetMetaCampaignInsights, getGetMetaCampaignInsightsQueryKey, useGetGoogleCampaignInsights, getGetGoogleCampaignInsightsQueryKey, useGetTikTokCampaignInsights, getGetTikTokCampaignInsightsQueryKey, useGetLinkedInCampaignInsights, getGetLinkedInCampaignInsightsQueryKey } from "@workspace/api-client-react";
 import { PlatformBadge, PLATFORM_CONFIG } from "@/components/platform-badge";
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -63,6 +63,7 @@ export default function CampaignDetail() {
   const pushToMeta = usePushToMeta();
   const pushToGoogle = usePushToGoogle();
   const pushToTikTok = usePushToTikTok();
+  const pushToLinkedIn = usePushToLinkedIn();
 
   const handlePushToMeta = () => {
     pushToMeta.mutate(
@@ -123,6 +124,28 @@ export default function CampaignDetail() {
           toast({
             title: "Error pushing to TikTok",
             description: (error as Error).message || "Failed to push campaign to TikTok Ads.",
+            variant: "destructive",
+          });
+        }
+      }
+    );
+  };
+
+  const handlePushToLinkedIn = () => {
+    pushToLinkedIn.mutate(
+      { campaignId: id },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getGetCampaignQueryKey(id) });
+          toast({
+            title: "Pushed to LinkedIn Campaign Manager",
+            description: "Campaign Group + Campaign + Text Ad created in PAUSED state. Update copy and budget in Campaign Manager.",
+          });
+        },
+        onError: (error: unknown) => {
+          toast({
+            title: "Error pushing to LinkedIn",
+            description: (error as Error).message || "Failed to push campaign to LinkedIn Ads.",
             variant: "destructive",
           });
         }
@@ -215,7 +238,20 @@ export default function CampaignDetail() {
               );
             }
 
-            if (platform !== "meta" && platform !== "google" && platform !== "tiktok") {
+            if (platform === "linkedin" && !campaign.linkedinCampaignId) {
+              return (
+                <Button
+                  onClick={handlePushToLinkedIn}
+                  disabled={pushToLinkedIn.isPending}
+                  className="gap-2 bg-[#0A66C2] hover:bg-[#004182] text-white border-transparent"
+                >
+                  {pushToLinkedIn.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Icon className="w-4 h-4" />}
+                  Push to LinkedIn Ads
+                </Button>
+              );
+            }
+
+            if (platform !== "meta" && platform !== "google" && platform !== "tiktok" && platform !== "linkedin") {
               return (
                 <Button disabled className="gap-2 opacity-60" title="API integration coming soon">
                   <Lock className="w-4 h-4" />
@@ -245,6 +281,12 @@ export default function CampaignDetail() {
               {campaign.tiktokCampaignId}
             </Badge>
           )}
+          {campaign.linkedinCampaignId && (
+            <Badge variant="outline" className="bg-[#0A66C2]/10 text-[#0A66C2] border-[#0A66C2]/20 px-3 py-1 flex items-center gap-2">
+              <Linkedin className="w-3 h-3" />
+              {campaign.linkedinCampaignId}
+            </Badge>
+          )}
 
           <Button variant="outline" size="icon">
             <Settings className="w-4 h-4" />
@@ -267,6 +309,13 @@ export default function CampaignDetail() {
             <Button variant="outline" className="gap-2" asChild>
               <a href="https://ads.tiktok.com" target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="w-4 h-4" /> Open in TikTok Ads Manager
+              </a>
+            </Button>
+          )}
+          {campaign.platform === "linkedin" && (
+            <Button variant="outline" className="gap-2" asChild>
+              <a href="https://www.linkedin.com/campaignmanager" target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="w-4 h-4" /> Open in Campaign Manager
               </a>
             </Button>
           )}
@@ -307,7 +356,16 @@ export default function CampaignDetail() {
             <span>Push this campaign to TikTok Ads to see live performance metrics here.</span>
           </div>
         )}
-        {(campaign.platform !== "meta" && campaign.platform !== "google" && campaign.platform !== "tiktok") && (
+        {campaign.linkedinCampaignId && campaign.platform === "linkedin" && (
+          <LiveLinkedInPerformanceCard campaignId={id} linkedinCampaignId={campaign.linkedinCampaignId} />
+        )}
+        {campaign.platform === "linkedin" && !campaign.linkedinCampaignId && (
+          <div className="mb-6 p-4 rounded-lg border border-[#0A66C2]/20 bg-[#0A66C2]/5 flex items-center gap-3 text-sm text-muted-foreground">
+            <Linkedin className="w-4 h-4 shrink-0 text-[#0A66C2]" />
+            <span>Push this campaign to LinkedIn Ads to see live performance metrics here.</span>
+          </div>
+        )}
+        {(campaign.platform !== "meta" && campaign.platform !== "google" && campaign.platform !== "tiktok" && campaign.platform !== "linkedin") && (
           <div className="mb-6 p-4 rounded-lg border border-border bg-secondary/10 flex items-center gap-3 text-sm text-muted-foreground">
             <Lock className="w-4 h-4 shrink-0" />
             <span>
@@ -517,6 +575,70 @@ function EditAdSetModal({ adSet, campaignId }: { adSet: any; campaignId: number 
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function LiveLinkedInPerformanceCard({ campaignId, linkedinCampaignId }: { campaignId: number; linkedinCampaignId: string }) {
+  const { data: insights, isLoading } = useGetLinkedInCampaignInsights(
+    { campaignId, datePreset: "last_7d" },
+    { query: { enabled: !!linkedinCampaignId, queryKey: getGetLinkedInCampaignInsightsQueryKey({ campaignId, datePreset: "last_7d" }) } }
+  );
+
+  return (
+    <Card className="mb-6 bg-secondary/10 border-[#0A66C2]/20">
+      <CardContent className="p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-[#0A66C2]/20 rounded-full">
+            <Linkedin className="w-4 h-4 text-[#0A66C2]" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-sm">Live LinkedIn Ads Performance</h3>
+            <p className="text-xs text-muted-foreground">Last 7 days · LinkedIn Marketing API</p>
+          </div>
+        </div>
+
+        {isLoading ? (
+          <div className="flex gap-8 px-4">
+            <div className="h-8 w-72 bg-secondary/50 rounded animate-pulse" />
+          </div>
+        ) : !insights ? (
+          <div className="text-sm text-muted-foreground px-4">
+            No performance data yet — activate the campaign and allow 24h for data to populate.
+          </div>
+        ) : (
+          <div className="flex items-center gap-6 px-4 flex-wrap">
+            <div>
+              <div className="text-xs text-muted-foreground">Spend</div>
+              <div className="text-sm font-bold">{formatCurrency(insights.spend || 0)}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Impressions</div>
+              <div className="text-sm font-bold">{(insights.impressions || 0).toLocaleString()}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Clicks</div>
+              <div className="text-sm font-bold">{(insights.clicks || 0).toLocaleString()}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">CTR</div>
+              <div className="text-sm font-bold">{(Number(insights.ctr || 0) * 100).toFixed(2)}%</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">CPC</div>
+              <div className="text-sm font-bold">{formatCurrency(insights.cpc || 0)}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Leads</div>
+              <div className="text-sm font-bold">{(insights.leads || 0).toLocaleString()}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Conversions</div>
+              <div className="text-sm font-bold">{(insights.conversions || 0).toLocaleString()}</div>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

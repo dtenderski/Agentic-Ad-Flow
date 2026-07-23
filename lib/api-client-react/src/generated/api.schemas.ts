@@ -270,6 +270,49 @@ export interface GooglePushResult {
   note?: string | null;
 }
 
+export interface LinkedInValidationResult {
+  valid: boolean;
+  /** @nullable */
+  accountId?: string | null;
+  /** @nullable */
+  accountName?: string | null;
+  /** @nullable */
+  currency?: string | null;
+  /** @nullable */
+  error?: string | null;
+}
+
+export interface LinkedInCampaignInsight {
+  linkedinCampaignId: string;
+  campaignName: string;
+  impressions: number;
+  clicks: number;
+  /** Click-through rate as fraction (0–1) */
+  ctr: number;
+  /** Cost per click in account currency */
+  cpc: number;
+  /** Lead Gen Form submissions */
+  leads: number;
+  /** External website conversions */
+  conversions: number;
+  /** Total spend in account currency */
+  spend: number;
+  dateStart: string;
+  dateStop: string;
+}
+
+export interface LinkedInPushResult {
+  success: boolean;
+  message: string;
+  linkedinCampaignId: string;
+  /** @nullable */
+  campaignGroupId?: string | null;
+  /** @nullable */
+  creativeId?: string | null;
+  /** @nullable */
+  note?: string | null;
+}
+
 export interface TikTokValidationResult {
   valid: boolean;
   /** @nullable */
@@ -325,6 +368,8 @@ export interface Campaign {
   googleCampaignId?: string | null;
   /** @nullable */
   tiktokCampaignId?: string | null;
+  /** @nullable */
+  linkedinCampaignId?: string | null;
   /** @nullable */
   blueprintId?: number | null;
   campaignName: string;
@@ -769,6 +814,11 @@ datePreset?: string;
 };
 
 export type GetTikTokCampaignInsightsParams = {
+campaignId: number;
+datePreset?: string;
+};
+
+export type GetLinkedInCampaignInsightsParams = {
 campaignId: number;
 datePreset?: string;
 };

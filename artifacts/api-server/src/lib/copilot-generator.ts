@@ -208,6 +208,11 @@ async function executeTool(toolUse: ToolInput): Promise<unknown> {
           const insights = await getTikTokCampaignInsights(c.tiktokCampaignId, date_preset);
           return insights ?? { message: "No TikTok Ads data available for this period" };
         }
+        if (c?.platform === "linkedin" && c.linkedinCampaignId) {
+          const { getLinkedInCampaignInsights } = await import("./linkedin-ads");
+          const insights = await getLinkedInCampaignInsights(c.linkedinCampaignId, date_preset, c.campaignName);
+          return insights ?? { message: "No LinkedIn Ads data available for this period" };
+        }
         if (c?.metaCampaignId) {
           const insights = await getMetaCampaignInsights(c.metaCampaignId, date_preset);
           return insights ?? { message: "No data available" };

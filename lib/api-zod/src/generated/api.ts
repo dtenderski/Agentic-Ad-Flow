@@ -46,6 +46,7 @@ export const GetRecentCampaignsResponseItem = zod.object({
   "metaCampaignId": zod.string().nullish(),
   "googleCampaignId": zod.string().nullish(),
   "tiktokCampaignId": zod.string().nullish(),
+  "linkedinCampaignId": zod.string().nullish(),
   "blueprintId": zod.number().nullish(),
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
@@ -501,6 +502,7 @@ export const ListCampaignsResponseItem = zod.object({
   "metaCampaignId": zod.string().nullish(),
   "googleCampaignId": zod.string().nullish(),
   "tiktokCampaignId": zod.string().nullish(),
+  "linkedinCampaignId": zod.string().nullish(),
   "blueprintId": zod.number().nullish(),
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
@@ -555,6 +557,7 @@ export const CreateCampaignResponse = zod.object({
   "metaCampaignId": zod.string().nullish(),
   "googleCampaignId": zod.string().nullish(),
   "tiktokCampaignId": zod.string().nullish(),
+  "linkedinCampaignId": zod.string().nullish(),
   "blueprintId": zod.number().nullish(),
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
@@ -592,6 +595,7 @@ export const GetCampaignResponse = zod.object({
   "metaCampaignId": zod.string().nullish(),
   "googleCampaignId": zod.string().nullish(),
   "tiktokCampaignId": zod.string().nullish(),
+  "linkedinCampaignId": zod.string().nullish(),
   "blueprintId": zod.number().nullish(),
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
@@ -642,6 +646,7 @@ export const UpdateCampaignResponse = zod.object({
   "metaCampaignId": zod.string().nullish(),
   "googleCampaignId": zod.string().nullish(),
   "tiktokCampaignId": zod.string().nullish(),
+  "linkedinCampaignId": zod.string().nullish(),
   "blueprintId": zod.number().nullish(),
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
@@ -694,6 +699,7 @@ export const ApproveCampaignResponse = zod.object({
   "metaCampaignId": zod.string().nullish(),
   "googleCampaignId": zod.string().nullish(),
   "tiktokCampaignId": zod.string().nullish(),
+  "linkedinCampaignId": zod.string().nullish(),
   "blueprintId": zod.number().nullish(),
   "campaignName": zod.string(),
   "objective": zod.string().describe('AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES'),
@@ -1318,6 +1324,60 @@ export const PushToTikTokResponse = zod.object({
   "tiktokCampaignId": zod.string(),
   "adGroupId": zod.string().nullish(),
   "adId": zod.string().nullish(),
+  "note": zod.string().nullish()
+})
+
+
+/**
+ * @summary Validate LinkedIn Ads credentials
+ */
+export const ValidateLinkedInResponse = zod.object({
+  "valid": zod.boolean(),
+  "accountId": zod.string().nullish(),
+  "accountName": zod.string().nullish(),
+  "currency": zod.string().nullish(),
+  "error": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get per-campaign LinkedIn Ads performance insights
+ */
+export const getLinkedInCampaignInsightsQueryDatePresetDefault = `last_7d`;
+
+export const GetLinkedInCampaignInsightsQueryParams = zod.object({
+  "campaignId": zod.coerce.number(),
+  "datePreset": zod.coerce.string().default(getLinkedInCampaignInsightsQueryDatePresetDefault)
+})
+
+export const GetLinkedInCampaignInsightsResponse = zod.union([zod.object({
+  "linkedinCampaignId": zod.string(),
+  "campaignName": zod.string(),
+  "impressions": zod.number(),
+  "clicks": zod.number(),
+  "ctr": zod.number().describe('Click-through rate as fraction (0–1)'),
+  "cpc": zod.number().describe('Cost per click in account currency'),
+  "leads": zod.number().describe('Lead Gen Form submissions'),
+  "conversions": zod.number().describe('External website conversions'),
+  "spend": zod.number().describe('Total spend in account currency'),
+  "dateStart": zod.string(),
+  "dateStop": zod.string()
+}),zod.null()])
+
+
+/**
+ * @summary Push approved campaign to LinkedIn Campaign Manager
+ */
+export const PushToLinkedInParams = zod.object({
+  "campaignId": zod.coerce.number()
+})
+
+export const PushToLinkedInResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string(),
+  "linkedinCampaignId": zod.string(),
+  "campaignGroupId": zod.string().nullish(),
+  "creativeId": zod.string().nullish(),
   "note": zod.string().nullish()
 })
 

@@ -36,6 +36,8 @@ tags:
     description: Google Ads & YouTube API integration
   - name: tiktok
     description: TikTok Ads API integration
+  - name: linkedin
+    description: LinkedIn Ads Campaign Manager integration
   - name: copilot
     description: AI Copilot scheduled reports and commands
 
@@ -1042,6 +1044,76 @@ paths:
         "500":
           description: TikTok API error
 
+  # ─── LinkedIn Ads API ─────────────────────────────────────────────────────────
+  /linkedin/validate:
+    get:
+      tags: [linkedin]
+      operationId: validateLinkedIn
+      summary: Validate LinkedIn Ads credentials
+      responses:
+        "200":
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LinkedInValidationResult"
+
+  /linkedin/insights/campaign:
+    get:
+      tags: [linkedin]
+      operationId: getLinkedInCampaignInsights
+      summary: Get per-campaign LinkedIn Ads performance insights
+      parameters:
+        - name: campaignId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: datePreset
+          in: query
+          required: false
+          schema:
+            type: string
+            default: last_7d
+      responses:
+        "200":
+          description: Campaign insight metrics, or null when no data
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/LinkedInCampaignInsight"
+                  - type: "null"
+        "400":
+          description: Campaign not pushed to LinkedIn yet, or missing credentials
+        "404":
+          description: Campaign not found
+
+  /linkedin/push/{campaignId}:
+    post:
+      tags: [linkedin]
+      operationId: pushToLinkedIn
+      summary: Push approved campaign to LinkedIn Campaign Manager
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Push result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LinkedInPushResult"
+        "400":
+          description: Campaign not approved, already pushed, or missing credentials
+        "404":
+          description: Campaign not found
+        "500":
+          description: LinkedIn API error
+
   # ─── Copilot ─────────────────────────────────────────────────────────────────
   /copilot/reports:
     get:
@@ -1490,6 +1562,71 @@ components:
         note:
           type: ["string", "null"]
 
+    # ─── LinkedIn Ads Schemas ─────────────────────────────────────────────────────
+    LinkedInValidationResult:
+      type: object
+      required: [valid]
+      properties:
+        valid:
+          type: boolean
+        accountId:
+          type: ["string", "null"]
+        accountName:
+          type: ["string", "null"]
+        currency:
+          type: ["string", "null"]
+        error:
+          type: ["string", "null"]
+
+    LinkedInCampaignInsight:
+      type: object
+      required: [linkedinCampaignId, campaignName, impressions, clicks, ctr, cpc, leads, conversions, spend, dateStart, dateStop]
+      properties:
+        linkedinCampaignId:
+          type: string
+        campaignName:
+          type: string
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          type: number
+          description: Click-through rate as fraction (0–1)
+        cpc:
+          type: number
+          description: Cost per click in account currency
+        leads:
+          type: integer
+          description: Lead Gen Form submissions
+        conversions:
+          type: integer
+          description: External website conversions
+        spend:
+          type: number
+          description: Total spend in account currency
+        dateStart:
+          type: string
+        dateStop:
+          type: string
+
+    LinkedInPushResult:
+      type: object
+      required: [success, message, linkedinCampaignId]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        linkedinCampaignId:
+          type: string
+        campaignGroupId:
+          type: ["string", "null"]
+        creativeId:
+          type: ["string", "null"]
+        note:
+          type: ["string", "null"]
+
     # ─── TikTok Ads Schemas ──────────────────────────────────────────────────────
     TikTokValidationResult:
       type: object
@@ -1574,6 +1711,8 @@ components:
         googleCampaignId:
           type: ["string", "null"]
         tiktokCampaignId:
+          type: ["string", "null"]
+        linkedinCampaignId:
           type: ["string", "null"]
         blueprintId:
           type: ["integer", "null"]

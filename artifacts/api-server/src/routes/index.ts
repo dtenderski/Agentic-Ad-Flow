@@ -13,6 +13,7 @@ import dashboardRouter from "./dashboard";
 import metaRouter from "./meta";
 import googleRouter from "./google";
 import tiktokRouter from "./tiktok";
+import linkedinRouter from "./linkedin";
 import copilotRouter from "./copilot";
 
 const router: IRouter = Router();
@@ -31,6 +32,7 @@ router.use(memoryRouter);
 router.use(metaRouter);
 router.use(googleRouter);
 router.use(tiktokRouter);
+router.use(linkedinRouter);
 router.use(copilotRouter);
 
 export default router;

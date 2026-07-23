@@ -9,6 +9,7 @@ export const campaignsTable = pgTable("campaigns", {
   metaCampaignId: text("meta_campaign_id"),
   googleCampaignId: text("google_campaign_id"),
   tiktokCampaignId: text("tiktok_campaign_id"),
+  linkedinCampaignId: text("linkedin_campaign_id"),
   blueprintId: integer("blueprint_id"),
   campaignName: text("campaign_name").notNull(),
   objective: text("objective").notNull(), // AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES

@@ -17,7 +17,7 @@ const PLATFORMS: { value: AdPlatform; description: string; available: boolean }[
   { value: "meta", description: "Facebook, Instagram, WhatsApp CTWA", available: true },
   { value: "google", description: "Search, Display, Shopping, YouTube", available: true },
   { value: "tiktok", description: "In-Feed, Video Views, Lead Gen", available: true },
-  { value: "linkedin", description: "Sponsored Content, Lead Gen Forms", available: false },
+  { value: "linkedin", description: "Sponsored Content, Lead Gen Forms", available: true },
 ];
 
 const PLACEMENTS = [

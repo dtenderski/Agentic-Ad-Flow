@@ -16,6 +16,8 @@ export interface Campaign {
   /** @nullable */
   tiktokCampaignId?: string | null;
   /** @nullable */
+  linkedinCampaignId?: string | null;
+  /** @nullable */
   blueprintId?: number | null;
   campaignName: string;
   /** AWARENESS | TRAFFIC | ENGAGEMENT | LEADS | APP_PROMOTION | SALES */
