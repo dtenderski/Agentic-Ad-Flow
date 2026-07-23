@@ -1,10 +1,9 @@
 import { Router } from "express";
-import Anthropic from "@anthropic-ai/sdk";
+import { deepseek, DEEPSEEK_MODEL } from "../lib/ai-clients.js";
 
 const router = Router();
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-const SYSTEM_PROMPT = `You are AdFlow AI, the intelligent assistant for Agentic AdFlow — the world's first fully agentic ad campaign engine powered by Claude AI.
+const SYSTEM_PROMPT = `You are AdFlow AI, the intelligent assistant for Agentic AdFlow — the world's first fully agentic ad campaign engine powered by AI.
 
 Agentic AdFlow uses a multi-agent pipeline (MultiClaw + OpenClaw) to:
 - Analyze a business brief and product details
@@ -34,24 +33,17 @@ router.post("/chat", async (req, res) => {
     return;
   }
 
-  const messages: Anthropic.MessageParam[] = [
-    ...history.map((m: ChatMessage) => ({
-      role: m.role,
-      content: m.content,
-    })),
-    { role: "user", content: message },
-  ];
-
-  const response = await anthropic.messages.create({
-    model: "claude-sonnet-4-5",
+  const response = await deepseek.chat.completions.create({
+    model: DEEPSEEK_MODEL,
     max_tokens: 512,
-    system: SYSTEM_PROMPT,
-    messages,
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...history.map((m: ChatMessage) => ({ role: m.role, content: m.content })),
+      { role: "user", content: message },
+    ],
   });
 
-  const reply =
-    response.content[0]?.type === "text" ? response.content[0].text : "";
-
+  const reply = response.choices[0]?.message?.content ?? "";
   res.json({ reply });
 });
 

@@ -1,9 +1,5 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { logger } from "./logger";
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+import { deepseek, DEEPSEEK_MODEL } from "./ai-clients.js";
+import { logger } from "./logger.js";
 
 interface BlueprintInput {
   businessName: string;
@@ -234,28 +230,27 @@ Produce exactly this structure (expand each section fully):
 }
 
 export async function generateLLMBlueprint(input: BlueprintInput): Promise<GeneratedBlueprint> {
-  logger.info({ business: input.businessName, product: input.productName }, "Starting LLM blueprint generation");
+  logger.info({ business: input.businessName, product: input.productName }, "Starting LLM blueprint generation (DeepSeek V3)");
 
-  const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-6",
+  const response = await deepseek.chat.completions.create({
+    model: DEEPSEEK_MODEL,
     max_tokens: 8000,
-    system: buildSystemPrompt(),
-    messages: [{ role: "user", content: buildUserPrompt(input) }],
+    messages: [
+      { role: "system", content: buildSystemPrompt() },
+      { role: "user", content: buildUserPrompt(input) },
+    ],
   });
 
-  const rawText = message.content
-    .filter((b) => b.type === "text")
-    .map((b) => (b as { type: "text"; text: string }).text)
-    .join("");
+  const rawText = response.choices[0]?.message?.content ?? "";
 
-  // Strip any markdown code fences if Claude added them
+  // Strip any markdown code fences if the model added them
   const jsonText = rawText.replace(/^```(?:json)?\n?/m, "").replace(/\n?```$/m, "").trim();
 
   let parsed: Record<string, unknown>;
   try {
     parsed = JSON.parse(jsonText);
   } catch (err) {
-    logger.error({ err, rawText: rawText.slice(0, 500) }, "Failed to parse Claude JSON response");
+    logger.error({ err, rawText: rawText.slice(0, 500) }, "Failed to parse blueprint JSON response");
     throw new Error("Blueprint AI returned invalid JSON. Please retry.");
   }
 
