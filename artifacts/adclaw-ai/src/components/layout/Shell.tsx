@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Activity, Briefcase, Plus, CopyPlus, Play, CheckCircle, Database, Server, Settings, Home, Target, MapPin, Search, RefreshCw, Loader2, Bot } from "lucide-react"
+import { Activity, Briefcase, Plus, CopyPlus, Play, CheckCircle, Database, Server, Settings, Home, Target, MapPin, Search, RefreshCw, Loader2, Bot, BookOpen } from "lucide-react"
 import { Link, useLocation } from "wouter"
 import { cn } from "@/lib/utils"
 import { useValidateMeta, useGetMetaTokenInfo, useRefreshMetaToken, getGetMetaTokenInfoQueryKey, getValidateMetaQueryKey, getGetMetaTokenInfoQueryKey as getTokenQueryKey } from "@workspace/api-client-react"
@@ -56,6 +56,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     { href: "/copilot", label: "Copilot", icon: Bot },
     { href: "/approvals", label: "Human Gate", icon: CheckCircle },
     { href: "/memory", label: "Agent Memory", icon: Database },
+    { href: "/panduan", label: "Panduan", icon: BookOpen },
   ]
 
   return (
