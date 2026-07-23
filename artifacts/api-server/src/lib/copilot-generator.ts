@@ -9,6 +9,7 @@ import {
   updateMetaCampaignBudget,
 } from "./meta-ads.js";
 import {
+  deepseek, DEEPSEEK_MODEL,
   gemini, GEMINI_MODEL,
   qwen, QWEN_MODEL,
   openai, OPENAI_TOOL_MODEL,
@@ -57,16 +58,31 @@ Your brief must cover (use markdown headers):
 
 Be specific, not generic. Reference actual numbers when available.`;
 
-  const message = await gemini.chat.completions.create({
-    model: GEMINI_MODEL,
-    max_tokens: 2000,
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
-    ],
-  });
-
-  const response = message.choices[0]?.message?.content ?? "";
+  let response = "";
+  try {
+    const message = await gemini.chat.completions.create({
+      model: GEMINI_MODEL,
+      max_tokens: 2000,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+    });
+    response = message.choices[0]?.message?.content ?? "";
+    logger.info("Trend brief generated via Gemini");
+  } catch (geminiErr) {
+    logger.warn({ err: geminiErr }, "Gemini failed for trend brief — falling back to DeepSeek");
+    const fallback = await deepseek.chat.completions.create({
+      model: DEEPSEEK_MODEL,
+      max_tokens: 2000,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+    });
+    response = fallback.choices[0]?.message?.content ?? "";
+    logger.info("Trend brief generated via DeepSeek (fallback)");
+  }
 
   const [report] = await db.insert(copilotReportsTable).values({
     type: "trend_brief",
@@ -150,16 +166,31 @@ Your report must cover:
 
 Be decisive. Use real numbers. Flag anything above IDR 150rb CPL as critical.`;
 
-  const message = await qwen.chat.completions.create({
-    model: QWEN_MODEL,
-    max_tokens: 2500,
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
-    ],
-  });
-
-  const response = message.choices[0]?.message?.content ?? "";
+  let response = "";
+  try {
+    const message = await qwen.chat.completions.create({
+      model: QWEN_MODEL,
+      max_tokens: 2500,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+    });
+    response = message.choices[0]?.message?.content ?? "";
+    logger.info("Performance report generated via Qwen");
+  } catch (qwenErr) {
+    logger.warn({ err: qwenErr }, "Qwen failed for performance report — falling back to DeepSeek");
+    const fallback = await deepseek.chat.completions.create({
+      model: DEEPSEEK_MODEL,
+      max_tokens: 2500,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+    });
+    response = fallback.choices[0]?.message?.content ?? "";
+    logger.info("Performance report generated via DeepSeek (fallback)");
+  }
 
   const [report] = await db.insert(copilotReportsTable).values({
     type: "performance_report",
