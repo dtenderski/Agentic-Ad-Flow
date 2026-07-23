@@ -3,8 +3,70 @@ import { eq } from "drizzle-orm";
 import { db, pipelineRunsTable, blueprintsTable, businessesTable, productsTable, agentMemoryTable } from "@workspace/db";
 import { RunPipelineBody, GetPipelineRunParams } from "@workspace/api-zod";
 import { generateLLMBlueprint } from "../lib/llm-blueprint";
+import { searchMetaInterest } from "../lib/meta-ads";
+import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
+
+// ─── Interest Resolution ──────────────────────────────────────────────────────
+// After the LLM generates the blueprint, resolve the suggested interest names
+// against Meta's Targeting Search API so the Human Gate reviewer can see which
+// interests actually matched (and which ones didn't) before approving a push.
+
+interface ResolvedInterest {
+  name: string;                // original name from Claude
+  id?: string;                 // real Meta interest ID (present when resolved)
+  resolvedName?: string;       // Meta's canonical name for the interest
+  audienceSize?: number;       // lower-bound audience size from Meta
+  resolved: boolean;           // true = found in Meta catalogue
+}
+
+async function resolveAudiencePlanInterests(audiencePlanJson: string): Promise<string> {
+  let plan: Record<string, unknown>;
+  try {
+    plan = JSON.parse(audiencePlanJson);
+  } catch {
+    // If we can't parse the audience plan, return it unchanged
+    return audiencePlanJson;
+  }
+
+  const cold = plan.coldAudience as Record<string, unknown> | undefined;
+  const rawInterests = cold?.interests;
+  if (!Array.isArray(rawInterests) || rawInterests.length === 0) {
+    return audiencePlanJson;
+  }
+
+  const resolved: ResolvedInterest[] = [];
+  for (const item of rawInterests.slice(0, 10)) {
+    const name = typeof item === "string" ? item : String(item);
+    try {
+      const hit = await searchMetaInterest(name);
+      if (hit) {
+        resolved.push({ name, id: hit.id, resolvedName: hit.name, audienceSize: hit.audienceSize, resolved: true });
+        logger.info({ interestName: name, metaId: hit.id, metaName: hit.name }, "Interest resolved at pipeline time");
+      } else {
+        resolved.push({ name, resolved: false });
+        logger.warn({ interestName: name }, "Interest not found in Meta catalogue — will be skipped at push time");
+      }
+    } catch (err) {
+      // Meta API unavailable or credentials not set — record as unresolved but don't fail the pipeline
+      resolved.push({ name, resolved: false });
+      logger.warn({ interestName: name, err }, "Could not reach Meta Interest Search API — interest marked unresolved");
+    }
+  }
+
+  // Replace the plain interest-name array with the enriched resolved list
+  const enrichedPlan = {
+    ...plan,
+    coldAudience: {
+      ...cold,
+      interests: resolved,
+      interestResolutionSummary: `${resolved.filter(i => i.resolved).length}/${resolved.length} interests resolved via Meta Interest Search API`,
+    },
+  };
+
+  return JSON.stringify(enrichedPlan);
+}
 
 const serializePipelineRun = (r: typeof pipelineRunsTable.$inferSelect) => ({
   ...r,
@@ -78,13 +140,18 @@ router.post("/pipeline/run", async (req, res): Promise<void> => {
       agentMemory: memory ?? null,
     });
 
+    // Resolve interest names in the audience plan against Meta's Targeting Search API.
+    // This enriches the stored blueprint with real IDs and resolution status so the
+    // Human Gate reviewer can see exactly which interests will be targeted before approval.
+    const enrichedAudiencePlan = await resolveAudiencePlanInterests(generated.audiencePlan);
+
     // Save blueprint
     const [blueprint] = await db.insert(blueprintsTable).values({
       pipelineRunId: run.id,
       title: generated.title,
       businessContext: generated.businessContext,
       campaignStrategy: generated.campaignStrategy,
-      audiencePlan: generated.audiencePlan,
+      audiencePlan: enrichedAudiencePlan,
       offerStrategy: generated.offerStrategy,
       creativeBlueprint: generated.creativeBlueprint,
       budgetPlan: generated.budgetPlan,

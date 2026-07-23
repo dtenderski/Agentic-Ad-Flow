@@ -440,7 +440,10 @@ export async function createMetaAdSet(opts: {
   targetingAgeMin?: number;
   targetingAgeMax?: number;
   targetingGender?: string;
+  /** Interest names to resolve via Meta Targeting Search API at push time */
   targetingInterests?: string[];
+  /** Pre-resolved interests (id + name) from the pipeline enrichment step — skips API lookup */
+  preResolvedInterests?: { id: string; name: string }[];
   bidAmount?: number;
 }): Promise<string> {
   const { accountId } = getMetaConfig();
@@ -455,20 +458,39 @@ export async function createMetaAdSet(opts: {
   if (opts.targetingGender === "male") baseTargeting.genders = [1];
   if (opts.targetingGender === "female") baseTargeting.genders = [2];
 
-  // Resolve interest names → real Meta interest IDs via Targeting Search API
-  if (opts.targetingInterests && opts.targetingInterests.length > 0) {
-    const resolvedInterests: { id: string; name: string }[] = [];
-    for (const interestName of opts.targetingInterests.slice(0, 5)) {
+  // Build the resolved interest list for Meta targeting.
+  // Pre-resolved interests (from pipeline enrichment) are used directly;
+  // plain interest names are resolved via the Targeting Search API.
+  const resolvedInterests: { id: string; name: string }[] = [];
+
+  // 1. Add pre-resolved interests (no API call needed)
+  if (opts.preResolvedInterests && opts.preResolvedInterests.length > 0) {
+    for (const interest of opts.preResolvedInterests) {
+      resolvedInterests.push({ id: interest.id, name: interest.name });
+    }
+    logger.info({ count: opts.preResolvedInterests.length }, "Using pre-resolved Meta interest IDs from pipeline enrichment");
+  }
+
+  // 2. Resolve any remaining plain interest names via Targeting Search API
+  const remainingSlots = Math.max(0, 5 - resolvedInterests.length);
+  if (opts.targetingInterests && opts.targetingInterests.length > 0 && remainingSlots > 0) {
+    for (const interestName of opts.targetingInterests.slice(0, remainingSlots)) {
       try {
         const found = await searchMetaInterest(interestName);
-        if (found) resolvedInterests.push(found);
+        if (found) {
+          resolvedInterests.push({ id: found.id, name: found.name });
+          logger.info({ interestName, metaId: found.id, metaName: found.name }, "Meta interest resolved at push time");
+        } else {
+          logger.warn({ interestName }, "Interest not found in Meta catalogue — skipped");
+        }
       } catch (e) {
         logger.warn({ interestName, err: e }, "Could not resolve Meta interest ID — skipping");
       }
     }
-    if (resolvedInterests.length > 0) {
-      baseTargeting.flexible_spec = [{ interests: resolvedInterests }];
-    }
+  }
+
+  if (resolvedInterests.length > 0) {
+    baseTargeting.flexible_spec = [{ interests: resolvedInterests }];
   }
 
   const targeting = buildPlacementTargeting(placement, baseTargeting);

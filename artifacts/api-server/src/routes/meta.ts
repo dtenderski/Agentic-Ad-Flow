@@ -120,9 +120,33 @@ router.post("/meta/push/:campaignId", async (req, res): Promise<void> => {
     const adsets = await db.select().from(adsetsTable).where(eq(adsetsTable.campaignId, campaign.id));
 
     for (const adset of adsets) {
-      let interests: string[] = [];
+      // Parse interest data — supports two formats:
+      // 1. Plain strings: ["technology", "fitness"] (resolve names via Meta API at push time)
+      // 2. Pre-resolved objects from the pipeline enrichment step:
+      //    [{ name, id, resolved, resolvedName, audienceSize }]
+      //    In this case, already-resolved interests skip the API lookup entirely.
+      let interestNames: string[] = [];
+      let preResolvedInterests: { id: string; name: string }[] = [];
+
       if (adset.interests) {
-        try { interests = JSON.parse(adset.interests); } catch { interests = []; }
+        try {
+          const parsed = JSON.parse(adset.interests);
+          if (Array.isArray(parsed)) {
+            for (const item of parsed) {
+              if (typeof item === "string") {
+                interestNames.push(item);
+              } else if (item && typeof item === "object") {
+                if (item.resolved && item.id) {
+                  // Already resolved at pipeline time — use the real ID directly
+                  preResolvedInterests.push({ id: item.id, name: item.resolvedName || item.name });
+                } else if (item.name) {
+                  // Unresolved enriched object — fall back to name-based lookup
+                  interestNames.push(item.name);
+                }
+              }
+            }
+          }
+        } catch { /* leave both arrays empty */ }
       }
 
       const metaAdsetId = await createMetaAdSet({
@@ -136,7 +160,8 @@ router.post("/meta/push/:campaignId", async (req, res): Promise<void> => {
         targetingAgeMin: adset.ageMin || undefined,
         targetingAgeMax: adset.ageMax || undefined,
         targetingGender: adset.gender || undefined,
-        targetingInterests: interests,
+        targetingInterests: interestNames,
+        preResolvedInterests: preResolvedInterests.length > 0 ? preResolvedInterests : undefined,
       });
 
       // Update local adset with Meta ID
