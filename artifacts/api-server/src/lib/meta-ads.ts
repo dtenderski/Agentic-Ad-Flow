@@ -338,6 +338,26 @@ export async function validateMetaCredentials(): Promise<{
   }
 }
 
+// ─── Campaign Status & Budget Updates ────────────────────────────────────────
+
+export async function updateMetaCampaignStatus(
+  metaCampaignId: string,
+  status: "PAUSED" | "ACTIVE"
+): Promise<void> {
+  await metaPost<{ success: boolean }>(`${metaCampaignId}`, { status });
+  logger.info({ metaCampaignId, status }, "Meta campaign status updated");
+}
+
+export async function updateMetaCampaignBudget(
+  metaCampaignId: string,
+  dailyBudgetIdr: number
+): Promise<void> {
+  await metaPost<{ success: boolean }>(`${metaCampaignId}`, {
+    daily_budget: Math.round(dailyBudgetIdr),
+  });
+  logger.info({ metaCampaignId, dailyBudgetIdr }, "Meta campaign budget updated");
+}
+
 // ─── Campaign ─────────────────────────────────────────────────────────────────
 
 const OBJECTIVE_MAP: Record<string, string> = {

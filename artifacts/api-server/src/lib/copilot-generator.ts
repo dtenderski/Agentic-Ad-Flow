@@ -2,7 +2,12 @@ import Anthropic from "@anthropic-ai/sdk";
 import { db, copilotReportsTable, campaignsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { logger } from "./logger";
-import { getAdAccountInsights, getMetaCampaignInsights } from "./meta-ads";
+import {
+  getAdAccountInsights,
+  getMetaCampaignInsights,
+  updateMetaCampaignStatus,
+  updateMetaCampaignBudget,
+} from "./meta-ads";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -241,24 +246,48 @@ async function executeTool(toolUse: ToolInput): Promise<unknown> {
       const { campaign_id } = toolUse.input;
       const localId = parseInt(campaign_id, 10);
       if (isNaN(localId)) throw new Error("campaign_id must be a local integer ID");
+      const [campaign] = await db.select().from(campaignsTable).where(eq(campaignsTable.id, localId));
+      if (!campaign) throw new Error(`Campaign ${campaign_id} not found`);
+      if (campaign.metaCampaignId) {
+        // Call Meta first — if it fails, local DB stays unchanged (no divergence)
+        await updateMetaCampaignStatus(campaign.metaCampaignId, "PAUSED");
+        await db.update(campaignsTable).set({ status: "paused" }).where(eq(campaignsTable.id, localId));
+        return { success: true, message: `Campaign "${campaign.campaignName}" paused in both AdClaw and Meta Ads Manager.` };
+      }
       await db.update(campaignsTable).set({ status: "paused" }).where(eq(campaignsTable.id, localId));
-      return { success: true, message: `Campaign ${campaign_id} paused in AdClaw (Meta status unchanged — push update separately)` };
+      return { success: true, message: `Campaign "${campaign.campaignName}" paused in AdClaw. (Not yet pushed to Meta — no Meta update needed.)` };
     }
 
     case "resume_campaign": {
       const { campaign_id } = toolUse.input;
       const localId = parseInt(campaign_id, 10);
       if (isNaN(localId)) throw new Error("campaign_id must be a local integer ID");
+      const [campaign] = await db.select().from(campaignsTable).where(eq(campaignsTable.id, localId));
+      if (!campaign) throw new Error(`Campaign ${campaign_id} not found`);
+      if (campaign.metaCampaignId) {
+        // Call Meta first — if it fails, local DB stays unchanged (no divergence)
+        await updateMetaCampaignStatus(campaign.metaCampaignId, "ACTIVE");
+        await db.update(campaignsTable).set({ status: "active" }).where(eq(campaignsTable.id, localId));
+        return { success: true, message: `Campaign "${campaign.campaignName}" resumed in both AdClaw and Meta Ads Manager.` };
+      }
       await db.update(campaignsTable).set({ status: "active" }).where(eq(campaignsTable.id, localId));
-      return { success: true, message: `Campaign ${campaign_id} resumed in AdClaw` };
+      return { success: true, message: `Campaign "${campaign.campaignName}" resumed in AdClaw. (Not yet pushed to Meta — no Meta update needed.)` };
     }
 
     case "update_budget": {
       const { campaign_id, new_daily_budget } = toolUse.input;
       const localId = parseInt(campaign_id, 10);
       if (isNaN(localId)) throw new Error("campaign_id must be a local integer ID");
+      const [campaign] = await db.select().from(campaignsTable).where(eq(campaignsTable.id, localId));
+      if (!campaign) throw new Error(`Campaign ${campaign_id} not found`);
+      if (campaign.metaCampaignId) {
+        // Call Meta first — if it fails, local DB stays unchanged (no divergence)
+        await updateMetaCampaignBudget(campaign.metaCampaignId, new_daily_budget);
+        await db.update(campaignsTable).set({ dailyBudget: String(new_daily_budget) }).where(eq(campaignsTable.id, localId));
+        return { success: true, message: `Daily budget for "${campaign.campaignName}" updated to IDR ${new_daily_budget.toLocaleString("id-ID")} in both AdClaw and Meta Ads Manager.` };
+      }
       await db.update(campaignsTable).set({ dailyBudget: String(new_daily_budget) }).where(eq(campaignsTable.id, localId));
-      return { success: true, message: `Budget updated to IDR ${new_daily_budget.toLocaleString("id-ID")} for campaign ${campaign_id} in AdClaw (push to Meta separately)` };
+      return { success: true, message: `Daily budget for "${campaign.campaignName}" updated to IDR ${new_daily_budget.toLocaleString("id-ID")} in AdClaw. (Not yet pushed to Meta — no Meta update needed.)` };
     }
 
     default:
@@ -326,7 +355,7 @@ export async function interpretCommand(message: string, businessId?: number): Pr
 
   const systemPrompt = `You are AdClaw Copilot — an AI Marketing Assistant for Indonesian Meta Ads operators. You understand commands in Bahasa Indonesia and English. When the user asks you to do something, use the available tools to fetch data or execute actions, then respond naturally in the same language they used. Always confirm what you did. Use IDR for currency formatting.
 
-Important: You manage campaigns in AdClaw (local database). Status changes in AdClaw don't automatically sync to Meta Ads Manager — tell the user if they need to also update in Meta directly.`;
+Important: When a campaign has been pushed to Meta (it has a metaCampaignId), pause/resume/budget commands update both AdClaw and Meta Ads Manager simultaneously — do NOT tell the operator to update Meta separately. Only mention Meta separately if the tool result explicitly says the campaign has not been pushed yet.`;
 
   const toolsUsed: string[] = [];
 
