@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Bot, User, Minimize2 } from 'lucide-react';
+import { MessageSquare, Send, Bot, User, Minimize2 } from 'lucide-react';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -10,7 +10,7 @@ interface ChatMessage {
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'assistant', content: "Hi! I'm AdFlow AI. Ask me anything about Agentic AdFlow, ad strategy, or how to get started." }
+    { role: 'assistant', content: "Halo! Saya AdFlow AI. Tanya apa saja tentang Agentic AdFlow, strategi iklan, atau cara memulai." }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -50,7 +50,7 @@ export function Chatbot() {
       const data = await response.json();
       setMessages([...newMessages, { role: 'assistant', content: data.reply }]);
     } catch (error) {
-      setMessages([...newMessages, { role: 'assistant', content: "AdFlow AI is offline. Try again in a moment." }]);
+      setMessages([...newMessages, { role: 'assistant', content: "AdFlow AI sedang offline. Coba lagi sebentar." }]);
     } finally {
       setIsLoading(false);
     }
@@ -75,7 +75,7 @@ export function Chatbot() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-sm">AdFlow AI</h3>
-                  <p className="text-xs text-primary-foreground/80">Agentic Copilot</p>
+                  <p className="text-xs text-primary-foreground/80">Copilot Agentic</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
@@ -132,7 +132,7 @@ export function Chatbot() {
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Ask a question..."
+                  placeholder="Tulis pertanyaan..."
                   className="flex-1 bg-muted/50 border border-border rounded-full pl-4 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                 />
                 <button

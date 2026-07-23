@@ -34,12 +34,12 @@ export default function Home() {
             <span className="font-bold text-lg tracking-tight">Agentic AdFlow</span>
           </div>
           <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-            <a href="#problem" className="hover:text-foreground transition-colors">The Problem</a>
-            <a href="#agents" className="hover:text-foreground transition-colors">Agents</a>
-            <a href="#features" className="hover:text-foreground transition-colors">Features</a>
+            <a href="#problem" className="hover:text-foreground transition-colors">Masalah</a>
+            <a href="#agents" className="hover:text-foreground transition-colors">Agen AI</a>
+            <a href="#features" className="hover:text-foreground transition-colors">Fitur</a>
           </div>
           <button onClick={() => document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth' })} className="px-4 py-2 text-sm font-medium bg-foreground text-background rounded-full hover:bg-foreground/90 transition-colors">
-            Get Access
+            Dapatkan Akses
           </button>
         </div>
       </nav>
@@ -60,24 +60,24 @@ export default function Home() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
               </span>
-              Claude AI-powered ad engine now in beta
+              Mesin iklan bertenaga Claude AI — kini dalam beta
             </motion.div>
             
             <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.1]">
-              Stop managing campaigns. <br className="hidden md:block" />
+              Berhenti kelola kampanye. <br className="hidden md:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent-foreground">
-                Start managing agents.
+                Mulai kelola agen.
               </span>
             </motion.h1>
             
             <motion.p variants={fadeInUp} className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-medium leading-relaxed">
-              Agentic AdFlow writes, builds, and publishes high-converting campaigns to Meta, Google, TikTok, and LinkedIn in minutes. You approve, AI executes.
+              Agentic AdFlow menulis, membangun, dan mempublikasikan kampanye iklan berkualitas tinggi ke Meta, Google, TikTok, dan LinkedIn dalam hitungan menit. Kamu yang setujui, AI yang eksekusi.
             </motion.p>
             
             <motion.div variants={fadeInUp} className="max-w-xl mx-auto pt-4">
               <WaitlistForm />
               <p className="text-xs text-muted-foreground mt-4 flex items-center justify-center gap-2">
-                <ShieldAlert size={14} /> Join 2,000+ performance marketers on the waitlist
+                <ShieldAlert size={14} /> Bergabung dengan 2.000+ marketer di daftar tunggu
               </p>
             </motion.div>
           </motion.div>
@@ -106,12 +106,12 @@ export default function Home() {
               <div className="flex-1 p-6 md:p-8">
                 <div className="flex items-center justify-between mb-8">
                   <div>
-                    <h3 className="font-bold text-xl">Campaign: Q4 Growth Blitz</h3>
-                    <p className="text-sm text-muted-foreground">Drafted by OpenClaw AI</p>
+                    <h3 className="font-bold text-xl">Kampanye: Blitz Pertumbuhan Q4</h3>
+                    <p className="text-sm text-muted-foreground">Dibuat oleh OpenClaw AI</p>
                   </div>
                   <div className="flex gap-2">
                     <div className="px-3 py-1 bg-destructive/10 text-destructive text-sm rounded-full font-medium flex items-center gap-1">
-                      <Clock size={14} /> Awaiting Approval
+                      <Clock size={14} /> Menunggu Persetujuan
                     </div>
                   </div>
                 </div>
@@ -119,10 +119,10 @@ export default function Home() {
                 {/* Scoring metrics */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                   {[
-                    { label: 'Conversion Readiness', score: 94, color: 'text-green-500' },
-                    { label: 'Creative Strength', score: 88, color: 'text-primary' },
-                    { label: 'Funnel Fit', score: 91, color: 'text-blue-500' },
-                    { label: 'Policy Risk', score: 12, color: 'text-green-500', isLowGood: true },
+                    { label: 'Kesiapan Konversi', score: 94, color: 'text-green-500' },
+                    { label: 'Kekuatan Kreatif', score: 88, color: 'text-primary' },
+                    { label: 'Kesesuaian Funnel', score: 91, color: 'text-blue-500' },
+                    { label: 'Risiko Kebijakan', score: 12, color: 'text-green-500', isLowGood: true },
                   ].map((metric, i) => (
                     <div key={i} className="p-4 rounded-xl border border-border bg-background">
                       <p className="text-xs text-muted-foreground mb-2 font-mono uppercase tracking-wider">{metric.label}</p>
@@ -132,9 +132,9 @@ export default function Home() {
                 </div>
 
                 <div className="flex justify-end gap-3 border-t border-border pt-6">
-                  <div className="px-4 py-2 bg-muted text-muted-foreground rounded-lg text-sm font-medium">Request Revision</div>
+                  <div className="px-4 py-2 bg-muted text-muted-foreground rounded-lg text-sm font-medium">Minta Revisi</div>
                   <div className="px-6 py-2 bg-foreground text-background rounded-lg text-sm font-bold flex items-center gap-2">
-                    <CheckCircle2 size={16} /> Approve & Push Live
+                    <CheckCircle2 size={16} /> Setujui & Tayangkan
                   </div>
                 </div>
               </div>
@@ -153,16 +153,16 @@ export default function Home() {
                 variants={staggerContainer}
               >
                 <motion.h2 variants={fadeInUp} className="text-3xl md:text-5xl font-bold mb-6">
-                  You're wasting hours clicking buttons in Ads Manager.
+                  Kamu buang berjam-jam cuma klik-klik di Ads Manager.
                 </motion.h2>
                 <motion.p variants={fadeInUp} className="text-xl text-muted/80 mb-8 leading-relaxed">
-                  Campaign setup hasn't changed in 10 years. You're still duplicating ad sets, guessing at interests, and praying you didn't leave a broad match keyword on by accident.
+                  Setup kampanye tidak berubah dalam 10 tahun terakhir. Kamu masih duplikat ad set, nebak-nebak interest, dan berharap tidak lupa matikan broad match keyword.
                 </motion.p>
                 <motion.ul variants={staggerContainer} className="space-y-4">
                   {[
-                    "Agency fees eating your margins.",
-                    "Budgets burned on bad targeting.",
-                    "Weeks lost waiting for creative approvals."
+                    "Biaya agensi menggerus margin kamu.",
+                    "Budget terbakar karena targeting yang salah.",
+                    "Berminggu-minggu menunggu approval kreatif.",
                   ].map((item, i) => (
                     <motion.li key={i} variants={fadeInUp} className="flex items-center gap-3 text-lg font-medium">
                       <div className="w-6 h-6 rounded-full bg-destructive/20 flex items-center justify-center text-destructive">
@@ -184,11 +184,11 @@ export default function Home() {
                 <div className="absolute top-0 right-0 p-4 opacity-10">
                   <BarChart3 size={120} />
                 </div>
-                <h3 className="text-2xl font-bold mb-4">The Status Quo</h3>
+                <h3 className="text-2xl font-bold mb-4">Kondisi Saat Ini</h3>
                 <div className="space-y-6 relative z-10">
                   <div>
                     <div className="flex justify-between text-sm mb-2">
-                      <span>Time spent on strategy</span>
+                      <span>Waktu untuk strategi</span>
                       <span className="font-mono text-muted/60">10%</span>
                     </div>
                     <div className="h-2 w-full bg-background/20 rounded-full overflow-hidden">
@@ -197,7 +197,7 @@ export default function Home() {
                   </div>
                   <div>
                     <div className="flex justify-between text-sm mb-2">
-                      <span>Time spent clicking in UI</span>
+                      <span>Waktu klik-klik di UI</span>
                       <span className="font-mono text-muted/60">90%</span>
                     </div>
                     <div className="h-2 w-full bg-background/20 rounded-full overflow-hidden">
@@ -213,9 +213,9 @@ export default function Home() {
         {/* SOLUTION (The Agents) */}
         <section id="agents" className="py-24 px-6 bg-muted/30">
           <div className="max-w-6xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Meet your new growth team.</h2>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">Kenali tim pertumbuhan barumu.</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Agentic AdFlow is powered by two specialized Claude AI agents working in tandem to scale your business.
+              Agentic AdFlow ditenagai oleh dua agen Claude AI khusus yang bekerja bersama untuk menskalakan bisnismu.
             </p>
           </div>
 
@@ -234,14 +234,14 @@ export default function Home() {
                 <Target size={28} />
               </div>
               <h3 className="text-2xl font-bold mb-3">MultiClaw</h3>
-              <p className="text-sm font-mono text-primary mb-4">THE STRATEGIST</p>
+              <p className="text-sm font-mono text-primary mb-4">SANG STRATEGI</p>
               <p className="text-muted-foreground leading-relaxed mb-6">
-                MultiClaw analyzes your business, reads your landing pages, and diagnoses your audience. It defines the angle, identifies the exact pain points, and outlines the perfect campaign structure.
+                MultiClaw menganalisis bisnis kamu, membaca landing page-mu, dan mendiagnosa audiensmu. Ia menentukan sudut pandang, mengidentifikasi pain point yang tepat, dan merancang struktur kampanye yang sempurna.
               </p>
               <ul className="space-y-2 text-sm font-medium">
-                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-primary"/> Audience Persona Generation</li>
-                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-primary"/> Offer Structuring</li>
-                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-primary"/> Budget Allocation Strategy</li>
+                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-primary"/> Pembuatan Persona Audiens</li>
+                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-primary"/> Struktur Penawaran</li>
+                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-primary"/> Strategi Alokasi Anggaran</li>
               </ul>
             </motion.div>
 
@@ -260,14 +260,14 @@ export default function Home() {
                 <Fingerprint size={28} />
               </div>
               <h3 className="text-2xl font-bold mb-3">OpenClaw</h3>
-              <p className="text-sm font-mono text-accent-foreground mb-4">THE EXECUTOR</p>
+              <p className="text-sm font-mono text-accent-foreground mb-4">SANG EKSEKUTOR</p>
               <p className="text-muted-foreground leading-relaxed mb-6">
-                OpenClaw takes the strategy and builds it. It selects interests on Meta, writes the ad copy, generates creative variations, and pushes directly to the platform via API.
+                OpenClaw mengambil strategi dan membangunnya. Ia memilih interest di Meta, menulis copy iklan, menghasilkan variasi kreatif, dan mendorong langsung ke platform melalui API.
               </p>
               <ul className="space-y-2 text-sm font-medium">
-                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-accent-foreground"/> Native Platform API Integration</li>
-                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-accent-foreground"/> Copywriting & Creative Gen</li>
-                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-accent-foreground"/> Policy Compliance Checking</li>
+                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-accent-foreground"/> Integrasi API Platform Langsung</li>
+                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-accent-foreground"/> Penulisan Copy & Generasi Kreatif</li>
+                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-accent-foreground"/> Pemeriksaan Kepatuhan Kebijakan</li>
               </ul>
             </motion.div>
           </div>
@@ -280,12 +280,12 @@ export default function Home() {
               
               <div className="md:col-span-2 bg-foreground text-background p-10 rounded-3xl relative overflow-hidden">
                 <div className="relative z-10 max-w-lg">
-                  <h3 className="text-3xl font-bold mb-4">Human Approval Gate</h3>
+                  <h3 className="text-3xl font-bold mb-4">Gerbang Persetujuan Manusia</h3>
                   <p className="text-lg text-muted/80 mb-8">
-                    AI does the heavy lifting, but you hold the keys. Nothing goes live without your explicit approval. Review targeting, copy, and spend limits before they hit the ad network.
+                    AI yang kerja keras, tapi kamu yang pegang kendali. Tidak ada yang tayang tanpa persetujuan eksplisitmu. Tinjau targeting, copy, dan batas pengeluaran sebelum menyentuh jaringan iklan.
                   </p>
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-semibold rounded-lg">
-                    <ShieldAlert size={18} /> 100% Control Maintained
+                    <ShieldAlert size={18} /> Kontrol 100% Terjaga
                   </div>
                 </div>
                 {/* Abstract graphic */}
@@ -297,12 +297,12 @@ export default function Home() {
                 <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-6">
                   <TrendingUp size={24} />
                 </div>
-                <h3 className="text-2xl font-bold mb-3">Daily Copilot</h3>
+                <h3 className="text-2xl font-bold mb-3">Copilot Harian</h3>
                 <p className="text-muted-foreground mb-6">
-                  Wake up to a morning trend brief. Finish the day with a performance teardown. Copilot tells you what to scale and what to kill.
+                  Bangun pagi dengan briefing tren terkini. Tutup hari dengan laporan performa mendalam. Copilot memberi tahu apa yang perlu di-scale dan apa yang harus dihentikan.
                 </p>
                 <div className="flex items-center gap-2 text-sm font-mono text-primary font-medium">
-                  <RefreshCcw size={16} /> Automated Daily
+                  <RefreshCcw size={16} /> Otomatis Setiap Hari
                 </div>
               </div>
 
@@ -314,22 +314,22 @@ export default function Home() {
         <section id="cta" className="py-32 px-6 bg-primary text-primary-foreground text-center relative overflow-hidden">
           <div className="absolute inset-0 opacity-10 mix-blend-overlay" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
           <div className="max-w-3xl mx-auto relative z-10">
-            <h2 className="text-4xl md:text-6xl font-extrabold mb-6">Ready to fire your agency?</h2>
+            <h2 className="text-4xl md:text-6xl font-extrabold mb-6">Siap pecat agency-mu?</h2>
             <p className="text-xl text-primary-foreground/80 mb-10 font-medium">
-              Stop paying retainers for tasks AI can do in 4 minutes. Join the waitlist for Agentic AdFlow and get early access to the beta.
+              Berhenti bayar retainer untuk tugas yang bisa diselesaikan AI dalam 4 menit. Daftar ke waitlist Agentic AdFlow dan dapatkan akses awal ke beta.
             </p>
             <div className="bg-background p-2 rounded-2xl shadow-2xl max-w-xl mx-auto text-foreground">
               <WaitlistForm />
             </div>
             <p className="text-sm text-primary-foreground/60 mt-6 font-mono">
-              NO CREDIT CARD REQUIRED • CANCEL YOUR AGENCY LATER
+              TANPA KARTU KREDIT • BATALKAN AGENCY-MU NANTI
             </p>
           </div>
         </section>
       </main>
 
       <footer className="py-8 text-center text-sm text-muted-foreground border-t border-border bg-background">
-        <p>© {new Date().getFullYear()} Agentic AdFlow. Built with Claude AI.</p>
+        <p>© {new Date().getFullYear()} Agentic AdFlow. Dibangun dengan Claude AI.</p>
       </footer>
 
       {/* Floating Chatbot */}

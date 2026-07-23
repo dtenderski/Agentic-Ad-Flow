@@ -28,9 +28,9 @@ export function WaitlistForm() {
         <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-4">
           <Check size={24} />
         </div>
-        <h3 className="text-xl font-bold text-foreground mb-2">You're on the list.</h3>
+        <h3 className="text-xl font-bold text-foreground mb-2">Kamu sudah terdaftar.</h3>
         <p className="text-muted-foreground text-sm">
-          We'll send you an invite to access Agentic AdFlow soon.
+          Kami akan mengirimkan undangan akses Agentic AdFlow segera.
         </p>
       </motion.div>
     );
@@ -41,7 +41,7 @@ export function WaitlistForm() {
       <div className="flex-1 flex flex-col gap-3 sm:flex-row sm:gap-2">
         <input
           type="text"
-          placeholder="First Name"
+          placeholder="Nama Depan"
           value={name}
           onChange={(e) => setName(e.target.value)}
           disabled={status === 'submitting'}
@@ -50,7 +50,7 @@ export function WaitlistForm() {
         />
         <input
           type="email"
-          placeholder="Work Email"
+          placeholder="Email Kerja"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={status === 'submitting'}
@@ -67,7 +67,7 @@ export function WaitlistForm() {
           <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
         ) : (
           <>
-            Get Early Access
+            Dapatkan Akses Awal
             <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </>
         )}
