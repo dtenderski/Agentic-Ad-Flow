@@ -1,4 +1,5 @@
 - [AdClaw AI architecture](adclaw-ai-arch.md) — MultiClaw+OpenClaw stack: React+Vite frontend, Express 5 API, PostgreSQL+Drizzle, Orval codegen from OpenAPI spec
 - [Orval Zod looseObject fix](orval-zod-fix.md) — blueprint type:object fields must be type:string (JSON strings) to avoid zod.looseObject() error in Zod 3.25.x
 - [LLM blueprint engine](llm-blueprint.md) — Claude claude-sonnet-4-6 powers pipeline generation; ANTHROPIC_API_KEY from user; blueprint sections are JSON strings stored in TEXT columns
-- [Meta Ads push layer](meta-ads-push.md) — META_ACCESS_TOKEN + META_AD_ACCOUNT_ID secrets; Marketing API v21.0; campaigns always created PAUSED; interest IDs are placeholders (need Meta Interest Search API for production)
+- [Meta Ads push layer](meta-ads-push.md) — META_ACCESS_TOKEN + META_AD_ACCOUNT_ID secrets; Marketing API v21.0; campaigns always created PAUSED; interest IDs resolved via Meta Targeting Search API
+- [Interest Preview Gate](interest-preview-gate.md) — GET /campaigns/:id/interest-preview resolves interests before approve; canApprove=false blocks UI + API when 0 interests match

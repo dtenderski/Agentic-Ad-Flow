@@ -32,6 +32,7 @@ import type {
   BusinessUpdate,
   Campaign,
   CampaignInput,
+  CampaignInterestPreview,
   CampaignUpdate,
   CopilotCommandInput,
   CopilotCommandResult,
@@ -1903,6 +1904,84 @@ export const useDeleteCampaign = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getDeleteCampaignMutationOptions(options));
     }
+
+export const getGetCampaignInterestPreviewUrl = (campaignId: number,) => {
+
+
+
+
+  return `/api/campaigns/${campaignId}/interest-preview`
+}
+
+/**
+ * Resolves each interest name in every ad set against the Meta Targeting Search API without creating anything. Used by the reviewer before approving.
+ * @summary Preview Meta interest matching for all ad sets
+ */
+export const getCampaignInterestPreview = async (campaignId: number, options?: RequestInit): Promise<CampaignInterestPreview> => {
+
+  return customFetch<CampaignInterestPreview>(getGetCampaignInterestPreviewUrl(campaignId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCampaignInterestPreviewQueryKey = (campaignId: number,) => {
+    return [
+    `/api/campaigns/${campaignId}/interest-preview`
+    ] as const;
+    }
+
+
+export const getGetCampaignInterestPreviewQueryOptions = <TData = Awaited<ReturnType<typeof getCampaignInterestPreview>>, TError = ErrorType<void>>(campaignId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCampaignInterestPreview>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCampaignInterestPreviewQueryKey(campaignId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCampaignInterestPreview>>> = ({ signal }) => getCampaignInterestPreview(campaignId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: campaignId !== null && campaignId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCampaignInterestPreview>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCampaignInterestPreviewQueryResult = NonNullable<Awaited<ReturnType<typeof getCampaignInterestPreview>>>
+export type GetCampaignInterestPreviewQueryError = ErrorType<void>
+
+
+/**
+ * @summary Preview Meta interest matching for all ad sets
+ */
+
+export function useGetCampaignInterestPreview<TData = Awaited<ReturnType<typeof getCampaignInterestPreview>>, TError = ErrorType<void>>(
+ campaignId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCampaignInterestPreview>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCampaignInterestPreviewQueryOptions(campaignId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getApproveCampaignUrl = (campaignId: number,) => {
 

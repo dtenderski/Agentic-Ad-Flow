@@ -679,6 +679,34 @@ export const DeleteCampaignResponse = zod.void()
 
 
 /**
+ * Resolves each interest name in every ad set against the Meta Targeting Search API without creating anything. Used by the reviewer before approving.
+ * @summary Preview Meta interest matching for all ad sets
+ */
+export const GetCampaignInterestPreviewParams = zod.object({
+  "campaignId": zod.coerce.number()
+})
+
+export const GetCampaignInterestPreviewResponse = zod.object({
+  "adsets": zod.array(zod.object({
+  "adsetId": zod.number(),
+  "adsetName": zod.string(),
+  "interests": zod.array(zod.object({
+  "query": zod.string().describe('The interest name string from the ad set'),
+  "matched": zod.union([zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "audienceSize": zod.number().nullish()
+}),zod.null()]).describe('The Meta interest that was found, or null if no match')
+}))
+})),
+  "totalInterests": zod.number().describe('Total number of interest strings across all ad sets'),
+  "matchedCount": zod.number().describe('Number of interests that were successfully resolved to a Meta ID'),
+  "hasUnmatchedInterests": zod.boolean().describe('True if any interest string failed to resolve'),
+  "canApprove": zod.boolean().describe('False if there are interests listed but none could be resolved in ANY ad set')
+})
+
+
+/**
  * @summary Approve a campaign (human gate)
  */
 export const ApproveCampaignParams = zod.object({

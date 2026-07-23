@@ -713,6 +713,31 @@ export interface MetaInterestItem {
   audienceSize?: number | null;
 }
 
+export interface InterestMatchResult {
+  /** The interest name string from the ad set */
+  query: string;
+  /** The Meta interest that was found, or null if no match */
+  matched: MetaInterestItem | null;
+}
+
+export interface AdSetInterestPreview {
+  adsetId: number;
+  adsetName: string;
+  interests: InterestMatchResult[];
+}
+
+export interface CampaignInterestPreview {
+  adsets: AdSetInterestPreview[];
+  /** Total number of interest strings across all ad sets */
+  totalInterests: number;
+  /** Number of interests that were successfully resolved to a Meta ID */
+  matchedCount: number;
+  /** True if any interest string failed to resolve */
+  hasUnmatchedInterests: boolean;
+  /** False if there are interests listed but none could be resolved in ANY ad set */
+  canApprove: boolean;
+}
+
 export interface MetaInterestSearchResult {
   data: MetaInterestItem[];
 }

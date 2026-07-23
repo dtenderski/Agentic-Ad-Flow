@@ -485,6 +485,28 @@ paths:
         "204":
           description: Deleted
 
+  /campaigns/{campaignId}/interest-preview:
+    get:
+      operationId: getCampaignInterestPreview
+      tags: [campaigns, meta]
+      summary: Preview Meta interest matching for all ad sets
+      description: Resolves each interest name in every ad set against the Meta Targeting Search API without creating anything. Used by the reviewer before approving.
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Interest preview per ad set
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CampaignInterestPreview"
+        "404":
+          description: Campaign not found
+
   /campaigns/{campaignId}/approve:
     post:
       operationId: approveCampaign
@@ -2206,6 +2228,53 @@ components:
           type: string
         dateStop:
           type: string
+
+    InterestMatchResult:
+      type: object
+      required: [query, matched]
+      properties:
+        query:
+          type: string
+          description: The interest name string from the ad set
+        matched:
+          description: The Meta interest that was found, or null if no match
+          oneOf:
+            - $ref: "#/components/schemas/MetaInterestItem"
+            - type: "null"
+
+    AdSetInterestPreview:
+      type: object
+      required: [adsetId, adsetName, interests]
+      properties:
+        adsetId:
+          type: integer
+        adsetName:
+          type: string
+        interests:
+          type: array
+          items:
+            $ref: "#/components/schemas/InterestMatchResult"
+
+    CampaignInterestPreview:
+      type: object
+      required: [adsets, totalInterests, matchedCount, hasUnmatchedInterests, canApprove]
+      properties:
+        adsets:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdSetInterestPreview"
+        totalInterests:
+          type: integer
+          description: Total number of interest strings across all ad sets
+        matchedCount:
+          type: integer
+          description: Number of interests that were successfully resolved to a Meta ID
+        hasUnmatchedInterests:
+          type: boolean
+          description: True if any interest string failed to resolve
+        canApprove:
+          type: boolean
+          description: False if there are interests listed but none could be resolved in ANY ad set
 
     MetaInterestItem:
       type: object

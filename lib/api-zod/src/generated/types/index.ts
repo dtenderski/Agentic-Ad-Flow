@@ -8,6 +8,7 @@
 
 export * from './adSet';
 export * from './adSetInput';
+export * from './adSetInterestPreview';
 export * from './adSetUpdate';
 export * from './agentMemory';
 export * from './approval';
@@ -18,6 +19,7 @@ export * from './businessInput';
 export * from './businessUpdate';
 export * from './campaign';
 export * from './campaignInput';
+export * from './campaignInterestPreview';
 export * from './campaignUpdate';
 export * from './copilotCommandInput';
 export * from './copilotCommandResult';
@@ -36,6 +38,7 @@ export * from './googleCampaignInsight';
 export * from './googlePushResult';
 export * from './googleValidationResult';
 export * from './healthStatus';
+export * from './interestMatchResult';
 export * from './linkedInCampaignInsight';
 export * from './linkedInPushResult';
 export * from './linkedInValidationResult';
