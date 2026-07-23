@@ -1,6 +1,6 @@
-# [Project name]
+# AdClaw AI
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+An agentic AI platform that generates and pushes ad campaigns to Meta Ads using Claude-powered pipelines.
 
 ## Run & Operate
 
@@ -22,15 +22,25 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/adclaw-ai/` — React+Vite frontend (shadcn/ui, Tailwind, Wouter routing)
+- `artifacts/api-server/` — Express 5 API server (port 8080 in dev)
+- `lib/api-spec/openapi.yaml` — OpenAPI spec (source of truth for all API contracts)
+- `lib/db/` — Drizzle ORM schema + migrations
+- `lib/api-client-react/` — Orval-generated React Query hooks
+- `lib/api-zod/` — Orval-generated Zod schemas
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Claude claude-sonnet-4-6 powers the pipeline generator; blueprints are JSON strings in TEXT columns to avoid Zod looseObject issues with Drizzle-Zod
+- Meta Ads campaigns are always created PAUSED; interest IDs are placeholders pending Meta Interest Search API
+- API codegen via Orval from OpenAPI spec; regenerate with `pnpm --filter @workspace/api-spec run codegen`
+- esbuild bundles the API server to a single CJS file for fast startup
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- AI-driven ad pipeline generator using Claude
+- One-click push of generated campaigns to Meta Ads (Marketing API v21.0)
+- Copilot scheduler: trend brief at 06:00 WIB, performance report at 16:00 WIB
 
 ## User preferences
 
@@ -38,7 +48,9 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Artifacts are not registered with the Replit platform (imported from GitHub); workflows are configured manually as "API Server" and "AdClaw AI"
+- `pnpm --filter @workspace/db run push` must be run after schema changes (dev only)
+- Frontend requires both `PORT` and `BASE_PATH` env vars at startup (enforced in vite.config.ts)
 
 ## Pointers
 
