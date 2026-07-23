@@ -15,9 +15,11 @@ import googleRouter from "./google";
 import tiktokRouter from "./tiktok";
 import linkedinRouter from "./linkedin";
 import copilotRouter from "./copilot";
+import chatRouter from "./chat";
 
 const router: IRouter = Router();
 
+router.use(chatRouter);
 router.use(healthRouter);
 router.use(dashboardRouter);
 router.use(businessesRouter);

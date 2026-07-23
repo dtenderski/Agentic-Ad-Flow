@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/adflow-landing/"
+title = "Agentic AdFlow Landing"
+version = "1.0.0"
+id = "artifacts/adflow-landing"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/adflow-landing/" ]
+localPort = 22849
+
+[services.development]
+run = "pnpm --filter @workspace/adflow-landing run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/adflow-landing", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/adflow-landing/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22849"
+BASE_PATH = "/adflow-landing/"
