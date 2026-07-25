@@ -104,26 +104,33 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   <div className="text-[10px] opacity-80 truncate">{metaStatus.adAccountName}</div>
                 </div>
               </div>
-              
-              {tokenInfo?.daysRemaining != null && tokenInfo.daysRemaining <= 7 && (
-                <div className="flex items-center justify-between gap-2 px-3 py-1.5 mt-1 text-xs font-medium text-orange-500 bg-orange-500/10 rounded-md border border-orange-500/20">
-                  <div className="truncate">
-                    {refreshMutation.isPending ? "Refreshing..." : `Token expires in ${tokenInfo.daysRemaining} days`}
-                  </div>
-                  <button 
-                    onClick={handleRefreshToken}
-                    disabled={refreshMutation.isPending}
-                    className="p-1 hover:bg-orange-500/20 rounded-md transition-colors disabled:opacity-50 shrink-0"
-                    title="Refresh Token"
-                  >
-                    {refreshMutation.isPending ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <RefreshCw className="w-3.5 h-3.5" />
-                    )}
-                  </button>
+
+              {/* Token info + refresh — always visible when connected */}
+              <div className={`flex items-center justify-between gap-2 px-3 py-1.5 text-xs font-medium rounded-md border ${
+                tokenInfo?.daysRemaining != null && tokenInfo.daysRemaining <= 7
+                  ? "text-orange-500 bg-orange-500/10 border-orange-500/20"
+                  : "text-muted-foreground bg-secondary border-border"
+              }`}>
+                <div className="truncate">
+                  {refreshMutation.isPending
+                    ? "Refreshing..."
+                    : tokenInfo?.daysRemaining != null
+                      ? `Token: ${tokenInfo.daysRemaining} hari tersisa`
+                      : "Token aktif"}
                 </div>
-              )}
+                <button
+                  onClick={handleRefreshToken}
+                  disabled={refreshMutation.isPending}
+                  className="p-1 hover:bg-white/10 rounded-md transition-colors disabled:opacity-50 shrink-0"
+                  title="Refresh Meta Token"
+                >
+                  {refreshMutation.isPending ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              </div>
             </div>
           ) : (
             <div className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-destructive bg-destructive/10 rounded-md" title={metaStatus?.error || "Connection error"}>

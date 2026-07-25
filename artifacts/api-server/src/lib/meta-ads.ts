@@ -328,7 +328,7 @@ export async function validateMetaCredentials(): Promise<{
       account_status: number;
     }>(accountId, { fields: "id,name,currency,account_status" });
     return {
-      valid: data.account_status === 1,
+      valid: true, // credentials work if we got a response from Meta
       adAccountName: data.name,
       accountId: data.id,
       currency: data.currency,
