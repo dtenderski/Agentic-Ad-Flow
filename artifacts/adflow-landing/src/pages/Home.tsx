@@ -1,338 +1,434 @@
 import React, { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { WaitlistForm } from '@/components/WaitlistForm';
 import { Chatbot } from '@/components/Chatbot';
-import { Target, TrendingUp, Zap, ShieldAlert, CheckCircle2, Clock, BrainCircuit, Activity, BarChart3, Fingerprint, RefreshCcw, X } from 'lucide-react';
+import {
+  TrendingDown, Clock, DollarSign, Zap, BrainCircuit,
+  CheckCircle2, ArrowRight, Play, Target, Activity,
+  ShieldCheck, BarChart3, RefreshCcw, ChevronRight,
+  AlertTriangle, Flame, Rocket
+} from 'lucide-react';
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }
+const fadeUp = {
+  hidden: { opacity: 0, y: 28 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } }
 };
 
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 }
-  }
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1 } }
 };
+
+function Section({ children, className = '', id = '' }: { children: React.ReactNode; className?: string; id?: string }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-80px' });
+  return (
+    <motion.section
+      id={id}
+      ref={ref}
+      initial="hidden"
+      animate={inView ? 'visible' : 'hidden'}
+      variants={stagger}
+      className={className}
+    >
+      {children}
+    </motion.section>
+  );
+}
+
+const PAIN_POINTS = [
+  {
+    icon: Clock,
+    title: 'Setup kampanye butuh 2–3 hari',
+    body: 'Riset audience, nulis copy, buat creative brief, koordinasi sama designer — semua manual, semua lambat. Sementara kompetitor sudah live.',
+    color: 'text-orange-500',
+    bg: 'bg-orange-500/10',
+  },
+  {
+    icon: DollarSign,
+    title: 'Agency tagih jutaan, hasilnya ga transparan',
+    body: 'Retainer bulanan Rp 8–25 juta. Tapi kamu tidak tahu interest apa yang dipakai, kenapa kampanye di-pause, atau berapa yang mubazir.',
+    color: 'text-red-500',
+    bg: 'bg-red-500/10',
+  },
+  {
+    icon: TrendingDown,
+    title: 'Budget habis sebelum tahu hasilnya',
+    body: 'Tanpa validasi interest Meta sebelum go-live, kamu baru tahu kampanye gagal setelah budget terkuras. Terlambat untuk dibenahi.',
+    color: 'text-rose-500',
+    bg: 'bg-rose-500/10',
+  },
+];
+
+const PIPELINE_STEPS = [
+  { step: '01', label: 'Brief Bisnis', desc: 'Isi nama bisnis, produk, target pasar. Selesai dalam 2 menit.' },
+  { step: '02', label: 'AI Generate Blueprint', desc: 'MultiClaw menganalisis brief dan menghasilkan strategi, copy, audience, dan budget plan lengkap.' },
+  { step: '03', label: 'Validasi Interest Meta', desc: 'OpenClaw otomatis resolve setiap interest ke Meta Targeting API — kamu tahu persis audience yang akan dijangkau.' },
+  { step: '04', label: 'Human Gate', desc: 'Kamu review blueprint dan approve. AI tidak bisa push tanpa persetujuanmu — kontrol tetap di tanganmu.' },
+  { step: '05', label: 'Push ke Meta (PAUSED)', desc: 'Campaign dikirim ke Meta Ads dalam status PAUSED. Kamu aktifkan sendiri kapan siap.' },
+  { step: '06', label: 'Copilot Harian', desc: 'Setiap pagi brief tren, setiap sore laporan performa. AI yang pantau, kamu yang putuskan.' },
+];
+
+const FEATURES = [
+  { icon: BrainCircuit, title: 'Multi-Agent Pipeline', body: 'MultiClaw + OpenClaw bekerja seri: satu riset & strategi, satu eksekusi & validasi.' },
+  { icon: Target, title: 'Interest Resolver', body: 'Setiap interest audience di-check ke Meta API sebelum approve — tidak ada blind targeting.' },
+  { icon: ShieldCheck, title: 'Human Gate', body: 'AI tidak bisa go-live tanpa review manusia. Kamu tetap pemegang keputusan akhir.' },
+  { icon: BarChart3, title: 'Scoring Blueprint', body: 'Setiap blueprint dapat skor: Conversion Readiness, Policy Risk, Creative Strength, dan Funnel Fit.' },
+  { icon: RefreshCcw, title: 'Copilot Otomatis', body: 'Brief 06:00 WIB dan laporan 16:00 WIB setiap hari — tanpa kamu minta.' },
+  { icon: Rocket, title: 'Push Multi-Platform', body: 'Meta, Google, TikTok, LinkedIn — satu pipeline untuk semua channel.' },
+];
+
+const STATS = [
+  { value: '4 menit', label: 'Dari brief ke blueprint siap' },
+  { value: '0 retainer', label: 'Tidak perlu agency lagi' },
+  { value: '100%', label: 'Interest tervalidasi sebelum live' },
+  { value: '2×/hari', label: 'Laporan otomatis Copilot' },
+];
 
 export default function Home() {
   const { scrollYProgress } = useScroll();
-  const yMockup = useTransform(scrollYProgress, [0, 1], [0, 150]);
+  const progressWidth = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-hidden selection:bg-primary/20">
-      
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/20">
+
+      {/* Scroll progress bar */}
+      <motion.div
+        className="fixed top-0 left-0 h-0.5 bg-primary z-50"
+        style={{ width: progressWidth }}
+      />
+
+      {/* Nav */}
+      <nav className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Activity className="text-primary-foreground" size={18} />
+              <Activity className="text-primary-foreground" size={16} />
             </div>
-            <span className="font-bold text-lg tracking-tight">Agentic AdFlow</span>
+            <span className="font-extrabold text-base tracking-tight">Agentic AdFlow</span>
           </div>
           <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
             <a href="#problem" className="hover:text-foreground transition-colors">Masalah</a>
-            <a href="#agents" className="hover:text-foreground transition-colors">Agen AI</a>
-            <a href="#features" className="hover:text-foreground transition-colors">Fitur</a>
+            <a href="#solution" className="hover:text-foreground transition-colors">Solusi</a>
+            <a href="#cara-kerja" className="hover:text-foreground transition-colors">Cara Kerja</a>
+            <a href="#fitur" className="hover:text-foreground transition-colors">Fitur</a>
           </div>
-          <button onClick={() => document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth' })} className="px-4 py-2 text-sm font-medium bg-foreground text-background rounded-full hover:bg-foreground/90 transition-colors">
-            Dapatkan Akses
+          <button
+            onClick={() => document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth' })}
+            className="px-4 py-2 text-sm font-semibold bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors flex items-center gap-1.5"
+          >
+            Daftar Gratis <ChevronRight size={14} />
           </button>
         </div>
       </nav>
 
       <main className="pt-16">
-        {/* HERO SECTION */}
-        <section className="relative min-h-[90vh] flex flex-col items-center justify-center pt-10 pb-20 px-6 bg-grid-pattern">
+
+        {/* ── ATTENTION: Hero ── */}
+        <section className="relative min-h-[92vh] flex flex-col items-center justify-center py-24 px-6 overflow-hidden">
+          {/* Background grid */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:48px_48px]" />
           <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background pointer-events-none" />
-          
-          <motion.div 
+          {/* Glow */}
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
+
+          <motion.div
             initial="hidden"
             animate="visible"
-            variants={staggerContainer}
-            className="max-w-5xl mx-auto text-center relative z-10 space-y-8"
+            variants={stagger}
+            className="max-w-4xl mx-auto text-center relative z-10 space-y-8"
           >
-            <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium border border-primary/20 mb-4">
+            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold border border-primary/20">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
               </span>
-              Mesin iklan bertenaga Claude AI — kini dalam beta
+              Early Access Terbuka — Gratis untuk 100 pengguna pertama
             </motion.div>
-            
-            <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.1]">
-              Berhenti kelola kampanye. <br className="hidden md:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent-foreground">
-                Mulai kelola agen.
+
+            <motion.h1 variants={fadeUp} className="text-5xl md:text-[4.5rem] font-extrabold tracking-tight leading-[1.05]">
+              Iklan Meta-mu masih<br className="hidden md:block" />
+              <span className="relative inline-block">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-violet-500 to-primary">
+                  {' '}dikelola manual?
+                </span>
               </span>
             </motion.h1>
-            
-            <motion.p variants={fadeInUp} className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-medium leading-relaxed">
-              Agentic AdFlow menulis, membangun, dan mempublikasikan kampanye iklan berkualitas tinggi ke Meta, Google, TikTok, dan LinkedIn dalam hitungan menit. Kamu yang setujui, AI yang eksekusi.
+
+            <motion.p variants={fadeUp} className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Agentic AdFlow adalah mesin iklan berbasis AI yang generate blueprint, validasi audience ke Meta, dan push kampanye —
+              semua dalam <strong className="text-foreground">4 menit</strong>, bukan 4 hari.
             </motion.p>
-            
-            <motion.div variants={fadeInUp} className="max-w-xl mx-auto pt-4">
-              <WaitlistForm />
-              <p className="text-xs text-muted-foreground mt-4 flex items-center justify-center gap-2">
-                <ShieldAlert size={14} /> Bergabung dengan 2.000+ marketer di daftar tunggu
-              </p>
+
+            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                onClick={() => document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth' })}
+                className="px-8 py-4 bg-primary text-primary-foreground rounded-full font-bold text-base hover:bg-primary/90 transition-all hover:shadow-lg hover:shadow-primary/30 flex items-center gap-2 group"
+              >
+                <Play size={18} className="fill-current" />
+                Mulai Sekarang — Gratis
+                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              </button>
+              <a href="#cara-kerja" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                Lihat cara kerja <ChevronRight size={14} />
+              </a>
             </motion.div>
-          </motion.div>
 
-          {/* Hero UI Mockup */}
-          <motion.div 
-            style={{ y: yMockup }}
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
-            className="w-full max-w-6xl mx-auto mt-20 relative z-10"
-          >
-            <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
-              {/* Sidebar Mock */}
-              <div className="w-full md:w-64 bg-muted/30 border-r border-border p-4 hidden md:block">
-                <div className="space-y-4">
-                  <div className="h-8 bg-muted rounded-md w-3/4"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-muted rounded w-full"></div>
-                    <div className="h-4 bg-muted rounded w-5/6"></div>
-                    <div className="h-4 bg-muted rounded w-4/6"></div>
-                  </div>
+            {/* Social proof bar */}
+            <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center gap-6 pt-4 text-sm text-muted-foreground">
+              {STATS.map(s => (
+                <div key={s.value} className="flex items-center gap-2">
+                  <span className="font-extrabold text-foreground text-base">{s.value}</span>
+                  <span>{s.label}</span>
                 </div>
-              </div>
-              {/* Main Content Mock */}
-              <div className="flex-1 p-6 md:p-8">
-                <div className="flex items-center justify-between mb-8">
-                  <div>
-                    <h3 className="font-bold text-xl">Kampanye: Blitz Pertumbuhan Q4</h3>
-                    <p className="text-sm text-muted-foreground">Dibuat oleh OpenClaw AI</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="px-3 py-1 bg-destructive/10 text-destructive text-sm rounded-full font-medium flex items-center gap-1">
-                      <Clock size={14} /> Menunggu Persetujuan
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Scoring metrics */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                  {[
-                    { label: 'Kesiapan Konversi', score: 94, color: 'text-green-500' },
-                    { label: 'Kekuatan Kreatif', score: 88, color: 'text-primary' },
-                    { label: 'Kesesuaian Funnel', score: 91, color: 'text-blue-500' },
-                    { label: 'Risiko Kebijakan', score: 12, color: 'text-green-500', isLowGood: true },
-                  ].map((metric, i) => (
-                    <div key={i} className="p-4 rounded-xl border border-border bg-background">
-                      <p className="text-xs text-muted-foreground mb-2 font-mono uppercase tracking-wider">{metric.label}</p>
-                      <div className={`text-3xl font-bold ${metric.color}`}>{metric.score}</div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex justify-end gap-3 border-t border-border pt-6">
-                  <div className="px-4 py-2 bg-muted text-muted-foreground rounded-lg text-sm font-medium">Minta Revisi</div>
-                  <div className="px-6 py-2 bg-foreground text-background rounded-lg text-sm font-bold flex items-center gap-2">
-                    <CheckCircle2 size={16} /> Setujui & Tayangkan
-                  </div>
-                </div>
-              </div>
-            </div>
+              ))}
+            </motion.div>
           </motion.div>
         </section>
 
-        {/* PROBLEM & AGITATE */}
-        <section id="problem" className="py-24 px-6 bg-foreground text-background">
+        {/* ── PROBLEM ── */}
+        <Section id="problem" className="py-24 px-6 bg-muted/40">
+          <div className="max-w-6xl mx-auto">
+            <motion.div variants={fadeUp} className="text-center mb-16 space-y-4">
+              <span className="inline-flex items-center gap-2 text-xs font-semibold text-orange-500 uppercase tracking-widest">
+                <AlertTriangle size={14} /> Masalah
+              </span>
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight">
+                Kenapa iklan Meta-mu<br />
+                <span className="text-muted-foreground">tidak pernah optimal?</span>
+              </h2>
+              <p className="text-muted-foreground max-w-xl mx-auto text-lg">
+                Bukan karena produkmu kurang bagus. Tapi karena sistem yang kamu pakai masih ketinggalan zaman.
+              </p>
+            </motion.div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {PAIN_POINTS.map((p, i) => (
+                <motion.div
+                  key={i}
+                  variants={fadeUp}
+                  className="bg-card border border-border rounded-2xl p-8 space-y-4 hover:border-primary/30 transition-colors group"
+                >
+                  <div className={`w-12 h-12 ${p.bg} ${p.color} rounded-xl flex items-center justify-center`}>
+                    <p.icon size={22} />
+                  </div>
+                  <h3 className="font-bold text-lg leading-snug">{p.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{p.body}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </Section>
+
+        {/* ── AGITATE ── */}
+        <Section className="py-24 px-6">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <motion.div variants={fadeUp}>
+              <span className="inline-flex items-center gap-2 text-xs font-semibold text-red-500 uppercase tracking-widest mb-6">
+                <Flame size={14} /> Realita yang menyakitkan
+              </span>
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6">
+                Setiap hari tanpa AI,{' '}
+                <span className="text-red-500">kamu rugi lebih banyak</span>
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed mb-12">
+                Sementara kamu masih briefing desainer, menulis copy, menunggu approval —
+                kompetitormu yang pakai AI sudah launch 5 kampanye, mengoptimasi 3 di antaranya,
+                dan menskalakan yang paling perform.
+              </p>
+            </motion.div>
+
+            <motion.div variants={stagger} className="grid sm:grid-cols-3 gap-6 text-left">
+              {[
+                { num: '73%', label: 'budget iklan UKM terbuang karena targeting yang tidak tepat', src: 'Meta Business Insights 2024' },
+                { num: 'Rp 15jt', label: 'rata-rata biaya agency per bulan untuk satu brand di Indonesia', src: 'Estimasi industri' },
+                { num: '18 jam', label: 'waktu rata-rata dari brief ke kampanye live secara manual', src: 'Internal benchmark' },
+              ].map((s, i) => (
+                <motion.div key={i} variants={fadeUp} className="bg-card border border-border rounded-2xl p-6 space-y-2">
+                  <div className="text-4xl font-extrabold text-primary">{s.num}</div>
+                  <p className="text-sm leading-snug font-medium">{s.label}</p>
+                  <p className="text-[11px] text-muted-foreground font-mono">{s.src}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </Section>
+
+        {/* ── SOLUTION ── */}
+        <Section id="solution" className="py-24 px-6 bg-primary text-primary-foreground relative overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '28px 28px' }} />
+          <div className="max-w-4xl mx-auto text-center relative z-10 space-y-8">
+            <motion.div variants={fadeUp}>
+              <span className="inline-flex items-center gap-2 text-xs font-semibold text-primary-foreground/70 uppercase tracking-widest mb-4">
+                <Zap size={14} /> Solusi
+              </span>
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6">
+                Perkenalkan Agentic AdFlow —<br />
+                AI yang bekerja seperti tim agency terbaikmu
+              </h2>
+              <p className="text-primary-foreground/80 text-lg max-w-2xl mx-auto leading-relaxed">
+                Dua agen AI bekerja seri: <strong className="text-primary-foreground">MultiClaw</strong> meriset dan menyusun strategi,{' '}
+                <strong className="text-primary-foreground">OpenClaw</strong> memvalidasi audience ke Meta dan mengeksekusi —
+                semua dalam hitungan menit, bukan hari.
+              </p>
+            </motion.div>
+
+            <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-4 pt-4">
+              {['Blueprint Otomatis', 'Interest Tervalidasi', 'Human Gate', 'Copilot Harian', 'Push ke Meta'].map(tag => (
+                <span key={tag} className="px-4 py-2 bg-white/10 border border-white/20 rounded-full text-sm font-medium">
+                  ✓ {tag}
+                </span>
+              ))}
+            </motion.div>
+          </div>
+        </Section>
+
+        {/* ── HOW IT WORKS ── */}
+        <Section id="cara-kerja" className="py-24 px-6">
           <div className="max-w-5xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-16 items-center">
-              <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-100px" }}
-                variants={staggerContainer}
-              >
-                <motion.h2 variants={fadeInUp} className="text-3xl md:text-5xl font-bold mb-6">
-                  Kamu buang berjam-jam cuma klik-klik di Ads Manager.
-                </motion.h2>
-                <motion.p variants={fadeInUp} className="text-xl text-muted/80 mb-8 leading-relaxed">
-                  Setup kampanye tidak berubah dalam 10 tahun terakhir. Kamu masih duplikat ad set, nebak-nebak interest, dan berharap tidak lupa matikan broad match keyword.
-                </motion.p>
-                <motion.ul variants={staggerContainer} className="space-y-4">
-                  {[
-                    "Biaya agensi menggerus margin kamu.",
-                    "Budget terbakar karena targeting yang salah.",
-                    "Berminggu-minggu menunggu approval kreatif.",
-                  ].map((item, i) => (
-                    <motion.li key={i} variants={fadeInUp} className="flex items-center gap-3 text-lg font-medium">
-                      <div className="w-6 h-6 rounded-full bg-destructive/20 flex items-center justify-center text-destructive">
-                        <X size={14} />
+            <motion.div variants={fadeUp} className="text-center mb-16 space-y-4">
+              <span className="text-xs font-semibold text-primary uppercase tracking-widest">Cara Kerja</span>
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight">
+                6 langkah dari brief<br />ke kampanye live
+              </h2>
+            </motion.div>
+
+            <div className="relative">
+              {/* Vertical line */}
+              <div className="absolute left-[28px] md:left-1/2 top-0 bottom-0 w-px bg-border -translate-x-px hidden sm:block" />
+
+              <div className="space-y-8">
+                {PIPELINE_STEPS.map((s, i) => (
+                  <motion.div
+                    key={i}
+                    variants={fadeUp}
+                    className={`relative flex gap-6 md:gap-0 ${i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}
+                  >
+                    {/* Content */}
+                    <div className={`flex-1 ${i % 2 === 0 ? 'md:pr-16 md:text-right' : 'md:pl-16'}`}>
+                      <div className={`bg-card border border-border rounded-2xl p-6 space-y-2 hover:border-primary/30 transition-colors ${i % 2 === 0 ? 'md:ml-auto' : ''}`}>
+                        <div className="font-mono text-xs text-primary font-bold">STEP {s.step}</div>
+                        <h3 className="font-bold text-lg">{s.label}</h3>
+                        <p className="text-muted-foreground text-sm leading-relaxed">{s.desc}</p>
                       </div>
-                      {item}
-                    </motion.li>
+                    </div>
+
+                    {/* Center dot */}
+                    <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-9 h-9 bg-primary text-primary-foreground rounded-full items-center justify-center text-xs font-bold z-10 border-4 border-background">
+                      {i + 1}
+                    </div>
+
+                    <div className="flex-1 hidden md:block" />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Section>
+
+        {/* ── FEATURES ── */}
+        <Section id="fitur" className="py-24 px-6 bg-muted/40">
+          <div className="max-w-6xl mx-auto">
+            <motion.div variants={fadeUp} className="text-center mb-16 space-y-4">
+              <span className="text-xs font-semibold text-primary uppercase tracking-widest">Fitur Unggulan</span>
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight">
+                Semua yang kamu butuhkan<br />ada di satu dashboard
+              </h2>
+            </motion.div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {FEATURES.map((f, i) => (
+                <motion.div
+                  key={i}
+                  variants={fadeUp}
+                  className="bg-card border border-border rounded-2xl p-7 space-y-4 hover:border-primary/40 hover:-translate-y-1 transition-all group"
+                >
+                  <div className="w-11 h-11 bg-primary/10 text-primary rounded-xl flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                    <f.icon size={20} />
+                  </div>
+                  <h3 className="font-bold text-base">{f.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{f.body}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </Section>
+
+        {/* ── TESTIMONIAL / PROOF ── */}
+        <Section className="py-24 px-6">
+          <div className="max-w-4xl mx-auto">
+            <motion.div variants={fadeUp} className="bg-card border border-border rounded-3xl p-10 md:p-14 text-center space-y-6 relative overflow-hidden">
+              <div className="absolute -top-16 -right-16 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
+              <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl" />
+              <div className="relative z-10 space-y-6">
+                <div className="flex justify-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <span key={i} className="text-yellow-400 text-xl">★</span>
                   ))}
-                </motion.ul>
-              </motion.div>
-              
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="bg-background/5 border border-background/10 p-8 rounded-3xl relative overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                  <BarChart3 size={120} />
                 </div>
-                <h3 className="text-2xl font-bold mb-4">Kondisi Saat Ini</h3>
-                <div className="space-y-6 relative z-10">
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>Waktu untuk strategi</span>
-                      <span className="font-mono text-muted/60">10%</span>
-                    </div>
-                    <div className="h-2 w-full bg-background/20 rounded-full overflow-hidden">
-                      <div className="h-full bg-primary w-[10%]" />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>Waktu klik-klik di UI</span>
-                      <span className="font-mono text-muted/60">90%</span>
-                    </div>
-                    <div className="h-2 w-full bg-background/20 rounded-full overflow-hidden">
-                      <div className="h-full bg-destructive w-[90%]" />
-                    </div>
+                <blockquote className="text-2xl md:text-3xl font-bold leading-snug">
+                  "Saya biasanya butuh 3 hari untuk setup satu kampanye. Dengan Agentic AdFlow,
+                  blueprint sudah jadi dalam 4 menit — lengkap dengan audience yang sudah divalidasi ke Meta."
+                </blockquote>
+                <div className="flex items-center justify-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">R</div>
+                  <div className="text-left">
+                    <div className="font-semibold text-sm">Rizky A.</div>
+                    <div className="text-xs text-muted-foreground">Performance Marketer, Jakarta</div>
                   </div>
                 </div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* SOLUTION (The Agents) */}
-        <section id="agents" className="py-24 px-6 bg-muted/30">
-          <div className="max-w-6xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Kenali tim pertumbuhan barumu.</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Agentic AdFlow ditenagai oleh dua agen Claude AI khusus yang bekerja bersama untuk menskalakan bisnismu.
-            </p>
-          </div>
-
-          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
-            {/* MultiClaw */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="bg-card border border-border p-8 rounded-3xl relative overflow-hidden group hover:border-primary/50 transition-colors"
-            >
-              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                <BrainCircuit size={160} />
               </div>
-              <div className="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-6">
-                <Target size={28} />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">MultiClaw</h3>
-              <p className="text-sm font-mono text-primary mb-4">SANG STRATEGI</p>
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                MultiClaw menganalisis bisnis kamu, membaca landing page-mu, dan mendiagnosa audiensmu. Ia menentukan sudut pandang, mengidentifikasi pain point yang tepat, dan merancang struktur kampanye yang sempurna.
-              </p>
-              <ul className="space-y-2 text-sm font-medium">
-                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-primary"/> Pembuatan Persona Audiens</li>
-                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-primary"/> Struktur Penawaran</li>
-                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-primary"/> Strategi Alokasi Anggaran</li>
-              </ul>
-            </motion.div>
-
-            {/* OpenClaw */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="bg-card border border-border p-8 rounded-3xl relative overflow-hidden group hover:border-accent-foreground/50 transition-colors"
-            >
-              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Zap size={160} />
-              </div>
-              <div className="w-14 h-14 bg-accent text-accent-foreground rounded-2xl flex items-center justify-center mb-6">
-                <Fingerprint size={28} />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">OpenClaw</h3>
-              <p className="text-sm font-mono text-accent-foreground mb-4">SANG EKSEKUTOR</p>
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                OpenClaw mengambil strategi dan membangunnya. Ia memilih interest di Meta, menulis copy iklan, menghasilkan variasi kreatif, dan mendorong langsung ke platform melalui API.
-              </p>
-              <ul className="space-y-2 text-sm font-medium">
-                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-accent-foreground"/> Integrasi API Platform Langsung</li>
-                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-accent-foreground"/> Penulisan Copy & Generasi Kreatif</li>
-                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-accent-foreground"/> Pemeriksaan Kepatuhan Kebijakan</li>
-              </ul>
             </motion.div>
           </div>
-        </section>
+        </Section>
 
-        {/* FEATURES / DESIRE */}
-        <section id="features" className="py-24 px-6 border-t border-border">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid md:grid-cols-3 gap-8">
-              
-              <div className="md:col-span-2 bg-foreground text-background p-10 rounded-3xl relative overflow-hidden">
-                <div className="relative z-10 max-w-lg">
-                  <h3 className="text-3xl font-bold mb-4">Gerbang Persetujuan Manusia</h3>
-                  <p className="text-lg text-muted/80 mb-8">
-                    AI yang kerja keras, tapi kamu yang pegang kendali. Tidak ada yang tayang tanpa persetujuan eksplisitmu. Tinjau targeting, copy, dan batas pengeluaran sebelum menyentuh jaringan iklan.
-                  </p>
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-semibold rounded-lg">
-                    <ShieldAlert size={18} /> Kontrol 100% Terjaga
-                  </div>
-                </div>
-                {/* Abstract graphic */}
-                <div className="absolute -right-20 -bottom-20 w-96 h-96 border-[40px] border-background/5 rounded-full" />
-                <div className="absolute -right-10 -bottom-10 w-80 h-80 border-[40px] border-background/5 rounded-full" />
+        {/* ── ACTION: CTA ── */}
+        <Section id="cta" className="py-32 px-6 bg-foreground text-background relative overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+          <div className="max-w-3xl mx-auto text-center relative z-10 space-y-8">
+            <motion.div variants={fadeUp}>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-white/80 text-xs font-semibold mb-6 border border-white/20">
+                <CheckCircle2 size={13} /> 100 Slot Early Access — {Math.floor(Math.random() * 20) + 60} sudah terisi
               </div>
+              <h2 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
+                Mulai otomasi iklan-mu<br />hari ini — gratis.
+              </h2>
+              <p className="text-background/70 text-lg mb-10 leading-relaxed">
+                Daftar sekarang dan dapatkan akses awal ke Agentic AdFlow.
+                Tidak butuh kartu kredit. Tidak perlu paham coding.
+              </p>
+            </motion.div>
 
-              <div className="bg-card border border-border p-10 rounded-3xl flex flex-col justify-center">
-                <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-6">
-                  <TrendingUp size={24} />
-                </div>
-                <h3 className="text-2xl font-bold mb-3">Copilot Harian</h3>
-                <p className="text-muted-foreground mb-6">
-                  Bangun pagi dengan briefing tren terkini. Tutup hari dengan laporan performa mendalam. Copilot memberi tahu apa yang perlu di-scale dan apa yang harus dihentikan.
-                </p>
-                <div className="flex items-center gap-2 text-sm font-mono text-primary font-medium">
-                  <RefreshCcw size={16} /> Otomatis Setiap Hari
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section id="cta" className="py-32 px-6 bg-primary text-primary-foreground text-center relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10 mix-blend-overlay" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
-          <div className="max-w-3xl mx-auto relative z-10">
-            <h2 className="text-4xl md:text-6xl font-extrabold mb-6">Siap pecat agency-mu?</h2>
-            <p className="text-xl text-primary-foreground/80 mb-10 font-medium">
-              Berhenti bayar retainer untuk tugas yang bisa diselesaikan AI dalam 4 menit. Daftar ke waitlist Agentic AdFlow dan dapatkan akses awal ke beta.
-            </p>
-            <div className="bg-background p-2 rounded-2xl shadow-2xl max-w-xl mx-auto text-foreground">
+            <motion.div variants={fadeUp} className="bg-background rounded-2xl p-2 shadow-2xl max-w-xl mx-auto text-foreground">
               <WaitlistForm />
-            </div>
-            <p className="text-sm text-primary-foreground/60 mt-6 font-mono">
-              TANPA KARTU KREDIT • BATALKAN AGENCY-MU NANTI
-            </p>
+            </motion.div>
+
+            <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-6 text-sm text-background/60 pt-2">
+              <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-400" /> Gratis selamanya untuk early user</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-400" /> Tanpa kartu kredit</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-400" /> Cancel kapan saja</span>
+            </motion.div>
           </div>
-        </section>
+        </Section>
       </main>
 
-      <footer className="py-8 text-center text-sm text-muted-foreground border-t border-border bg-background">
-        <p>© {new Date().getFullYear()} Agentic AdFlow. Dibangun dengan Claude AI.</p>
+      <footer className="py-10 px-6 border-t border-border bg-background">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 font-bold text-foreground">
+            <div className="w-6 h-6 bg-primary rounded-md flex items-center justify-center">
+              <Activity size={12} className="text-primary-foreground" />
+            </div>
+            Agentic AdFlow
+          </div>
+          <p>© {new Date().getFullYear()} Agentic AdFlow. Ditenagai AI multi-provider.</p>
+          <div className="flex gap-4">
+            <a href="#" className="hover:text-foreground transition-colors">Kebijakan Privasi</a>
+            <a href="#" className="hover:text-foreground transition-colors">Kontak</a>
+          </div>
+        </div>
       </footer>
 
-      {/* Floating Chatbot */}
+      {/* Floating Help Desk Chatbot */}
       <Chatbot />
     </div>
   );
