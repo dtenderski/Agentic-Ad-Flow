@@ -5,8 +5,186 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ShieldAlert, Target, Users, Megaphone, PenTool, CircleDollarSign, Check, X, Briefcase } from "lucide-react";
+import { ShieldAlert, Target, Users, Megaphone, PenTool, CircleDollarSign, Check, X, Briefcase, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+
+// ─── Resolved Interest Table ──────────────────────────────────────────────────
+
+interface ResolvedInterest {
+  name: string;
+  id?: string;
+  resolvedName?: string;
+  audienceSize?: number;
+  resolved: boolean;
+}
+
+function InterestTable({ interests, summary }: { interests: ResolvedInterest[]; summary?: string }) {
+  const resolvedCount = interests.filter((i) => i.resolved).length;
+  const totalCount = interests.length;
+  const allResolved = resolvedCount === totalCount;
+  const noneResolved = resolvedCount === 0;
+
+  return (
+    <div className="space-y-3">
+      {/* Summary line */}
+      <div className="flex items-center gap-2">
+        {noneResolved ? (
+          <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
+        ) : !allResolved ? (
+          <AlertTriangle className="w-4 h-4 text-warning shrink-0" />
+        ) : (
+          <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+        )}
+        <span
+          className={
+            noneResolved
+              ? "text-sm font-semibold text-destructive"
+              : !allResolved
+              ? "text-sm font-semibold text-warning"
+              : "text-sm font-semibold text-success"
+          }
+        >
+          {summary ?? `${resolvedCount}/${totalCount} interests resolved via Meta Interest Search API`}
+        </span>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto rounded-lg border border-border">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border bg-secondary/40">
+              <th className="text-left px-4 py-2.5 font-mono text-xs uppercase text-muted-foreground">Interest Name</th>
+              <th className="text-left px-4 py-2.5 font-mono text-xs uppercase text-muted-foreground">Meta Status</th>
+              <th className="text-left px-4 py-2.5 font-mono text-xs uppercase text-muted-foreground">Meta Canonical Name</th>
+              <th className="text-right px-4 py-2.5 font-mono text-xs uppercase text-muted-foreground">Audience Size</th>
+            </tr>
+          </thead>
+          <tbody>
+            {interests.map((interest, idx) => (
+              <tr
+                key={idx}
+                className={
+                  interest.resolved
+                    ? "border-b border-border/50 last:border-0"
+                    : "border-b border-border/50 last:border-0 bg-destructive/5"
+                }
+              >
+                <td className="px-4 py-2.5 font-medium text-foreground">{interest.name}</td>
+                <td className="px-4 py-2.5">
+                  {interest.resolved ? (
+                    <Badge
+                      variant="outline"
+                      className="border-success/40 bg-success/10 text-success gap-1 text-[11px]"
+                    >
+                      <CheckCircle2 className="w-2.5 h-2.5" />
+                      Resolved
+                    </Badge>
+                  ) : (
+                    <Badge
+                      variant="outline"
+                      className="border-destructive/40 bg-destructive/10 text-destructive gap-1 text-[11px]"
+                    >
+                      <XCircle className="w-2.5 h-2.5" />
+                      Not Found
+                    </Badge>
+                  )}
+                </td>
+                <td className="px-4 py-2.5 text-muted-foreground">
+                  {interest.resolvedName ?? (
+                    <span className="italic text-muted-foreground/50">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-2.5 text-right text-muted-foreground">
+                  {interest.audienceSize != null
+                    ? interest.audienceSize >= 1_000_000
+                      ? `${(interest.audienceSize / 1_000_000).toFixed(1)}M`
+                      : interest.audienceSize >= 1_000
+                      ? `${(interest.audienceSize / 1_000).toFixed(0)}K`
+                      : String(interest.audienceSize)
+                    : <span className="italic text-muted-foreground/50">—</span>}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {noneResolved && (
+        <div className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2">
+          <AlertTriangle className="w-3.5 h-3.5 text-destructive mt-0.5 shrink-0" />
+          <p className="text-xs text-destructive">
+            None of the audience interests matched Meta's catalogue. Fix the interest targeting before approving this blueprint.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Audience Plan Viewer ─────────────────────────────────────────────────────
+// Renders the audiencePlan JSON with a special interest-resolution table for
+// coldAudience.interests, falling back to the generic viewer for all other fields.
+
+function AudiencePlanViewer({ plan }: { plan: Record<string, unknown> }) {
+  const cold = plan.coldAudience as Record<string, unknown> | undefined;
+  const interests = cold?.interests;
+  const summary = cold?.interestResolutionSummary as string | undefined;
+
+  const hasEnrichedInterests =
+    Array.isArray(interests) &&
+    interests.length > 0 &&
+    typeof (interests[0] as any)?.resolved === "boolean";
+
+  // Fields to render with the generic viewer (everything except coldAudience)
+  const otherFields = Object.fromEntries(
+    Object.entries(plan).filter(([k]) => k !== "coldAudience")
+  );
+
+  // coldAudience fields except interests + summary (those go into the table)
+  const coldOtherFields = cold
+    ? Object.fromEntries(
+        Object.entries(cold).filter(
+          ([k]) => k !== "interests" && k !== "interestResolutionSummary"
+        )
+      )
+    : null;
+
+  return (
+    <div className="space-y-5">
+      {/* Other top-level fields */}
+      {Object.keys(otherFields).length > 0 && (
+        <StructuredDataViewer data={otherFields} />
+      )}
+
+      {/* Cold Audience section */}
+      {cold && (
+        <div className="space-y-4">
+          <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Users className="w-4 h-4 text-primary" />
+            Cold Audience
+          </h4>
+
+          {/* Non-interest cold audience fields */}
+          {coldOtherFields && Object.keys(coldOtherFields).length > 0 && (
+            <StructuredDataViewer data={coldOtherFields} />
+          )}
+
+          {/* Interest table or raw interests */}
+          {hasEnrichedInterests ? (
+            <InterestTable
+              interests={interests as ResolvedInterest[]}
+              summary={summary}
+            />
+          ) : Array.isArray(interests) && interests.length > 0 ? (
+            <StructuredDataViewer data={{ interests }} />
+          ) : null}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Generic Structured Data Viewer ──────────────────────────────────────────
 
 function StructuredDataViewer({ data }: { data: any }) {
   if (typeof data !== 'object' || data === null) {
@@ -202,13 +380,41 @@ export default function BlueprintDetail() {
 
           <AccordionItem value="audiencePlan" className="border border-border bg-card rounded-lg overflow-hidden">
             <AccordionTrigger className="px-6 hover:bg-secondary/50 hover:no-underline">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 w-full">
                 <Users className="w-5 h-5 text-primary" />
                 <h3 className="text-lg font-bold">Audience Plan</h3>
+                {(() => {
+                  if (!audience?.parsed) return null;
+                  const cold = audience.parsed.coldAudience as Record<string, unknown> | undefined;
+                  const interests = cold?.interests;
+                  if (!Array.isArray(interests) || interests.length === 0) return null;
+                  const hasEnriched = typeof (interests[0] as any)?.resolved === "boolean";
+                  if (!hasEnriched) return null;
+                  const resolvedCount = (interests as Array<{ resolved: boolean }>).filter(i => i.resolved).length;
+                  const total = interests.length;
+                  const allOk = resolvedCount === total;
+                  const noneOk = resolvedCount === 0;
+                  return (
+                    <Badge
+                      variant="outline"
+                      className={
+                        noneOk
+                          ? "ml-3 border-destructive/40 bg-destructive/10 text-destructive text-[11px]"
+                          : !allOk
+                          ? "ml-3 border-warning/40 bg-warning/10 text-warning text-[11px]"
+                          : "ml-3 border-success/40 bg-success/10 text-success text-[11px]"
+                      }
+                    >
+                      {resolvedCount}/{total} interests matched
+                    </Badge>
+                  );
+                })()}
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-6 pt-2">
-              {renderSectionContent(audience)}
+              {audience?.parsed && typeof audience.parsed === "object" && !Array.isArray(audience.parsed)
+                ? <AudiencePlanViewer plan={audience.parsed as Record<string, unknown>} />
+                : renderSectionContent(audience)}
             </AccordionContent>
           </AccordionItem>
 
