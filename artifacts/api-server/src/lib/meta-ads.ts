@@ -429,6 +429,63 @@ function buildPlacementTargeting(
   return t;
 }
 
+/**
+ * Resolve a mixed list of interest names and pre-resolved interests into the
+ * final `{ id, name }[]` list that Meta's targeting spec expects.
+ *
+ * Pre-resolved interests are used as-is (no API call). Plain interest names
+ * are looked up via the Targeting Search API, up to a combined cap of 5.
+ *
+ * Exported so the push route can call it in a dry-run pass before creating
+ * anything in Meta — enabling early rejection when block mode is active.
+ *
+ * The optional `searchFn` parameter lets tests inject a stub without needing
+ * complex module-level mocks.
+ */
+export interface ResolveInterestsResult {
+  resolved: { id: string; name: string }[];
+  /** Number of name-based lookups that threw an API error (vs returned null /
+   *  "not found").  Used by the interest gate to distinguish transient API
+   *  failures from genuine catalogue mismatches in error messages. */
+  errorCount: number;
+}
+
+export async function resolveInterests(
+  interestNames: string[],
+  preResolvedInterests: { id: string; name: string }[],
+  searchFn: typeof searchMetaInterest = searchMetaInterest
+): Promise<ResolveInterestsResult> {
+  const resolved: { id: string; name: string }[] = [];
+  let errorCount = 0;
+
+  // 1. Add pre-resolved interests (no API call needed)
+  if (preResolvedInterests.length > 0) {
+    for (const interest of preResolvedInterests) {
+      resolved.push({ id: interest.id, name: interest.name });
+    }
+    logger.info({ count: preResolvedInterests.length }, "Using pre-resolved Meta interest IDs from pipeline enrichment");
+  }
+
+  // 2. Resolve remaining plain names via Targeting Search API (cap at 5 total)
+  const remainingSlots = Math.max(0, 5 - resolved.length);
+  for (const interestName of interestNames.slice(0, remainingSlots)) {
+    try {
+      const found = await searchFn(interestName);
+      if (found) {
+        resolved.push({ id: found.id, name: found.name });
+        logger.info({ interestName, metaId: found.id, metaName: found.name }, "Meta interest resolved");
+      } else {
+        logger.warn({ interestName }, "Interest not found in Meta catalogue — skipped");
+      }
+    } catch (e) {
+      errorCount++;
+      logger.warn({ interestName, err: e }, "Could not resolve Meta interest ID — skipping");
+    }
+  }
+
+  return { resolved, errorCount };
+}
+
 export async function createMetaAdSet(opts: {
   campaignId: string;
   name: string;
@@ -444,8 +501,14 @@ export async function createMetaAdSet(opts: {
   targetingInterests?: string[];
   /** Pre-resolved interests (id + name) from the pipeline enrichment step — skips API lookup */
   preResolvedInterests?: { id: string; name: string }[];
+  /**
+   * Fully-resolved interests supplied by the caller (e.g. from a prior
+   * `resolveInterests` call in the push route).  When provided, skips all
+   * internal resolution — both pre-resolved and name-based lookups are ignored.
+   */
+  fullyResolvedInterests?: { id: string; name: string }[];
   bidAmount?: number;
-}): Promise<string> {
+}): Promise<{ id: string; resolvedInterestCount: number }> {
   const { accountId } = getMetaConfig();
   const placement = (opts.placement ?? "facebook") as CampaignPlacement;
 
@@ -458,36 +521,12 @@ export async function createMetaAdSet(opts: {
   if (opts.targetingGender === "male") baseTargeting.genders = [1];
   if (opts.targetingGender === "female") baseTargeting.genders = [2];
 
-  // Build the resolved interest list for Meta targeting.
-  // Pre-resolved interests (from pipeline enrichment) are used directly;
-  // plain interest names are resolved via the Targeting Search API.
-  const resolvedInterests: { id: string; name: string }[] = [];
-
-  // 1. Add pre-resolved interests (no API call needed)
-  if (opts.preResolvedInterests && opts.preResolvedInterests.length > 0) {
-    for (const interest of opts.preResolvedInterests) {
-      resolvedInterests.push({ id: interest.id, name: interest.name });
-    }
-    logger.info({ count: opts.preResolvedInterests.length }, "Using pre-resolved Meta interest IDs from pipeline enrichment");
-  }
-
-  // 2. Resolve any remaining plain interest names via Targeting Search API
-  const remainingSlots = Math.max(0, 5 - resolvedInterests.length);
-  if (opts.targetingInterests && opts.targetingInterests.length > 0 && remainingSlots > 0) {
-    for (const interestName of opts.targetingInterests.slice(0, remainingSlots)) {
-      try {
-        const found = await searchMetaInterest(interestName);
-        if (found) {
-          resolvedInterests.push({ id: found.id, name: found.name });
-          logger.info({ interestName, metaId: found.id, metaName: found.name }, "Meta interest resolved at push time");
-        } else {
-          logger.warn({ interestName }, "Interest not found in Meta catalogue — skipped");
-        }
-      } catch (e) {
-        logger.warn({ interestName, err: e }, "Could not resolve Meta interest ID — skipping");
-      }
-    }
-  }
+  // Use caller-supplied fully-resolved interests when available (avoids a
+  // second round of Meta API calls after the pre-check pass in the push route).
+  // Otherwise resolve from the raw inputs now.
+  const resolvedInterests: { id: string; name: string }[] = opts.fullyResolvedInterests
+    ? [...opts.fullyResolvedInterests]
+    : (await resolveInterests(opts.targetingInterests ?? [], opts.preResolvedInterests ?? [])).resolved;
 
   if (resolvedInterests.length > 0) {
     baseTargeting.flexible_spec = [{ interests: resolvedInterests }];
@@ -534,8 +573,8 @@ export async function createMetaAdSet(opts: {
   if (opts.bidAmount) body.bid_amount = opts.bidAmount;
 
   const result = await metaPost<{ id: string }>(`${accountId}/adsets`, body);
-  logger.info({ metaAdsetId: result.id, placement }, "Meta ad set created");
-  return result.id;
+  logger.info({ metaAdsetId: result.id, placement, resolvedInterestCount: resolvedInterests.length }, "Meta ad set created");
+  return { id: result.id, resolvedInterestCount: resolvedInterests.length };
 }
 
 // ─── Ad Creative ──────────────────────────────────────────────────────────────

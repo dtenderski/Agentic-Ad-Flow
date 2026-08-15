@@ -12,7 +12,9 @@ import {
   getMetaCampaignInsights,
   getMetaTokenInfo,
   refreshMetaToken,
+  resolveInterests,
 } from "../lib/meta-ads";
+import { checkInterestGate, type AdSetResolutionResult } from "../lib/interest-gate";
 import { PushToMetaParams } from "@workspace/api-zod";
 
 const router: IRouter = Router();
@@ -98,7 +100,61 @@ router.post("/meta/push/:campaignId", async (req, res): Promise<void> => {
     adSets: { localId: number; metaAdsetId: string; ads: { localId: number; metaAdId: string }[] }[];
   } = { metaCampaignId: "", adSets: [] };
 
+  // Helper: parse interest arrays from a raw interests JSON string
+  function parseAdsetInterests(interestsJson: string | null): {
+    interestNames: string[];
+    preResolvedInterests: { id: string; name: string }[];
+  } {
+    const interestNames: string[] = [];
+    const preResolvedInterests: { id: string; name: string }[] = [];
+    if (!interestsJson) return { interestNames, preResolvedInterests };
+    try {
+      const parsed = JSON.parse(interestsJson);
+      if (Array.isArray(parsed)) {
+        for (const item of parsed) {
+          if (typeof item === "string") {
+            interestNames.push(item);
+          } else if (item && typeof item === "object") {
+            if (item.resolved && item.id) {
+              preResolvedInterests.push({ id: item.id, name: item.resolvedName || item.name });
+            } else if (item.name) {
+              interestNames.push(item.name);
+            }
+          }
+        }
+      }
+    } catch { /* leave both arrays empty */ }
+    return { interestNames, preResolvedInterests };
+  }
+
   try {
+    // Load ad sets early — needed for the interest pre-resolution pass below.
+    const adsets = await db.select().from(adsetsTable).where(eq(adsetsTable.campaignId, campaign.id));
+
+    // ── Interest pre-resolution pass (always runs) ─────────────────────────────
+    // We must know actual resolution outcomes *before* creating anything in Meta,
+    // because interest names can be present yet fail the Targeting Search API.
+    //
+    // Default behaviour: block the push when any ad set resolves to zero interests.
+    // Set ALLOW_ZERO_INTEREST_PUSH=true to downgrade to warnings-only.
+    const allowZeroInterest = process.env.ALLOW_ZERO_INTEREST_PUSH === "true";
+    const resolutionResults: AdSetResolutionResult[] = [];
+    const resolvedByAdsetId = new Map<number, { id: string; name: string }[]>();
+
+    for (const adset of adsets) {
+      const { interestNames, preResolvedInterests } = parseAdsetInterests(adset.interests);
+      const hadInput = interestNames.length > 0 || preResolvedInterests.length > 0;
+      const { resolved, errorCount } = await resolveInterests(interestNames, preResolvedInterests);
+      resolvedByAdsetId.set(adset.id, resolved);
+      resolutionResults.push({ id: adset.id, name: adset.adsetName, resolved, hadInput, errorCount });
+    }
+
+    const gate = checkInterestGate(resolutionResults, allowZeroInterest);
+    if (gate.blocked) {
+      res.status(400).json({ error: gate.blockError });
+      return;
+    }
+
     // 1. Create Meta Campaign
     const metaCampaignId = await createMetaCampaign({
       name: campaign.campaignName,
@@ -116,40 +172,11 @@ router.post("/meta/push/:campaignId", async (req, res): Promise<void> => {
       status: "active",
     }).where(eq(campaignsTable.id, campaign.id));
 
-    // 2. Create Ad Sets
-    const adsets = await db.select().from(adsetsTable).where(eq(adsetsTable.campaignId, campaign.id));
+    // 2. Create Ad Sets — pass pre-resolved interests so createMetaAdSet skips
+    //    a redundant second round of Meta API calls.
 
     for (const adset of adsets) {
-      // Parse interest data — supports two formats:
-      // 1. Plain strings: ["technology", "fitness"] (resolve names via Meta API at push time)
-      // 2. Pre-resolved objects from the pipeline enrichment step:
-      //    [{ name, id, resolved, resolvedName, audienceSize }]
-      //    In this case, already-resolved interests skip the API lookup entirely.
-      let interestNames: string[] = [];
-      let preResolvedInterests: { id: string; name: string }[] = [];
-
-      if (adset.interests) {
-        try {
-          const parsed = JSON.parse(adset.interests);
-          if (Array.isArray(parsed)) {
-            for (const item of parsed) {
-              if (typeof item === "string") {
-                interestNames.push(item);
-              } else if (item && typeof item === "object") {
-                if (item.resolved && item.id) {
-                  // Already resolved at pipeline time — use the real ID directly
-                  preResolvedInterests.push({ id: item.id, name: item.resolvedName || item.name });
-                } else if (item.name) {
-                  // Unresolved enriched object — fall back to name-based lookup
-                  interestNames.push(item.name);
-                }
-              }
-            }
-          }
-        } catch { /* leave both arrays empty */ }
-      }
-
-      const metaAdsetId = await createMetaAdSet({
+      const { id: metaAdsetId } = await createMetaAdSet({
         campaignId: metaCampaignId,
         name: adset.adsetName,
         dailyBudget: adset.budget ? Number(adset.budget) : (campaign.dailyBudget ? Number(campaign.dailyBudget) / Math.max(adsets.length, 1) : 50000),
@@ -160,8 +187,7 @@ router.post("/meta/push/:campaignId", async (req, res): Promise<void> => {
         targetingAgeMin: adset.ageMin || undefined,
         targetingAgeMax: adset.ageMax || undefined,
         targetingGender: adset.gender || undefined,
-        targetingInterests: interestNames,
-        preResolvedInterests: preResolvedInterests.length > 0 ? preResolvedInterests : undefined,
+        fullyResolvedInterests: resolvedByAdsetId.get(adset.id),
       });
 
       // Update local adset with Meta ID
@@ -198,6 +224,7 @@ router.post("/meta/push/:campaignId", async (req, res): Promise<void> => {
       success: true,
       message: `Campaign berhasil dipush ke Meta Ads Manager (status: PAUSED untuk review akhir)`,
       results,
+      ...(gate.warnings.length > 0 ? { warnings: gate.warnings } : {}),
     });
   } catch (err: unknown) {
     req.log.error({ err }, "Meta push failed");
