@@ -4,6 +4,7 @@ import {
   Alert,
   Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,9 +14,11 @@ import { useColors } from '@/hooks/useColors';
 import { Feather } from '@expo/vector-icons';
 import {
   getGetCampaignInterestPreviewQueryKey,
+  getGetMetaCampaignInsightsQueryKey,
   useApproveCampaign,
   useGetCampaign,
   useGetCampaignInterestPreview,
+  useGetMetaCampaignInsights,
   usePushToMeta,
 } from '@workspace/api-client-react';
 import * as Haptics from 'expo-haptics';
@@ -57,8 +60,22 @@ export default function CampaignDetailScreen() {
   const topPad = Platform.OS === 'web' ? 67 : 0;
 
   const [previewEnabled, setPreviewEnabled] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const { data: campaign, isLoading, isError, refetch } = useGetCampaign(campaignId);
+
+  const alreadyPushedEarly = !!campaign?.metaCampaignId;
+
+  const { data: insights, isLoading: insightsLoading, refetch: refetchInsights } = useGetMetaCampaignInsights(
+    { campaignId, datePreset: 'last_7d' },
+    {
+      query: {
+        queryKey: getGetMetaCampaignInsightsQueryKey({ campaignId, datePreset: 'last_7d' }),
+        enabled: alreadyPushedEarly,
+        retry: false,
+      },
+    }
+  );
 
   const { data: interestPreview, isLoading: previewLoading } = useGetCampaignInterestPreview(
     campaignId,
@@ -102,6 +119,15 @@ export default function CampaignDetailScreen() {
       },
     },
   });
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      refetch(),
+      alreadyPushedEarly ? refetchInsights() : Promise.resolve(),
+    ]);
+    setRefreshing(false);
+  };
 
   const handleApprove = () => {
     Alert.alert(
@@ -161,6 +187,12 @@ export default function CampaignDetailScreen() {
 
   const statusColor = STATUS_COLORS[campaign.status] ?? colors.mutedForeground;
   const alreadyPushed = !!campaign.metaCampaignId;
+  // fmt helpers
+  const fmt = {
+    currency: (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+    int: (n: number) => n.toLocaleString('en-US'),
+    pct: (n: number) => `${(n * 100).toFixed(2)}%`,
+  };
   const canApprove = campaign.approvalStatus === 'pending' &&
     (campaign.status === 'draft' || campaign.status === 'review');
   const canPush = campaign.approvalStatus === 'approved' && !alreadyPushed;
@@ -178,6 +210,13 @@ export default function CampaignDetailScreen() {
         styles.content,
         { paddingTop: topPad + 16, paddingBottom: 40 + insets.bottom },
       ]}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          tintColor={colors.primary}
+        />
+      }
     >
       {/* Status banner */}
       <View style={[styles.banner, { backgroundColor: statusColor + '22', borderColor: statusColor + '44' }]}>
@@ -230,6 +269,64 @@ export default function CampaignDetailScreen() {
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
         <InfoRow label="Created" value={new Date(campaign.createdAt).toLocaleDateString()} />
       </View>
+
+      {/* Meta Metrics card */}
+      {alreadyPushed && (
+        <>
+          <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>PERFORMANCE · LAST 7 DAYS</Text>
+          {insightsLoading ? (
+            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, alignItems: 'center', padding: 24 }]}>
+              <ActivityIndicator color={colors.primary} />
+              <Text style={[{ color: colors.mutedForeground, fontSize: 13, marginTop: 8 }]}>Loading insights…</Text>
+            </View>
+          ) : insights ? (
+            <View style={[styles.metricsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <View style={styles.metricsGrid}>
+                <View style={styles.metricCell}>
+                  <Text style={[styles.metricValue, { color: colors.foreground }]}>{fmt.currency(insights.spend)}</Text>
+                  <Text style={[styles.metricLabel, { color: colors.mutedForeground }]}>Spend</Text>
+                </View>
+                <View style={[styles.metricCell, styles.metricCellBorder, { borderColor: colors.border }]}>
+                  <Text style={[styles.metricValue, { color: colors.foreground }]}>{fmt.int(insights.impressions)}</Text>
+                  <Text style={[styles.metricLabel, { color: colors.mutedForeground }]}>Impressions</Text>
+                </View>
+                <View style={[styles.metricCell, styles.metricCellBorder, { borderColor: colors.border }]}>
+                  <Text style={[styles.metricValue, { color: colors.foreground }]}>{fmt.int(insights.clicks)}</Text>
+                  <Text style={[styles.metricLabel, { color: colors.mutedForeground }]}>Clicks</Text>
+                </View>
+              </View>
+              <View style={[styles.metricsGridDivider, { backgroundColor: colors.border }]} />
+              <View style={styles.metricsGrid}>
+                <View style={styles.metricCell}>
+                  <Text style={[styles.metricValue, { color: colors.foreground }]}>{fmt.pct(insights.ctr)}</Text>
+                  <Text style={[styles.metricLabel, { color: colors.mutedForeground }]}>CTR</Text>
+                </View>
+                <View style={[styles.metricCell, styles.metricCellBorder, { borderColor: colors.border }]}>
+                  <Text style={[styles.metricValue, { color: colors.foreground }]}>{insights.leads > 0 ? fmt.int(insights.leads) : '—'}</Text>
+                  <Text style={[styles.metricLabel, { color: colors.mutedForeground }]}>Leads</Text>
+                </View>
+                <View style={[styles.metricCell, styles.metricCellBorder, { borderColor: colors.border }]}>
+                  <Text style={[styles.metricValue, { color: colors.foreground }]}>{fmt.int(insights.reach)}</Text>
+                  <Text style={[styles.metricLabel, { color: colors.mutedForeground }]}>Reach</Text>
+                </View>
+              </View>
+              <View style={[styles.metricsFooter, { borderTopColor: colors.border }]}>
+                <Feather name="calendar" size={11} color={colors.mutedForeground} />
+                <Text style={[styles.metricsFooterText, { color: colors.mutedForeground }]}>
+                  {insights.dateStart} – {insights.dateStop}
+                </Text>
+              </View>
+            </View>
+          ) : (
+            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, alignItems: 'center', padding: 24, gap: 8 }]}>
+              <Feather name="bar-chart-2" size={24} color={colors.mutedForeground} />
+              <Text style={[{ color: colors.mutedForeground, fontSize: 13, textAlign: 'center' }]}>
+                No data yet for this period.{'\n'}Metrics will appear once the campaign has delivery.
+              </Text>
+            </View>
+          )}
+        </>
+      )}
 
       {/* Interest preview */}
       <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>INTEREST PREVIEW</Text>
@@ -429,4 +526,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   pushedNoticeText: { fontSize: 13, fontWeight: '600' },
+
+  metricsCard: { borderRadius: 12, borderWidth: 1, overflow: 'hidden' },
+  metricsGrid: { flexDirection: 'row' },
+  metricCell: { flex: 1, alignItems: 'center', paddingVertical: 16, paddingHorizontal: 8 },
+  metricCellBorder: { borderLeftWidth: 1 },
+  metricValue: { fontSize: 17, fontWeight: '700', letterSpacing: -0.3 },
+  metricLabel: { fontSize: 11, fontWeight: '500', marginTop: 2, letterSpacing: 0.3 },
+  metricsGridDivider: { height: 1 },
+  metricsFooter: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 14, paddingVertical: 8, borderTopWidth: 1 },
+  metricsFooterText: { fontSize: 11 },
 });
