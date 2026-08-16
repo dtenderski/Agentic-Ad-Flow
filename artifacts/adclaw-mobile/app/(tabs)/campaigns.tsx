@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { useColors } from '@/hooks/useColors';
+import { classifyError } from '@/hooks/useConnectionStatus';
 import { Feather } from '@expo/vector-icons';
 import { useListCampaigns } from '@workspace/api-client-react';
 import type { Campaign } from '@workspace/api-client-react';
@@ -101,7 +102,7 @@ export default function CampaignsScreen() {
   const colors = useColors();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { data: campaigns, isLoading, isError, refetch, isFetching } = useListCampaigns();
+  const { data: campaigns, isLoading, isError, error, refetch, isFetching } = useListCampaigns();
 
   const handleRefresh = useCallback(() => { refetch(); }, [refetch]);
   const topPad = Platform.OS === 'web' ? 67 : 0;
@@ -115,11 +116,27 @@ export default function CampaignsScreen() {
   }
 
   if (isError) {
+    const kind = classifyError(error);
+    const icon: React.ComponentProps<typeof Feather>['name'] =
+      kind === 'network' ? 'wifi-off' : kind === 'server' ? 'server' : 'alert-circle';
+    const title =
+      kind === 'network'
+        ? 'No network connection'
+        : kind === 'server'
+        ? 'Server unavailable'
+        : 'Something went wrong';
+    const detail =
+      kind === 'network'
+        ? 'Check your internet connection and try again.'
+        : kind === 'server'
+        ? 'The API server is down or restarting. It will retry automatically.'
+        : 'An unexpected error occurred. Tap Retry to try again.';
+
     return (
       <View style={[styles.center, { backgroundColor: colors.background, paddingTop: topPad }]}>
-        <Feather name="wifi-off" size={32} color={colors.mutedForeground} />
-        <Text style={[styles.emptyTitle, { color: colors.foreground }]}>Connection error</Text>
-        <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>Check that the API server is running</Text>
+        <Feather name={icon} size={32} color={colors.mutedForeground} />
+        <Text style={[styles.emptyTitle, { color: colors.foreground }]}>{title}</Text>
+        <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>{detail}</Text>
         <Pressable onPress={handleRefresh} style={[styles.retryBtn, { backgroundColor: colors.primary }]}>
           <Text style={{ color: colors.primaryForeground, fontWeight: '600' }}>Retry</Text>
         </Pressable>
