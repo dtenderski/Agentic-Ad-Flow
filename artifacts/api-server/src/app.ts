@@ -3,6 +3,7 @@ import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { requireAuth } from "./middleware/auth";
 
 const app: Express = express();
 
@@ -14,6 +15,7 @@ app.use(
         return {
           id: req.id,
           method: req.method,
+          // Strip query string from logs to avoid leaking tokens/params
           url: req.url?.split("?")[0],
         };
       },
@@ -29,6 +31,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api", router);
+// All /api/* routes — auth middleware exempts /healthz and /chat internally
+app.use("/api", requireAuth, router);
 
 export default app;

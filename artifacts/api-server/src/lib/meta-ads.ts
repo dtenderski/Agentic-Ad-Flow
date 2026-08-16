@@ -3,6 +3,35 @@ import { logger } from "./logger";
 const META_API_VERSION = "v21.0";
 const META_BASE = `https://graph.facebook.com/${META_API_VERSION}`;
 
+// ─── Rate Limiter ─────────────────────────────────────────────────────────────
+// Enforces a minimum delay between consecutive Meta API POST calls.
+// Configurable via META_API_DELAY_MS env var (default 350 ms). Set to 0 in tests.
+
+let _lastMetaPostAt = 0;
+
+async function metaRateLimitDelay(): Promise<void> {
+  const delayMs = parseInt(process.env.META_API_DELAY_MS ?? "350", 10);
+  if (delayMs <= 0) return;
+  const elapsed = Date.now() - _lastMetaPostAt;
+  if (elapsed < delayMs) {
+    await new Promise((resolve) => setTimeout(resolve, delayMs - elapsed));
+  }
+  _lastMetaPostAt = Date.now();
+}
+
+// ─── Token-safe URL builder ───────────────────────────────────────────────────
+// Returns a sanitized version of the URL (no access_token) safe for logging.
+
+function sanitizeUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    u.searchParams.delete("access_token");
+    return u.toString();
+  } catch {
+    return url.split("?")[0];
+  }
+}
+
 function getMetaConfig() {
   const accessToken = process.env.META_ACCESS_TOKEN;
   const adAccountId = process.env.META_AD_ACCOUNT_ID;
@@ -15,6 +44,9 @@ function getMetaConfig() {
 }
 
 async function metaPost<T>(path: string, body: Record<string, unknown>): Promise<T> {
+  // Rate-limit consecutive POSTs to avoid Meta fraud detection
+  await metaRateLimitDelay();
+
   const { accessToken } = getMetaConfig();
   const url = `${META_BASE}/${path}`;
 
@@ -35,7 +67,8 @@ async function metaPost<T>(path: string, body: Record<string, unknown>): Promise
   const data = (await res.json()) as T & { error?: { message: string; code: number } };
   if (!res.ok || (data as Record<string, unknown>).error) {
     const err = (data as Record<string, unknown>).error as { message: string } | undefined;
-    logger.error({ url, status: res.status, metaError: err }, "Meta API error");
+    // Log sanitized URL — never include access_token in logs
+    logger.error({ url: sanitizeUrl(url), status: res.status, metaError: err }, "Meta API error");
     throw new Error(`Meta API error: ${err?.message ?? res.statusText}`);
   }
   return data;
@@ -50,7 +83,8 @@ async function metaGet<T>(path: string, params: Record<string, string> = {}): Pr
   const data = (await res.json()) as T & { error?: { message: string } };
   if (!res.ok || (data as Record<string, unknown>).error) {
     const err = (data as Record<string, unknown>).error as { message: string } | undefined;
-    logger.error({ url, status: res.status, metaError: err }, "Meta API GET error");
+    // Log sanitized URL — never include access_token in logs
+    logger.error({ url: sanitizeUrl(url), status: res.status, metaError: err }, "Meta API GET error");
     throw new Error(`Meta API error: ${err?.message ?? res.statusText}`);
   }
   return data;

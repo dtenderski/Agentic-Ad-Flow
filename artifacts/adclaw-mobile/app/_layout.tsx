@@ -15,10 +15,16 @@ import {
 } from '@expo-google-fonts/inter';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { setBaseUrl } from '@workspace/api-client-react';
+import { setBaseUrl, setAuthTokenGetter } from '@workspace/api-client-react';
 
 // Set the API base URL so Expo (which runs outside the web proxy) can reach the API server.
 setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
+
+// Attach bearer token so the API server can verify this is an authorised client.
+const apiKey = process.env.EXPO_PUBLIC_API_ACCESS_KEY;
+if (apiKey) {
+  setAuthTokenGetter(() => apiKey);
+}
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
