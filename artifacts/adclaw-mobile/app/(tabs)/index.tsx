@@ -141,11 +141,27 @@ export default function PipelinesScreen() {
             <Feather name="zap" size={40} color={colors.border} />
             <Text style={[styles.emptyTitle, { color: colors.foreground }]}>No pipelines yet</Text>
             <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>
-              Run your first AI pipeline from the web app
+              Tap the button below to run your first AI pipeline
             </Text>
           </View>
         }
       />
+
+      {/* Floating Action Button */}
+      <Pressable
+        onPress={() => router.push('/pipeline/run' as any)}
+        style={({ pressed }) => [
+          styles.fab,
+          {
+            backgroundColor: colors.primary,
+            bottom: Platform.OS === 'web' ? 84 + 16 : 16 + insets.bottom,
+            opacity: pressed ? 0.85 : 1,
+          },
+        ]}
+      >
+        <Feather name="zap" size={20} color={colors.primaryForeground} />
+        <Text style={[styles.fabText, { color: colors.primaryForeground }]}>Run Pipeline</Text>
+      </Pressable>
     </View>
   );
 }
@@ -181,4 +197,20 @@ const styles = StyleSheet.create({
   emptyTitle: { fontSize: 18, fontWeight: '600', marginTop: 8 },
   emptyText: { fontSize: 14, textAlign: 'center', paddingHorizontal: 32 },
   retryBtn: { marginTop: 8, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 28,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  fabText: { fontSize: 15, fontWeight: '700' },
 });

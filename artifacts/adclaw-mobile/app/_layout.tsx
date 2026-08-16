@@ -46,6 +46,10 @@ function RootLayoutNav() {
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
+        name="pipeline/run"
+        options={{ title: 'Run Pipeline', headerBackTitle: 'Pipelines' }}
+      />
+      <Stack.Screen
         name="pipeline/[id]"
         options={{ title: 'Pipeline', headerBackTitle: 'Pipelines' }}
       />
